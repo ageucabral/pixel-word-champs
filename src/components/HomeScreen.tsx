@@ -222,68 +222,70 @@ const HomeScreen = ({
           </div>
         </div>
 
-        {/* Card de Ranking Global aprimorado */}
-        <div className="bg-card rounded-2xl p-4 shadow-lg border border-border transition-all duration-200 hover:shadow-xl">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary-darker rounded-full flex items-center justify-center text-primary-foreground font-bold text-lg shadow-sm">
-              #{stats?.position || 'N/A'}
-            </div>
-            
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between mb-2">
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs text-muted-foreground font-medium">Posição atual</p>
-                  <p className="text-lg font-bold text-foreground truncate">
-                    {stats?.position ? `${stats.position}º lugar mundial` : 'Posição não disponível'}
-                  </p>
-                </div>
-                
-                {/* Informação de Premiação compacta */}
-                {stats?.position && !prizesLoading && (
-                  <div className="text-right flex-shrink-0 ml-2">
-                    {(() => {
-                      const position = stats.position;
-                      const prizeInfo = calculatePrizeForPosition(position);
-                      return (
-                        <div 
-                          className={`px-2 py-1 rounded-lg text-xs font-medium transition-colors ${
-                            prizeInfo.amount > 0 
-                              ? 'bg-green-50 text-green-700 border border-green-200' 
-                              : 'bg-muted text-muted-foreground'
-                          }`}
-                          title={prizeInfo.amount > 0 ? `Premiação: ${prizeInfo.text}` : 'Sem premiação nesta posição'}
-                        >
-                          {prizeInfo.amount > 0 ? `🎁 ${prizeInfo.text}` : '💰 Sem premiação'}
-                        </div>
-                      );
-                    })()}
-                  </div>
-                )}
+        {/* Card de Ranking Global aprimorado - só exibe se tiver posição */}
+        {stats?.position && (
+          <div className="bg-card rounded-2xl p-4 shadow-lg border border-border transition-all duration-200 hover:shadow-xl">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary-darker rounded-full flex items-center justify-center text-primary-foreground font-bold text-lg shadow-sm">
+                #{stats.position}
               </div>
               
-              {/* Barra de progresso aprimorada */}
-              <div className="space-y-1">
-                <div className="bg-secondary rounded-full h-2 overflow-hidden">
-                  <div 
-                    className="bg-gradient-to-r from-primary to-primary-darker rounded-full h-2 transition-all duration-500 ease-out" 
-                    style={{ width: '65%' }}
-                    role="progressbar"
-                    aria-valuenow={65}
-                    aria-valuemin={0}
-                    aria-valuemax={100}
-                    aria-label="Progresso no ranking"
-                  />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs text-muted-foreground font-medium">Posição atual</p>
+                    <p className="text-lg font-bold text-foreground truncate">
+                      {stats.position}º lugar mundial
+                    </p>
+                  </div>
+                  
+                  {/* Informação de Premiação compacta */}
+                  {!prizesLoading && (
+                    <div className="text-right flex-shrink-0 ml-2">
+                      {(() => {
+                        const position = stats.position;
+                        const prizeInfo = calculatePrizeForPosition(position);
+                        return (
+                          <div 
+                            className={`px-2 py-1 rounded-lg text-xs font-medium transition-colors ${
+                              prizeInfo.amount > 0 
+                                ? 'bg-green-50 text-green-700 border border-green-200' 
+                                : 'bg-muted text-muted-foreground'
+                            }`}
+                            title={prizeInfo.amount > 0 ? `Premiação: ${prizeInfo.text}` : 'Sem premiação nesta posição'}
+                          >
+                            {prizeInfo.amount > 0 ? `🎁 ${prizeInfo.text}` : '💰 Sem premiação'}
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  )}
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  {stats?.position && stats.position > 1 
-                    ? `${calculatePointsToNextPosition().toLocaleString()} pts para subir no ranking` 
-                    : 'Você está no topo!'
-                  }
-                </p>
+                
+                {/* Barra de progresso aprimorada */}
+                <div className="space-y-1">
+                  <div className="bg-secondary rounded-full h-2 overflow-hidden">
+                    <div 
+                      className="bg-gradient-to-r from-primary to-primary-darker rounded-full h-2 transition-all duration-500 ease-out" 
+                      style={{ width: '65%' }}
+                      role="progressbar"
+                      aria-valuenow={65}
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-label="Progresso no ranking"
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {stats.position > 1 
+                      ? `${calculatePointsToNextPosition().toLocaleString()} pts para subir no ranking` 
+                      : 'Você está no topo!'
+                    }
+                  </p>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
 
         {error && <ErrorState error={error} onRetry={refetch} />}
 
