@@ -1,8 +1,9 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from './useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { getCurrentBrasiliaDate, createBrasiliaTimestamp } from '@/utils/brasiliaTimeUnified';
+import { logger } from '@/utils/logger';
 
 interface UserStats {
   position: number | null;
@@ -24,6 +25,7 @@ export const useUserStats = () => {
     bestWeeklyPosition: null
   });
   const [isLoading, setIsLoading] = useState(true);
+  const channelRef = useRef<any>(null);
 
   const loadUserStats = useCallback(async (retryCount = 0) => {
     if (!user?.id) {
@@ -213,6 +215,90 @@ export const useUserStats = () => {
       setIsLoading(false);
     }
   }, [user?.id, debouncedLoadStats]);
+
+  // Configurar realtime para atualizações dinâmicas do ranking
+  useEffect(() => {
+    if (!user?.id) return;
+
+    logger.debug('Configurando realtime para atualização do ranking', { userId: user.id }, 'USER_STATS_REALTIME');
+
+    // Limpar canal anterior se existir
+    if (channelRef.current) {
+      supabase.removeChannel(channelRef.current);
+    }
+
+    // Criar canal para escutar mudanças no ranking
+    const channel = supabase
+      .channel('user-ranking-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'weekly_rankings',
+          filter: `user_id=eq.${user.id}`
+        },
+        (payload) => {
+          logger.debug('Mudança detectada no ranking do usuário', { 
+            payload, 
+            userId: user.id 
+          }, 'USER_STATS_REALTIME');
+          
+          // Atualizar posição em tempo real
+          if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+            const newRanking = payload.new;
+            setStats(prevStats => ({
+              ...prevStats,
+              position: newRanking?.position || null
+            }));
+          } else if (payload.eventType === 'DELETE') {
+            setStats(prevStats => ({
+              ...prevStats,
+              position: null
+            }));
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'profiles',
+          filter: `id=eq.${user.id}`
+        },
+        (payload) => {
+          logger.debug('Mudança detectada no perfil do usuário', { 
+            payload, 
+            userId: user.id 
+          }, 'USER_STATS_REALTIME');
+          
+          // Atualizar estatísticas do perfil em tempo real
+          if (payload.eventType === 'UPDATE') {
+            const newProfile = payload.new;
+            setStats(prevStats => ({
+              ...prevStats,
+              totalScore: newProfile?.total_score || 0,
+              gamesPlayed: newProfile?.games_played || 0,
+              bestDailyPosition: newProfile?.best_daily_position || null,
+              bestWeeklyPosition: newProfile?.best_weekly_position || null
+            }));
+          }
+        }
+      )
+      .subscribe();
+
+    channelRef.current = channel;
+
+    // Cleanup ao desmontar
+    return () => {
+      logger.debug('Removendo canal de realtime', { userId: user.id }, 'USER_STATS_REALTIME');
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+      }
+    };
+  }, [user?.id]);
 
   return {
     stats,
