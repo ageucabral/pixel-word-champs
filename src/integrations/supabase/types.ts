@@ -1521,6 +1521,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      generate_unique_invite_code: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       get_advanced_analytics: {
         Args: Record<PropertyKey, never>
         Returns: Json

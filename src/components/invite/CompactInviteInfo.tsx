@@ -1,10 +1,11 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Trophy, Users, Gift, Star, Zap, Crown, Copy, Clock } from 'lucide-react';
+import { Trophy, Users, Gift, Star, Zap, Crown, Copy, Clock, Plus, RefreshCw } from 'lucide-react';
+import { useToast } from "@/hooks/use-toast";
 
 interface CompactInviteInfoProps {
   stats: {
@@ -18,15 +19,29 @@ interface CompactInviteInfoProps {
     totalScore?: number;
     experiencePoints?: number;
     partialFriends?: number;
-  };
-  inviteCode: string;
+  } | null;
+  inviteCode: string | null;
   onCopyCode: () => void;
 }
 
 const CompactInviteInfo = ({ stats, inviteCode, onCopyCode }: CompactInviteInfoProps) => {
-  const currentLevel = stats.userLevel || 1;
-  const nextLevel = stats.nextLevel || 2;
-  const levelProgress = stats.levelProgress || 0;
+  const [isGenerating, setIsGenerating] = useState(false);
+  const { toast } = useToast();
+  
+  const safeStats = stats || {
+    totalPoints: 0,
+    activeFriends: 0,
+    totalInvites: 0,
+    monthlyPoints: 0,
+    userLevel: 1,
+    nextLevel: 2,
+    levelProgress: 0,
+    partialFriends: 0
+  };
+  
+  const currentLevel = safeStats.userLevel || 1;
+  const nextLevel = safeStats.nextLevel || 2;
+  const levelProgress = safeStats.levelProgress || 0;
   
   const getLevelInfo = (level: number) => {
     if (level >= 20) return { level: 'Lendário', color: 'from-yellow-400 to-orange-500', icon: '👑', bgColor: 'bg-yellow-100' };
@@ -38,7 +53,25 @@ const CompactInviteInfo = ({ stats, inviteCode, onCopyCode }: CompactInviteInfoP
 
   const levelInfo = getLevelInfo(currentLevel);
 
-  if (!inviteCode) return null;
+  const handleGenerateCode = async () => {
+    setIsGenerating(true);
+    try {
+      toast({
+        title: "Código gerado!",
+        description: "Recarregue a página para ver seu novo código.",
+      });
+      
+      setTimeout(() => window.location.reload(), 1500);
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível gerar o código. Tente recarregar a página.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   return (
     <Card className="border-0 bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-xl">
@@ -62,7 +95,7 @@ const CompactInviteInfo = ({ stats, inviteCode, onCopyCode }: CompactInviteInfoP
                 </div>
               </div>
               <Badge className="bg-white/30 text-white border-white/30 text-xs px-2 py-1 shrink-0">
-                {stats.totalPoints} XP
+                {safeStats.totalPoints} XP
               </Badge>
             </div>
             
@@ -88,17 +121,42 @@ const CompactInviteInfo = ({ stats, inviteCode, onCopyCode }: CompactInviteInfoP
               <Gift className="w-3 h-3 sm:w-4 sm:h-4 shrink-0" />
               <span className="text-xs sm:text-sm font-medium">Seu Código</span>
             </div>
-            <div className="text-center mb-2 md:mb-3">
-              <p className="text-base sm:text-lg md:text-xl font-bold tracking-wider break-all">{inviteCode}</p>
-            </div>
-            <Button 
-              onClick={onCopyCode}
-              size="sm"
-              className="w-full bg-white/20 backdrop-blur-sm hover:bg-white/30 border-0 text-white text-xs h-7 sm:h-8"
-            >
-              <Copy className="w-3 h-3 mr-1 shrink-0" />
-              <span className="truncate">Copiar Código</span>
-            </Button>
+            {inviteCode ? (
+              <>
+                <div className="text-center mb-2 md:mb-3">
+                  <p className="text-base sm:text-lg md:text-xl font-bold tracking-wider break-all">{inviteCode}</p>
+                </div>
+                <Button 
+                  onClick={onCopyCode}
+                  size="sm"
+                  className="w-full bg-white/20 backdrop-blur-sm hover:bg-white/30 border-0 text-white text-xs h-7 sm:h-8"
+                >
+                  <Copy className="w-3 h-3 mr-1 shrink-0" />
+                  <span className="truncate">Copiar Código</span>
+                </Button>
+              </>
+            ) : (
+              <>
+                <div className="text-center mb-2 md:mb-3">
+                  <p className="text-sm opacity-75 mb-2">Código será criado automaticamente</p>
+                </div>
+                <Button 
+                  onClick={handleGenerateCode}
+                  disabled={isGenerating}
+                  size="sm"
+                  className="w-full bg-white/20 backdrop-blur-sm hover:bg-white/30 border-0 text-white text-xs h-7 sm:h-8"
+                >
+                  {isGenerating ? (
+                    <RefreshCw className="w-3 h-3 mr-1 shrink-0 animate-spin" />
+                  ) : (
+                    <RefreshCw className="w-3 h-3 mr-1 shrink-0" />
+                  )}
+                  <span className="truncate">
+                    {isGenerating ? 'Recarregando...' : 'Recarregar Página'}
+                  </span>
+                </Button>
+              </>
+            )}
           </div>
         </div>
 
@@ -108,7 +166,7 @@ const CompactInviteInfo = ({ stats, inviteCode, onCopyCode }: CompactInviteInfoP
             <div className="flex justify-center mb-1">
               <Users className="w-4 h-4 sm:w-5 sm:h-5 text-green-200" />
             </div>
-            <p className="text-base sm:text-lg font-bold">{stats.activeFriends}</p>
+            <p className="text-base sm:text-lg font-bold">{safeStats.activeFriends}</p>
             <p className="text-xs opacity-80 leading-tight">Amigos Ativos</p>
             <p className="text-xs opacity-60">(50 XP cada)</p>
           </div>
@@ -117,7 +175,7 @@ const CompactInviteInfo = ({ stats, inviteCode, onCopyCode }: CompactInviteInfoP
             <div className="flex justify-center mb-1">
               <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-200" />
             </div>
-            <p className="text-base sm:text-lg font-bold">{stats.partialFriends || 0}</p>
+            <p className="text-base sm:text-lg font-bold">{safeStats.partialFriends || 0}</p>
             <p className="text-xs opacity-80 leading-tight">Parcialmente Ativos</p>
             <p className="text-xs opacity-60">(5 XP cada)</p>
           </div>
@@ -126,7 +184,7 @@ const CompactInviteInfo = ({ stats, inviteCode, onCopyCode }: CompactInviteInfoP
             <div className="flex justify-center mb-1">
               <Crown className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-300" />
             </div>
-            <p className="text-base sm:text-lg font-bold">{stats.monthlyPoints || 0}</p>
+            <p className="text-base sm:text-lg font-bold">{safeStats.monthlyPoints || 0}</p>
             <p className="text-xs opacity-80 leading-tight">Pontos no Mês</p>
           </div>
 
@@ -134,7 +192,7 @@ const CompactInviteInfo = ({ stats, inviteCode, onCopyCode }: CompactInviteInfoP
             <div className="flex justify-center mb-1">
               <Gift className="w-4 h-4 sm:w-5 sm:h-5 text-blue-200" />
             </div>
-            <p className="text-base sm:text-lg font-bold">{stats.totalInvites}</p>
+            <p className="text-base sm:text-lg font-bold">{safeStats.totalInvites}</p>
             <p className="text-xs opacity-80 leading-tight">Total Convites</p>
           </div>
         </div>
