@@ -121,13 +121,13 @@ export const useInviteMonitoringData = (filters: MonitoringFilters) => {
           // Filtrar convites deste usuário
           const userInvites = invitesData?.filter(invite => invite.invited_by === user.id) || [];
           
-          // Se filtro "apenas com indicações" está ativo e usuário não tem convites, excluir
-          if (filters.onlyWithInvites && userInvites.length === 0) {
-            return null; // Usuário sem convites
-          }
-
           // Filtrar recompensas deste usuário
           const userRewards = rewardsData?.filter(reward => reward.user_id === user.id) || [];
+          
+          // Se filtro "apenas com indicações" está ativo e usuário não tem indicações reais, excluir
+          if (filters.onlyWithInvites && userRewards.length === 0) {
+            return null; // Usuário sem indicações reais
+          }
           
           const totalInvites = userInvites.length;
           const processedInvites = userRewards.filter(r => r.status === 'processed').length;
