@@ -5,175 +5,165 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { logger } from '@/utils/logger';
-
 interface RankingPlayer {
   pos: number;
   user_id: string;
   name: string;
   score: number;
 }
-
 interface PrizeConfig {
   position: number;
   prize_amount: number;
 }
-
 const RankingScreen = () => {
-  const { user } = useAuth();
+  const {
+    user
+  } = useAuth();
   const [ranking, setRanking] = useState<RankingPlayer[]>([]);
   const [userPosition, setUserPosition] = useState<number | null>(null);
   const [prizeConfigs, setPrizeConfigs] = useState<PrizeConfig[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
   const loadPrizeConfigurations = async () => {
     try {
       logger.debug('Carregando configurações de prêmios', undefined, 'RANKING_SCREEN');
-      
-      const { data, error } = await supabase
-        .from('prize_configurations')
-        .select('position, prize_amount')
-        .eq('type', 'individual')
-        .eq('active', true)
-        .in('position', [1, 2, 3])
-        .order('position', { ascending: true });
-
+      const {
+        data,
+        error
+      } = await supabase.from('prize_configurations').select('position, prize_amount').eq('type', 'individual').eq('active', true).in('position', [1, 2, 3]).order('position', {
+        ascending: true
+      });
       if (error) {
-        logger.error('Erro ao carregar prêmios', { error }, 'RANKING_SCREEN');
+        logger.error('Erro ao carregar prêmios', {
+          error
+        }, 'RANKING_SCREEN');
         throw error;
       }
-
       const prizes: PrizeConfig[] = (data || []).map(config => ({
         position: config.position!,
         prize_amount: Number(config.prize_amount) || 0
       }));
-
       setPrizeConfigs(prizes);
-      logger.info('Prêmios carregados com sucesso', { prizesCount: prizes.length }, 'RANKING_SCREEN');
+      logger.info('Prêmios carregados com sucesso', {
+        prizesCount: prizes.length
+      }, 'RANKING_SCREEN');
     } catch (err) {
-      logger.error('Erro ao carregar configurações de prêmios', { error: err }, 'RANKING_SCREEN');
+      logger.error('Erro ao carregar configurações de prêmios', {
+        error: err
+      }, 'RANKING_SCREEN');
       // Define prêmios padrão em caso de erro
-      setPrizeConfigs([
-        { position: 1, prize_amount: 100 },
-        { position: 2, prize_amount: 50 },
-        { position: 3, prize_amount: 25 }
-      ]);
+      setPrizeConfigs([{
+        position: 1,
+        prize_amount: 100
+      }, {
+        position: 2,
+        prize_amount: 50
+      }, {
+        position: 3,
+        prize_amount: 25
+      }]);
     }
   };
-
   const loadRanking = async () => {
     try {
       setIsLoading(true);
       setError(null);
-      
       logger.debug('Carregando ranking', undefined, 'RANKING_SCREEN');
-      
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id, username, total_score')
-        .gt('total_score', 0)
-        .order('total_score', { ascending: false })
-        .limit(50);
-
+      const {
+        data,
+        error
+      } = await supabase.from('profiles').select('id, username, total_score').gt('total_score', 0).order('total_score', {
+        ascending: false
+      }).limit(50);
       if (error) {
-        logger.error('Erro ao carregar ranking', { error }, 'RANKING_SCREEN');
+        logger.error('Erro ao carregar ranking', {
+          error
+        }, 'RANKING_SCREEN');
         throw error;
       }
-
       const players: RankingPlayer[] = (data || []).map((profile, index) => ({
         pos: index + 1,
         user_id: profile.id,
         name: profile.username || 'Usuário',
         score: profile.total_score || 0
       }));
-
       setRanking(players);
 
       // Encontrar posição do usuário atual
       if (user?.id) {
         const userRank = players.find(p => p.user_id === user.id);
         setUserPosition(userRank?.pos || null);
-        
         if (userRank) {
-          logger.info('Posição do usuário encontrada', { 
-            position: userRank.pos, 
-            score: userRank.score 
+          logger.info('Posição do usuário encontrada', {
+            position: userRank.pos,
+            score: userRank.score
           }, 'RANKING_SCREEN');
         }
       }
-
-      logger.info('Ranking carregado com sucesso', { playersCount: players.length }, 'RANKING_SCREEN');
-
+      logger.info('Ranking carregado com sucesso', {
+        playersCount: players.length
+      }, 'RANKING_SCREEN');
     } catch (err) {
-      logger.error('Erro ao carregar ranking', { error: err }, 'RANKING_SCREEN');
+      logger.error('Erro ao carregar ranking', {
+        error: err
+      }, 'RANKING_SCREEN');
       setError('Erro ao carregar ranking');
     } finally {
       setIsLoading(false);
     }
   };
-
   useEffect(() => {
-    Promise.all([
-      loadPrizeConfigurations(),
-      loadRanking()
-    ]);
+    Promise.all([loadPrizeConfigurations(), loadRanking()]);
   }, [user?.id]);
 
   // Configurar atualizações em tempo real
   useEffect(() => {
     logger.debug('Configurando monitoramento em tempo real', undefined, 'RANKING_SCREEN');
-
-    const profilesChannel = supabase
-      .channel('profiles-ranking-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'profiles'
-        },
-        (payload) => {
-          logger.debug('Mudança detectada nos perfis', { payload }, 'RANKING_SCREEN');
-          loadRanking();
-        }
-      )
-      .subscribe();
+    const profilesChannel = supabase.channel('profiles-ranking-changes').on('postgres_changes', {
+      event: '*',
+      schema: 'public',
+      table: 'profiles'
+    }, payload => {
+      logger.debug('Mudança detectada nos perfis', {
+        payload
+      }, 'RANKING_SCREEN');
+      loadRanking();
+    }).subscribe();
 
     // Atualizar a cada 30 segundos
     const interval = setInterval(() => {
       logger.debug('Atualização periódica do ranking', undefined, 'RANKING_SCREEN');
       loadRanking();
     }, 30000);
-
     return () => {
       logger.debug('Desconectando canais de tempo real', undefined, 'RANKING_SCREEN');
       supabase.removeChannel(profilesChannel);
       clearInterval(interval);
     };
   }, [user?.id]);
-
   const getPositionIcon = (position: number) => {
     switch (position) {
-      case 1: return <Crown className="w-5 h-5 text-yellow-500" />;
-      case 2: return <Medal className="w-5 h-5 text-gray-400" />;
-      case 3: return <Award className="w-5 h-5 text-orange-500" />;
-      default: return (
-        <div className="w-5 h-5 rounded-full bg-gray-300 flex items-center justify-center text-xs font-bold text-gray-600">
+      case 1:
+        return <Crown className="w-5 h-5 text-yellow-500" />;
+      case 2:
+        return <Medal className="w-5 h-5 text-gray-400" />;
+      case 3:
+        return <Award className="w-5 h-5 text-orange-500" />;
+      default:
+        return <div className="w-5 h-5 rounded-full bg-gray-300 flex items-center justify-center text-xs font-bold text-gray-600">
           {position}
-        </div>
-      );
+        </div>;
     }
   };
-
   const getPrizeAmount = (position: number) => {
     const prizeConfig = prizeConfigs.find(config => config.position === position);
     return prizeConfig?.prize_amount || 0;
   };
-
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center relative overflow-hidden">
-        <div className="absolute inset-0 opacity-20" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")` }}></div>
+    return <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center relative overflow-hidden">
+        <div className="absolute inset-0 opacity-20" style={{
+        backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+      }}></div>
         
         {/* Floating elements */}
         <div className="absolute top-20 left-16 w-32 h-32 bg-gradient-to-br from-yellow-400/20 to-orange-500/20 rounded-full blur-xl animate-pulse"></div>
@@ -202,42 +192,12 @@ const RankingScreen = () => {
             Carregando ranking épico...
           </p>
         </div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50 p-3 pb-20">
+  return <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50 p-3 pb-20">
       <div className="max-w-md mx-auto space-y-4">
         {/* Header com mesmo estilo do HomeScreen */}
-        <div className="text-center mb-8 relative">
-          {/* Decorative stars */}
-          <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-            <div className="flex space-x-2">
-              <Star className="w-4 h-4 text-yellow-400 animate-bounce" />
-              <Sparkles className="w-4 h-4 text-pink-400 animate-bounce delay-100" />
-              <Star className="w-4 h-4 text-blue-400 animate-bounce delay-200" />
-            </div>
-          </div>
-          
-          <div className="relative mb-4">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-yellow-400 via-orange-500 to-red-500 rounded-2xl shadow-2xl animate-pulse">
-              <Trophy className="w-8 h-8 text-white" />
-            </div>
-            {/* Decorative elements */}
-            <div className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-400 rounded-full animate-ping"></div>
-            <div className="absolute -bottom-1 -left-1 w-3 h-3 bg-blue-400 rounded-full animate-ping delay-300"></div>
-          </div>
-          
-          <div className="bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent">
-            <h1 className="text-3xl font-black tracking-wide mb-2">
-              🏆 Ranking Geral
-            </h1>
-          </div>
-          <p className="text-slate-600 text-base font-medium">
-            🌟 Classificação por pontuação total
-          </p>
-        </div>
+        
 
         {/* Premiação dos 3 primeiros colocados */}
         <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 animate-fade-in">
@@ -248,17 +208,26 @@ const RankingScreen = () => {
             </div>
             
             <div className="grid grid-cols-3 gap-3">
-              {[1, 2, 3].map((position) => {
-                const prizeAmount = getPrizeAmount(position);
-                const icons = [
-                  { icon: Crown, color: 'text-yellow-500', bg: 'from-yellow-400 to-yellow-500', medal: '🥇' },
-                  { icon: Medal, color: 'text-gray-400', bg: 'from-gray-400 to-gray-500', medal: '🥈' },
-                  { icon: Award, color: 'text-orange-500', bg: 'from-orange-400 to-orange-500', medal: '🥉' }
-                ];
-                const iconData = icons[position - 1];
-                
-                return (
-                  <div key={position} className="text-center">
+              {[1, 2, 3].map(position => {
+              const prizeAmount = getPrizeAmount(position);
+              const icons = [{
+                icon: Crown,
+                color: 'text-yellow-500',
+                bg: 'from-yellow-400 to-yellow-500',
+                medal: '🥇'
+              }, {
+                icon: Medal,
+                color: 'text-gray-400',
+                bg: 'from-gray-400 to-gray-500',
+                medal: '🥈'
+              }, {
+                icon: Award,
+                color: 'text-orange-500',
+                bg: 'from-orange-400 to-orange-500',
+                medal: '🥉'
+              }];
+              const iconData = icons[position - 1];
+              return <div key={position} className="text-center">
                     <div className={`w-12 h-12 bg-gradient-to-r ${iconData.bg} rounded-full flex items-center justify-center mx-auto mb-2 shadow-lg`}>
                       <iconData.icon className="w-6 h-6 text-white" />
                     </div>
@@ -269,16 +238,14 @@ const RankingScreen = () => {
                     <div className="text-xs text-slate-600">
                       {position}º lugar
                     </div>
-                  </div>
-                );
-              })}
+                  </div>;
+            })}
             </div>
           </CardContent>
         </Card>
 
         {/* User Position Card com animação */}
-        {userPosition && user && (
-          <Card className="bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 border-0 shadow-xl animate-fade-in">
+        {userPosition && user && <Card className="bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 border-0 shadow-xl animate-fade-in">
             <CardContent className="p-4">
               <div className="flex items-center justify-between text-white">
                 <div className="flex items-center gap-3">
@@ -295,35 +262,26 @@ const RankingScreen = () => {
                     {ranking.find(p => p.user_id === user.id)?.score.toLocaleString() || 0}
                   </p>
                   <p className="text-white/80 text-sm">pontos</p>
-                  {getPrizeAmount(userPosition) > 0 && (
-                    <div className="text-sm font-semibold bg-white/20 rounded-full px-3 py-1 mt-2 backdrop-blur-sm">
+                  {getPrizeAmount(userPosition) > 0 && <div className="text-sm font-semibold bg-white/20 rounded-full px-3 py-1 mt-2 backdrop-blur-sm">
                       💰 R$ {getPrizeAmount(userPosition).toFixed(2)}
-                    </div>
-                  )}
+                    </div>}
                 </div>
               </div>
             </CardContent>
-          </Card>
-        )}
+          </Card>}
 
         {/* Error State */}
-        {error && (
-          <Card className="border-red-200 bg-red-50/80 backdrop-blur-sm animate-fade-in">
+        {error && <Card className="border-red-200 bg-red-50/80 backdrop-blur-sm animate-fade-in">
             <CardContent className="p-4 text-center">
               <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
                 <Trophy className="w-6 h-6 text-red-500" />
               </div>
               <p className="text-red-700 font-medium mb-3">{error}</p>
-              <Button 
-                onClick={loadRanking} 
-                variant="outline" 
-                className="border-red-300 text-red-700 hover:bg-red-100 bg-white/50 backdrop-blur-sm"
-              >
+              <Button onClick={loadRanking} variant="outline" className="border-red-300 text-red-700 hover:bg-red-100 bg-white/50 backdrop-blur-sm">
                 🔄 Tentar novamente
               </Button>
             </CardContent>
-          </Card>
-        )}
+          </Card>}
 
         {/* Ranking List com estilo melhorado */}
         <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg animate-fade-in">
@@ -336,28 +294,19 @@ const RankingScreen = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
-            {ranking.length === 0 ? (
-              <div className="text-center py-12 text-slate-500">
+            {ranking.length === 0 ? <div className="text-center py-12 text-slate-500">
                 <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Trophy className="w-10 h-10 text-slate-400" />
                 </div>
                 <p className="font-semibold text-lg mb-2">Arena Vazia!</p>
                 <p className="text-sm">Seja o primeiro campeão! 🎯</p>
-              </div>
-            ) : (
-              <div className="space-y-1">
+              </div> : <div className="space-y-1">
                 {ranking.map((player, index) => {
-                  const isCurrentUser = user?.id === player.user_id;
-                  const prizeAmount = getPrizeAmount(player.pos);
-                  
-                  return (
-                    <div 
-                      key={player.user_id}
-                      className={`flex items-center justify-between p-4 transition-all hover:bg-slate-50 ${
-                        isCurrentUser ? 'bg-gradient-to-r from-purple-50 to-pink-50 border-l-4 border-purple-500' : ''
-                      } ${player.pos <= 3 ? 'bg-gradient-to-r from-yellow-50 to-orange-50' : ''}`}
-                      style={{ animationDelay: `${index * 50}ms` }}
-                    >
+              const isCurrentUser = user?.id === player.user_id;
+              const prizeAmount = getPrizeAmount(player.pos);
+              return <div key={player.user_id} className={`flex items-center justify-between p-4 transition-all hover:bg-slate-50 ${isCurrentUser ? 'bg-gradient-to-r from-purple-50 to-pink-50 border-l-4 border-purple-500' : ''} ${player.pos <= 3 ? 'bg-gradient-to-r from-yellow-50 to-orange-50' : ''}`} style={{
+                animationDelay: `${index * 50}ms`
+              }}>
                       <div className="flex items-center gap-4">
                         <div className="flex items-center justify-center w-12 h-12">
                           {getPositionIcon(player.pos)}
@@ -384,22 +333,16 @@ const RankingScreen = () => {
                         <div className="font-bold text-lg text-purple-700">
                           #{player.pos}
                         </div>
-                        {prizeAmount > 0 && (
-                          <div className="text-xs text-green-600 font-semibold bg-green-100 rounded-full px-2 py-1 mt-1">
+                        {prizeAmount > 0 && <div className="text-xs text-green-600 font-semibold bg-green-100 rounded-full px-2 py-1 mt-1">
                             R$ {prizeAmount.toFixed(2)}
-                          </div>
-                        )}
+                          </div>}
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+                    </div>;
+            })}
+              </div>}
           </CardContent>
         </Card>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default RankingScreen;
