@@ -1562,6 +1562,10 @@ export type Database = {
         Args: { competition_id: string; new_end_date: string }
         Returns: Json
       }
+      update_all_competitions_status: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       update_competition_status: {
         Args: Record<PropertyKey, never>
         Returns: undefined
