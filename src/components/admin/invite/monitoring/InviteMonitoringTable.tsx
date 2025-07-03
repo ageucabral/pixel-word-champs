@@ -109,8 +109,11 @@ export const InviteMonitoringTable = ({
                 <TableRow key={user.id} className="hover:bg-slate-50">
                   <TableCell>
                     <div className="flex items-center gap-3">
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage src={user.avatar_url} />
+                      <Avatar className="h-8 w-8 flex-shrink-0">
+                        <AvatarImage 
+                          src={user.avatar_url} 
+                          className="object-cover w-full h-full"
+                        />
                         <AvatarFallback>
                           {user.username.charAt(0).toUpperCase()}
                         </AvatarFallback>

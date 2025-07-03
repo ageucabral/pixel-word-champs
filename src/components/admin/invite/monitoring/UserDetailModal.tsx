@@ -61,8 +61,11 @@ export const UserDetailModal = ({
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-3">
-            <Avatar className="h-10 w-10">
-              <AvatarImage src={user.avatar_url} />
+            <Avatar className="h-10 w-10 flex-shrink-0">
+              <AvatarImage 
+                src={user.avatar_url} 
+                className="object-cover w-full h-full"
+              />
               <AvatarFallback>
                 {user.username.charAt(0).toUpperCase()}
               </AvatarFallback>
