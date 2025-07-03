@@ -42,22 +42,29 @@ export const useOptimizedCompetitions = () => {
     setError(null);
 
     try {
-      const [competitionsResponse, customCompetitionsResponse] = await Promise.all([
+      // Usar Promise.allSettled para não falhar se uma requisição falhar
+      const [competitionsResponse, customCompetitionsResponse] = await Promise.allSettled([
         competitionService.getActiveCompetitions(),
         customCompetitionService.getCustomCompetitions()
       ]);
 
-      if (competitionsResponse.success) {
-        // Agora incluindo todas as competições, não apenas as ativas
-        setAllCompetitions(competitionsResponse.data || []);
+      // Processar resultado das competições
+      if (competitionsResponse.status === 'fulfilled' && competitionsResponse.value.success) {
+        setAllCompetitions(competitionsResponse.value.data || []);
       } else {
-        throw new Error(competitionsResponse.error || 'Erro ao carregar competições');
+        logger.warn('Falha ao carregar competições principais', undefined, 'COMPETITIONS');
       }
 
-      if (customCompetitionsResponse.success) {
-        setCustomCompetitions(customCompetitionsResponse.data || []);
+      // Processar resultado das competições customizadas
+      if (customCompetitionsResponse.status === 'fulfilled' && customCompetitionsResponse.value.success) {
+        setCustomCompetitions(customCompetitionsResponse.value.data || []);
       } else {
-        throw new Error(customCompetitionsResponse.error || 'Erro ao carregar competições customizadas');
+        logger.warn('Falha ao carregar competições customizadas', undefined, 'COMPETITIONS');
+      }
+
+      // Só falhar se ambas falharam
+      if (competitionsResponse.status === 'rejected' && customCompetitionsResponse.status === 'rejected') {
+        throw new Error('Falha ao carregar todas as competições');
       }
 
       logger.debug('Competições carregadas com sucesso - incluindo agendadas e ativas');
@@ -73,10 +80,11 @@ export const useOptimizedCompetitions = () => {
   useEffect(() => {
     loadCompetitions();
     
-    // Atualizar a cada 2 minutos para buscar dados frescos do banco
-    const interval = setInterval(loadCompetitions, 120000);
+    // Otimizar intervalo para produção - aumentar para 5 minutos
+    const interval = import.meta.env.PROD ? 300000 : 120000;
+    const intervalId = setInterval(loadCompetitions, interval);
     
-    return () => clearInterval(interval);
+    return () => clearInterval(intervalId);
   }, []);
 
   return {
