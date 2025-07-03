@@ -128,10 +128,11 @@ export const useInviteMonitoringData = (filters: MonitoringFilters) => {
           if (filters.onlyWithInvites && userRewards.length === 0) {
             return null; // Usuário sem indicações reais
           }
-          
-          const totalInvites = userInvites.length;
+           
+          // Calcular métricas baseadas apenas em convites realmente usados (com recompensas)
+          const totalInvites = userRewards.length; // Total baseado em recompensas existentes
           const processedInvites = userRewards.filter(r => r.status === 'processed').length;
-          const pendingInvites = userRewards.filter(r => r.status === 'pending').length;
+          const pendingInvites = userRewards.filter(r => r.status === 'pending' || r.status === 'partial').length;
           const totalRewards = userRewards.reduce((sum, r) => sum + (r.reward_amount || 0), 0);
 
           // Calcular score de suspeita
