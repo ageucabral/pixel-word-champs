@@ -90,7 +90,6 @@ export const DailyCompetitionFilters: React.FC<DailyCompetitionFiltersProps> = (
               <SelectItem value="scheduled">Agendada</SelectItem>
               <SelectItem value="active">Ativa</SelectItem>
               <SelectItem value="completed">Finalizada</SelectItem>
-              <SelectItem value="draft">Rascunho</SelectItem>
             </SelectContent>
           </Select>
         </div>
