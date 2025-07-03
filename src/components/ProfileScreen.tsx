@@ -102,7 +102,7 @@ const ProfileScreen = ({
   };
   if (showMyData) {
     return <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 p-3 pb-20">
-        <div className="max-w-md mx-auto space-y-4">
+        <div className="max-w-md mx-auto space-y-4 w-full px-2 sm:px-0">
           {/* Header com botão voltar */}
           <div className="flex items-center gap-3 mb-6">
             <Button variant="ghost" size="icon" onClick={() => setShowMyData(false)}>
@@ -119,7 +119,7 @@ const ProfileScreen = ({
       </div>;
   }
   return <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 p-3 pb-20">
-      <div className="max-w-md mx-auto space-y-4">
+      <div className="max-w-md mx-auto space-y-4 w-full px-2 sm:px-0">
 
         {/* Card principal do jogador com novo sistema XP */}
         <ProfileHeader user={user} currentAvatar={currentAvatar} currentLevel={currentLevel} nextLevel={nextLevel} progress={progress} onAvatarUpdate={handleAvatarUpdate} getAvatarFallback={getAvatarFallback} formatXP={formatXP} />

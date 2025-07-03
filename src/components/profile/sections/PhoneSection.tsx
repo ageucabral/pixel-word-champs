@@ -79,7 +79,7 @@ const PhoneSection = ({ phone, editPhone, isEditing, onPhoneChange }: PhoneSecti
         </div>
       ) : (
         <div className="min-h-[40px] flex items-center px-3 py-2 bg-gray-50 border border-gray-200 rounded-md">
-          <span className="text-gray-800">
+          <span className="text-gray-800 text-sm truncate">
             {phone || 'Não informado'}
           </span>
         </div>

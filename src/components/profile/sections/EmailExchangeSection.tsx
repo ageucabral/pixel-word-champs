@@ -78,11 +78,11 @@ const EmailExchangeSection = ({ email }: EmailExchangeSectionProps) => {
     return (
       <div className="space-y-2">
         <Label>Email</Label>
-        <div className="p-3 bg-gray-50 rounded-lg border flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-gray-900">{email}</span>
+        <div className="p-3 bg-gray-50 rounded-lg border flex flex-col sm:flex-row sm:items-center gap-2 sm:justify-between">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <span className="text-gray-900 truncate text-sm">{email}</span>
             {isTemporary && (
-              <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full">
+              <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full shrink-0">
                 Temporário
               </span>
             )}
@@ -92,7 +92,7 @@ const EmailExchangeSection = ({ email }: EmailExchangeSectionProps) => {
               variant="outline"
               size="sm"
               onClick={handleStartExchange}
-              className="text-xs"
+              className="text-xs w-full sm:w-auto shrink-0"
             >
               Definir Email Real
             </Button>
@@ -100,8 +100,8 @@ const EmailExchangeSection = ({ email }: EmailExchangeSectionProps) => {
         </div>
         {isTemporary ? (
           <Alert className="border-orange-200 bg-orange-50">
-            <AlertTriangle className="h-4 w-4 text-orange-600" />
-            <AlertDescription className="text-orange-700">
+            <AlertTriangle className="h-4 w-4 text-orange-600 shrink-0" />
+            <AlertDescription className="text-orange-700 text-sm">
               Este é um email temporário. Defina um email real para receber comunicações e facilitar o acesso à sua conta.
             </AlertDescription>
           </Alert>
@@ -181,11 +181,11 @@ const EmailExchangeSection = ({ email }: EmailExchangeSectionProps) => {
           </AlertDescription>
         </Alert>
 
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           <Button
             onClick={handleSendVerification}
             disabled={!newEmail || !isValidEmail(newEmail) || emailCheck.exists || emailCheck.checking || isLoading}
-            className="flex-1"
+            className="flex-1 text-sm"
           >
             {isLoading ? 'Enviando...' : 'Enviar Verificação'}
           </Button>
@@ -193,6 +193,7 @@ const EmailExchangeSection = ({ email }: EmailExchangeSectionProps) => {
             variant="outline"
             onClick={handleCancelExchange}
             disabled={isLoading}
+            className="text-sm"
           >
             Cancelar
           </Button>

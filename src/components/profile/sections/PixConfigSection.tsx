@@ -54,15 +54,15 @@ const PixConfigSection = ({
       {!isEditing ? (
         <div className="space-y-3">
           <div>
-            <Label>Nome do titular</Label>
+            <Label className="text-sm">Nome do titular</Label>
             <div className="p-3 bg-gray-50 rounded-lg border">
-              <span className="text-gray-900">{pixHolderName || 'Não configurado'}</span>
+              <span className="text-gray-900 text-sm break-words">{pixHolderName || 'Não configurado'}</span>
             </div>
           </div>
           <div>
-            <Label>Chave PIX</Label>
+            <Label className="text-sm">Chave PIX</Label>
             <div className="p-3 bg-gray-50 rounded-lg border">
-              <span className="text-gray-900">{pixKey || 'Não configurado'}</span>
+              <span className="text-gray-900 text-sm break-all">{pixKey || 'Não configurado'}</span>
             </div>
           </div>
         </div>
@@ -79,12 +79,12 @@ const PixConfigSection = ({
           </div>
 
           <div>
-            <Label htmlFor="pixType">Tipo de chave PIX</Label>
+            <Label htmlFor="pixType" className="text-sm">Tipo de chave PIX</Label>
             <select
               id="pixType"
               value={editPixType}
               onChange={(e) => onPixTypeChange(e.target.value as any)}
-              className="w-full mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
             >
               <option value="cpf">CPF</option>
               <option value="email">E-mail</option>
@@ -94,7 +94,7 @@ const PixConfigSection = ({
           </div>
 
           <div>
-            <Label htmlFor="pixKey">Chave PIX</Label>
+            <Label htmlFor="pixKey" className="text-sm">Chave PIX</Label>
             <div className="relative">
               <Input
                 id="pixKey"
