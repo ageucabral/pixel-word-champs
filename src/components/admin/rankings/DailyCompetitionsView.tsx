@@ -1,13 +1,15 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, Calendar } from 'lucide-react';
 import { UnifiedCompetitionsList } from './UnifiedCompetitionsList';
 import { UnifiedCompetitionModal } from './UnifiedCompetitionModal';
+import { DailyCompetitionFilters } from './daily/DailyCompetitionFilters';
 import { UnifiedCompetition } from '@/types/competition';
 import { useToast } from "@/hooks/use-toast";
 import { getCurrentBrasiliaTime } from '@/utils/brasiliaTimeUnified';
+import { isSameDay, parseISO } from 'date-fns';
 
 interface DailyCompetitionsViewProps {
   competitions: UnifiedCompetition[];
@@ -18,10 +20,38 @@ interface DailyCompetitionsViewProps {
 export const DailyCompetitionsView = ({ competitions, isLoading, onRefresh }: DailyCompetitionsViewProps) => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [localCompetitions, setLocalCompetitions] = useState<UnifiedCompetition[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const { toast } = useToast();
 
   // Use local competitions if available, otherwise use props
-  const displayedCompetitions = localCompetitions.length > 0 ? localCompetitions : competitions;
+  const baseCompetitions = localCompetitions.length > 0 ? localCompetitions : competitions;
+
+  // Apply filters to competitions
+  const displayedCompetitions = useMemo(() => {
+    return baseCompetitions.filter(competition => {
+      // Filter by search term (title)
+      if (searchTerm && !competition.title.toLowerCase().includes(searchTerm.toLowerCase())) {
+        return false;
+      }
+      
+      // Filter by status
+      if (statusFilter !== 'all' && competition.status !== statusFilter) {
+        return false;
+      }
+      
+      // Filter by specific date
+      if (selectedDate) {
+        const competitionDate = parseISO(competition.startDate);
+        if (!isSameDay(competitionDate, selectedDate)) {
+          return false;
+        }
+      }
+      
+      return true;
+    });
+  }, [baseCompetitions, searchTerm, statusFilter, selectedDate]);
 
   // Update local competitions when props change
   React.useEffect(() => {
@@ -119,6 +149,16 @@ export const DailyCompetitionsView = ({ competitions, isLoading, onRefresh }: Da
           </div>
         </CardHeader>
       </Card>
+
+      {/* Filtros */}
+      <DailyCompetitionFilters
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        statusFilter={statusFilter}
+        setStatusFilter={setStatusFilter}
+        selectedDate={selectedDate}
+        setSelectedDate={setSelectedDate}
+      />
 
       {/* Lista de Competições */}
       <UnifiedCompetitionsList
