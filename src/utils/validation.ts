@@ -1,8 +1,22 @@
 import { z } from 'zod';
+import { 
+  detectInputType, 
+  validateEmail as validateEmailFromDetection, 
+  validatePhoneBR 
+} from './emailPhoneDetection';
+
+// Validação customizada para email ou telefone
+const emailOrPhoneValidator = (value: string) => {
+  if (!value) return false;
+  const type = detectInputType(value);
+  return type === 'email' ? validateEmailFromDetection(value) : type === 'phone' ? validatePhoneBR(value) : false;
+};
 
 // Esquemas de validação
 export const loginSchema = z.object({
-  email: z.string().email('Email inválido'),
+  emailOrPhone: z.string()
+    .min(1, 'Email ou telefone é obrigatório')
+    .refine(emailOrPhoneValidator, 'Digite um email válido ou telefone brasileiro'),
   password: z.string().min(6, 'Senha deve ter pelo menos 6 caracteres'),
 });
 
@@ -11,7 +25,9 @@ export const registerSchema = z.object({
     .min(3, 'Nome de usuário deve ter pelo menos 3 caracteres')
     .max(20, 'Nome de usuário deve ter no máximo 20 caracteres')
     .regex(/^[a-zA-Z0-9_]+$/, 'Nome de usuário pode conter apenas letras, números e underscore'),
-  email: z.string().email('Email inválido'),
+  emailOrPhone: z.string()
+    .min(1, 'Email ou telefone é obrigatório')
+    .refine(emailOrPhoneValidator, 'Digite um email válido ou telefone brasileiro'),
   password: z.string()
     .min(8, 'Senha deve ter pelo menos 8 caracteres')
     .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'Senha deve conter pelo menos uma letra maiúscula, uma minúscula e um número'),

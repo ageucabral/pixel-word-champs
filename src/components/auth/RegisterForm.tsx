@@ -15,16 +15,9 @@ import { useEmailVerification } from '@/hooks/useEmailVerification';
 import { AvailabilityIndicator } from './AvailabilityIndicator';
 import { EmailVerificationModal } from './EmailVerificationModal';
 
-const registerSchema = z.object({
-  username: z.string().min(3, 'Nome de usuário deve ter pelo menos 3 caracteres'),
-  email: z.string().email('Email inválido').min(1, 'Email é obrigatório'),
-  password: z.string().min(6, 'A senha deve ter pelo menos 6 caracteres'),
-  confirmPassword: z.string().min(6, 'Confirmação de senha é obrigatória'),
-  inviteCode: z.string().optional()
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "As senhas não coincidem",
-  path: ["confirmPassword"],
-});
+import { registerSchema } from '@/utils/validation';
+import { processInput } from '@/utils/emailPhoneDetection';
+import { Phone } from 'lucide-react';
 
 const RegisterForm = () => {
   const { register, isLoading, error } = useAuth();
@@ -37,7 +30,7 @@ const RegisterForm = () => {
     resolver: zodResolver(registerSchema),
     defaultValues: {
       username: '',
-      email: '',
+      emailOrPhone: '',
       password: '',
       confirmPassword: '',
       inviteCode: ''
@@ -45,10 +38,19 @@ const RegisterForm = () => {
   });
 
   const watchedUsername = form.watch('username');
-  const watchedEmail = form.watch('email');
+  const watchedEmailOrPhone = form.watch('emailOrPhone');
+
+  const [inputType, setInputType] = useState<'email' | 'phone' | 'unknown'>('unknown');
 
   const usernameCheck = useUsernameVerification(watchedUsername);
-  const emailCheck = useEmailVerification(watchedEmail);
+  const emailCheck = useEmailVerification(inputType === 'email' ? watchedEmailOrPhone : '');
+
+  // Função para lidar com mudanças no campo email/telefone
+  const handleEmailPhoneChange = (value: string) => {
+    const result = processInput(value);
+    setInputType(result.type);
+    return result.value;
+  };
 
   const onSubmit = async (data: RegisterFormType) => {
     if (!usernameCheck.available && watchedUsername) {
@@ -56,24 +58,24 @@ const RegisterForm = () => {
       return;
     }
 
-    if (!emailCheck.available && watchedEmail) {
-      form.setError('email', { message: 'Este email já está cadastrado' });
+    if (inputType === 'email' && !emailCheck.available && watchedEmailOrPhone) {
+      form.setError('emailOrPhone', { message: 'Este email já está cadastrado' });
       return;
     }
 
     try {
       logger.info('Tentativa de registro iniciada', { 
-        email: data.email, 
+        emailOrPhone: data.emailOrPhone, 
         username: data.username 
       }, 'REGISTER_FORM');
       
       await register(data);
       
-      setRegisteredEmail(data.email);
-      setShowEmailModal(true);
+      setRegisteredEmail(inputType === 'email' ? data.emailOrPhone : '');
+      setShowEmailModal(inputType === 'email');
       
       logger.info('Registro concluído com sucesso', { 
-        email: data.email 
+        emailOrPhone: data.emailOrPhone 
       }, 'REGISTER_FORM');
     } catch (err: any) {
       logger.error('Erro no registro', { error: err.message }, 'REGISTER_FORM');
@@ -120,34 +122,50 @@ const RegisterForm = () => {
 
           <FormField
             control={form.control}
-            name="email"
+            name="emailOrPhone"
             render={({ field }) => (
               <FormItem className="space-y-1">
-                <label className="text-gray-700 font-medium text-sm">Email</label>
+                <label className="text-gray-700 font-medium text-sm">
+                  Email ou Telefone
+                  {inputType !== 'unknown' && (
+                    <span className="ml-2 text-xs text-purple-600">
+                      ({inputType === 'email' ? 'Email' : 'Telefone'})
+                    </span>
+                  )}
+                </label>
                 <FormControl>
                   <div className="relative">
                     <Input 
-                      placeholder="seu@email.com" 
-                      type="email"
+                      placeholder="seu@email.com ou (11) 99999-9999" 
                       className={`w-full px-4 py-3 bg-gray-50 border-2 rounded-xl focus:border-purple-500 focus:outline-none transition-colors text-gray-800 pl-12 ${
-                        watchedEmail && emailCheck.exists 
+                        inputType === 'email' && watchedEmailOrPhone && emailCheck.exists 
                           ? 'border-red-300 bg-red-50' 
-                          : watchedEmail && emailCheck.available 
+                          : inputType === 'email' && watchedEmailOrPhone && emailCheck.available 
                           ? 'border-green-300 bg-green-50' 
                           : 'border-gray-200'
                       }`}
                       {...field}
+                      onChange={(e) => {
+                        const formatted = handleEmailPhoneChange(e.target.value);
+                        field.onChange(formatted);
+                      }}
                     />
-                    <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    {inputType === 'phone' ? (
+                      <Phone className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    ) : (
+                      <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    )}
                   </div>
                 </FormControl>
-                <AvailabilityIndicator
-                  checking={emailCheck.checking}
-                  available={emailCheck.available}
-                  exists={emailCheck.exists}
-                  type="email"
-                  value={watchedEmail}
-                />
+                {inputType === 'email' && (
+                  <AvailabilityIndicator
+                    checking={emailCheck.checking}
+                    available={emailCheck.available}
+                    exists={emailCheck.exists}
+                    type="email"
+                    value={watchedEmailOrPhone}
+                  />
+                )}
                 <FormMessage />
               </FormItem>
             )}
@@ -243,9 +261,9 @@ const RegisterForm = () => {
             disabled={
               isLoading || 
               (watchedUsername && !usernameCheck.available) ||
-              (watchedEmail && !emailCheck.available) ||
+              (inputType === 'email' && watchedEmailOrPhone && !emailCheck.available) ||
               usernameCheck.checking ||
-              emailCheck.checking
+              (inputType === 'email' && emailCheck.checking)
             }
             className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 py-3 rounded-xl text-white font-bold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
           >

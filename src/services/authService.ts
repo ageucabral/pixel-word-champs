@@ -3,7 +3,7 @@ import { logger } from '@/utils/logger';
 import { createBrasiliaTimestamp } from '@/utils/brasiliaTimeUnified';
 
 interface AuthData {
-  email: string;
+  emailOrPhone: string;
   password: string;
   username?: string;
 }
@@ -11,10 +11,10 @@ interface AuthData {
 export const authService = {
   async signUp(data: AuthData) {
     try {
-      logger.info('Iniciando processo de cadastro', { email: data.email, username: data.username });
+      logger.info('Iniciando processo de cadastro', { emailOrPhone: data.emailOrPhone, username: data.username });
 
       const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: data.email,
+        email: data.emailOrPhone, // Assumindo que é email para Supabase
         password: data.password,
         options: {
           data: {
@@ -51,9 +51,9 @@ export const authService = {
     }
   },
 
-  async signIn(email: string, password: string, rememberMe: boolean = false) {
+  async signIn(emailOrPhone: string, password: string, rememberMe: boolean = false) {
     try {
-      logger.info('Iniciando processo de login', { email, rememberMe });
+      logger.info('Iniciando processo de login', { emailOrPhone, rememberMe });
 
       // Configurar o tipo de armazenamento antes do login
       if (rememberMe) {
@@ -65,7 +65,7 @@ export const authService = {
       }
 
       const { data, error } = await supabase.auth.signInWithPassword({
-        email,
+        email: emailOrPhone, // Assumindo que é email para Supabase
         password
       });
 

@@ -14,11 +14,9 @@ import { useNavigate } from 'react-router-dom';
 import { logger } from '@/utils/logger';
 import ForgotPasswordModal from './ForgotPasswordModal';
 
-const loginSchema = z.object({
-  email: z.string().email('Email inválido').min(1, 'Email é obrigatório'),
-  password: z.string().min(6, 'A senha deve ter pelo menos 6 caracteres'),
-  rememberMe: z.boolean().optional()
-});
+import { loginSchema } from '@/utils/validation';
+import { processInput } from '@/utils/emailPhoneDetection';
+import { Phone } from 'lucide-react';
 
 const LoginForm = () => {
   const { login, isLoading, error } = useAuth();
@@ -34,11 +32,13 @@ const LoginForm = () => {
   const form = useForm<LoginFormType>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: '',
+      emailOrPhone: '',
       password: '',
       rememberMe: false
     }
   });
+
+  const [inputType, setInputType] = useState<'email' | 'phone' | 'unknown'>('unknown');
 
   // Efeito para salvar preferência no localStorage
   useEffect(() => {
@@ -47,9 +47,9 @@ const LoginForm = () => {
 
   const onSubmit = async (data: LoginFormType) => {
     try {
-      logger.info('Tentativa de login iniciada', { email: data.email, rememberMe }, 'LOGIN_FORM');
+      logger.info('Tentativa de login iniciada', { emailOrPhone: data.emailOrPhone, rememberMe }, 'LOGIN_FORM');
       await login({ 
-        email: data.email, 
+        emailOrPhone: data.emailOrPhone, 
         password: data.password, 
         rememberMe 
       });
@@ -61,26 +61,47 @@ const LoginForm = () => {
     }
   };
 
+  // Função para lidar com mudanças no campo email/telefone
+  const handleEmailPhoneChange = (value: string) => {
+    const result = processInput(value);
+    setInputType(result.type);
+    return result.value;
+  };
+
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
-          name="email"
+          name="emailOrPhone"
           render={({ field }) => (
             <FormItem className="space-y-2">
-              <label className="text-gray-700 font-medium text-sm">Email</label>
+              <label className="text-gray-700 font-medium text-sm">
+                Email ou Telefone
+                {inputType !== 'unknown' && (
+                  <span className="ml-2 text-xs text-purple-600">
+                    ({inputType === 'email' ? 'Email' : 'Telefone'})
+                  </span>
+                )}
+              </label>
               <FormControl>
                 <div className="relative">
                   <Input 
-                    placeholder="seu@email.com" 
-                    type="email"
+                    placeholder="seu@email.com ou (11) 99999-9999" 
                     autoComplete="email"
                     className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none transition-colors text-gray-800 pl-12"
                     {...field}
+                    onChange={(e) => {
+                      const formatted = handleEmailPhoneChange(e.target.value);
+                      field.onChange(formatted);
+                    }}
                   />
-                  <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  {inputType === 'phone' ? (
+                    <Phone className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  ) : (
+                    <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  )}
                 </div>
               </FormControl>
               <FormMessage />

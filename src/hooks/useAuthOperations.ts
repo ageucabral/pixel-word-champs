@@ -26,9 +26,9 @@ export const useAuthOperations = (
     setError('');
 
     try {
-      logger.info('Iniciando processo de login', { email: credentials.email }, 'AUTH_OPERATIONS');
+      logger.info('Iniciando processo de login', { emailOrPhone: credentials.emailOrPhone }, 'AUTH_OPERATIONS');
       
-      const response = await authService.signIn(credentials.email, credentials.password, credentials.rememberMe);
+      const response = await authService.signIn(credentials.emailOrPhone, credentials.password, credentials.rememberMe);
       
       if (!isMountedRef.current) return;
 
@@ -66,10 +66,10 @@ export const useAuthOperations = (
     setError('');
 
     try {
-      logger.info('Iniciando processo de registro', { email: userData.email, username: userData.username }, 'AUTH_OPERATIONS');
+      logger.info('Iniciando processo de registro', { emailOrPhone: userData.emailOrPhone, username: userData.username }, 'AUTH_OPERATIONS');
       
       const response = await authService.signUp({
-        email: userData.email,
+        emailOrPhone: userData.emailOrPhone,
         password: userData.password,
         username: userData.username
       });
@@ -123,16 +123,16 @@ export const useAuthOperations = (
     }
   }, [setUser, setIsAuthenticated, setError, isMountedRef]);
 
-  const resetPassword = useCallback(async (email: string) => {
+  const resetPassword = useCallback(async (emailOrPhone: string) => {
     if (!isMountedRef.current) return;
     
     setIsLoading(true);
     setError('');
 
     try {
-      logger.info('Iniciando recuperação de senha', { email }, 'AUTH_OPERATIONS');
+      logger.info('Iniciando recuperação de senha', { emailOrPhone }, 'AUTH_OPERATIONS');
       
-      const response = await authService.resetPassword(email);
+      const response = await authService.resetPassword(emailOrPhone);
       
       if (!isMountedRef.current) return;
 
@@ -143,7 +143,7 @@ export const useAuthOperations = (
         return { success: false, error: errorMessage };
       } else {
         setError('');
-        logger.info('Email de recuperação enviado com sucesso', { email }, 'AUTH_OPERATIONS');
+        logger.info('Email de recuperação enviado com sucesso', { emailOrPhone }, 'AUTH_OPERATIONS');
         return { success: true };
       }
     } catch (error: any) {

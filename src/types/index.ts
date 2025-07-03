@@ -83,14 +83,14 @@ export interface Challenge {
 
 // Formulários de autenticação
 export interface LoginForm {
-  email: string;
+  emailOrPhone: string;
   password: string;
   rememberMe?: boolean;
 }
 
 export interface RegisterForm {
   username: string;
-  email: string;
+  emailOrPhone: string;
   password: string;
   confirmPassword: string;
   inviteCode?: string;
