@@ -115,6 +115,18 @@ export const useInviteMonitoringData = (filters: MonitoringFilters) => {
         throw new Error(`Erro ao buscar recompensas: ${rewardsError.message}`);
       }
 
+      // Buscar dias de atividade dos usuários
+      const { data: activityData, error: activityError } = await supabase
+        .from('user_activity_days')
+        .select(`
+          user_id,
+          activity_date
+        `);
+
+      if (activityError) {
+        throw new Error(`Erro ao buscar dias de atividade: ${activityError.message}`);
+      }
+
       // Processar dados e calcular scores de suspeita
       const processedUsers: MonitoringUser[] = usersData
         .map(user => {
@@ -216,14 +228,19 @@ export const useInviteMonitoringData = (filters: MonitoringFilters) => {
               invited_user: invitedProfilesData?.find(p => p.id === inv.used_by)?.username || 'Usuário desconhecido',
               status: inv.used_by ? 'used' : 'pending'
             })),
-            invited_users: invitedUsers.filter(Boolean).map(profile => ({
-              id: profile!.id,
-              username: profile!.username,
-              games_played: profile!.games_played,
-              total_score: profile!.total_score,
-              created_at: profile!.created_at,
-              invite_date: userInvites.find(inv => inv.used_by === profile!.id)?.created_at
-            }))
+            invited_users: invitedUsers.filter(Boolean).map(profile => {
+              // Calcular dias únicos de atividade para este usuário
+              const userActivityDays = activityData?.filter(activity => activity.user_id === profile!.id).length || 0;
+              return {
+                id: profile!.id,
+                username: profile!.username,
+                games_played: profile!.games_played,
+                total_score: profile!.total_score,
+                created_at: profile!.created_at,
+                invite_date: userInvites.find(inv => inv.used_by === profile!.id)?.created_at,
+                days_played: userActivityDays
+              };
+            })
           };
         })
         .filter((user) => {

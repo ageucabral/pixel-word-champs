@@ -185,6 +185,14 @@ export const UserDetailModal = ({
                           <div className="text-right">
                             <div className="text-sm font-medium">{invitedUser.total_score} pontos</div>
                             <div className="text-xs text-slate-600">{invitedUser.games_played} jogos</div>
+                            <div className="text-xs text-slate-500">
+                              {invitedUser.days_played || 0} dias ativos
+                              {(invitedUser.days_played || 0) < 5 && (
+                                <span className="ml-1 text-orange-600">
+                                  ({5 - (invitedUser.days_played || 0)} para recompensa completa)
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
                       ))}
