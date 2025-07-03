@@ -121,19 +121,34 @@ export const useInviteMonitoringData = (filters: MonitoringFilters) => {
           // Filtrar convites deste usuário
           const userInvites = invitesData?.filter(invite => invite.invited_by === user.id) || [];
           
-          // Filtrar recompensas deste usuário
+          // Filtrar recompensas deste usuário e agrupar por usuário indicado para evitar duplicatas
           const userRewards = rewardsData?.filter(reward => reward.user_id === user.id) || [];
           
+          // Agrupar por invited_user_id para contar indicações únicas (evitar duplicatas)
+          const uniqueRewards = userRewards.reduce((acc, reward) => {
+            const existing = acc.find(r => r.invited_user_id === reward.invited_user_id);
+            if (!existing) {
+              acc.push(reward);
+            } else {
+              // Se já existe, manter o com maior reward_amount (processed > partial)
+              if (reward.reward_amount > existing.reward_amount) {
+                const index = acc.findIndex(r => r.invited_user_id === reward.invited_user_id);
+                acc[index] = reward;
+              }
+            }
+            return acc;
+          }, [] as any[]);
+          
           // Se filtro "apenas com indicações" está ativo e usuário não tem indicações reais, excluir
-          if (filters.onlyWithInvites && userRewards.length === 0) {
+          if (filters.onlyWithInvites && uniqueRewards.length === 0) {
             return null; // Usuário sem indicações reais
           }
            
-          // Calcular métricas baseadas apenas em convites realmente usados (com recompensas)
-          const totalInvites = userRewards.length; // Total baseado em recompensas existentes
-          const processedInvites = userRewards.filter(r => r.status === 'processed').length;
-          const pendingInvites = userRewards.filter(r => r.status === 'pending' || r.status === 'partial').length;
-          const totalRewards = userRewards.reduce((sum, r) => sum + (r.reward_amount || 0), 0);
+          // Calcular métricas baseadas em indicações únicas
+          const totalInvites = uniqueRewards.length;
+          const processedInvites = uniqueRewards.filter(r => r.status === 'processed').length;
+          const pendingInvites = uniqueRewards.filter(r => r.status === 'pending' || r.status === 'partial').length;
+          const totalRewards = uniqueRewards.reduce((sum, r) => sum + (r.reward_amount || 0), 0);
 
           // Calcular score de suspeita
           let suspicionScore = 0;
