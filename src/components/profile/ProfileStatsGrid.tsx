@@ -26,7 +26,7 @@ const ProfileStatsGrid = ({ user }: ProfileStatsGridProps) => {
     },
     { 
       label: 'XP Total', 
-      value: user?.total_score?.toLocaleString() || '0', 
+      value: user?.experience_points?.toLocaleString() || '0', 
       icon: Star,
       color: 'text-purple-600',
       bgColor: 'bg-purple-50'
