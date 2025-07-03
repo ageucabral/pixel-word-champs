@@ -222,8 +222,8 @@ const HomeScreen = ({
           </div>
         </div>
 
-        {/* Card de Ranking Global aprimorado - só exibe se tiver posição */}
-        {stats?.position && (
+        {/* Card de Ranking Global aprimorado - só exibe se tiver posição válida */}
+        {stats?.position && stats.position > 0 && (
           <div className="bg-card rounded-2xl p-4 shadow-lg border border-border transition-all duration-200 hover:shadow-xl">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary-darker rounded-full flex items-center justify-center text-primary-foreground font-bold text-lg shadow-sm">

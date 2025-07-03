@@ -121,8 +121,15 @@ export const useUserStats = () => {
       const today = getCurrentBrasiliaDate();
       const dayOfWeek = today.getDay();
       const diff = today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
-      const weekStart = new Date(today.setDate(diff));
+      // Criar nova instância para não modificar o objeto original
+      const weekStart = new Date(today.getFullYear(), today.getMonth(), today.getDate() + diff);
       const weekStartStr = weekStart.toISOString().split('T')[0];
+      
+      console.log('🔍 DEBUG RANKING:', {
+        userId: user.id,
+        weekStartStr,
+        today: today.toISOString().split('T')[0]
+      });
 
       // Buscar ranking semanal
 
@@ -182,6 +189,12 @@ export const useUserStats = () => {
         bestDailyPosition: profile?.best_daily_position || null,
         bestWeeklyPosition: profile?.best_weekly_position || null
       };
+      
+      console.log('📊 STATS FINAIS:', {
+        weeklyRanking,
+        userStats,
+        hasPosition: !!userStats.position
+      });
 
       // Definir estatísticas finais
       setStats(userStats);
