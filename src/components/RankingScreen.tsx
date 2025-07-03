@@ -194,49 +194,81 @@ const RankingScreen = () => {
         </div>
       </div>;
   }
-  return <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50 p-2 pb-20">
-      <div className="max-w-md mx-auto space-y-2">
-        {/* Header compacto com premiação e posição do usuário */}
-        <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg animate-fade-in">
-          <CardContent className="p-3">
-            {/* Premiação compacta em linha */}
-            <div className="flex items-center justify-between mb-3">
-              <div className="text-xs font-medium text-slate-600">🏆 Premiação</div>
-              <div className="flex gap-2">
-                {[1, 2, 3].map(position => {
-                  const prizeAmount = getPrizeAmount(position);
-                  const medals = ['🥇', '🥈', '🥉'];
-                  return <div key={position} className="text-center">
-                      <div className="text-sm">{medals[position - 1]}</div>
-                      <div className="text-xs font-bold text-green-600">R$ {prizeAmount.toFixed(0)}</div>
-                    </div>;
-                })}
-              </div>
+  return <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50 p-3 pb-20">
+      <div className="max-w-md mx-auto space-y-4">
+        {/* Header com mesmo estilo do HomeScreen */}
+        
+
+        {/* Premiação dos 3 primeiros colocados */}
+        <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 animate-fade-in">
+          <CardContent className="p-4">
+            <div className="text-center mb-4">
+              <h3 className="text-lg font-bold text-slate-800 mb-2">🏆 Premiação</h3>
+              <p className="text-sm text-slate-600">Prêmios para os primeiros colocados</p>
             </div>
             
-            {/* Posição do usuário integrada */}
-            {userPosition && user && (
-              <div className="bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 rounded-xl p-3 text-white">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                      <span className="text-sm font-bold">#{userPosition}</span>
+            <div className="grid grid-cols-3 gap-3">
+              {[1, 2, 3].map(position => {
+              const prizeAmount = getPrizeAmount(position);
+              const icons = [{
+                icon: Crown,
+                color: 'text-yellow-500',
+                bg: 'from-yellow-400 to-yellow-500',
+                medal: '🥇'
+              }, {
+                icon: Medal,
+                color: 'text-gray-400',
+                bg: 'from-gray-400 to-gray-500',
+                medal: '🥈'
+              }, {
+                icon: Award,
+                color: 'text-orange-500',
+                bg: 'from-orange-400 to-orange-500',
+                medal: '🥉'
+              }];
+              const iconData = icons[position - 1];
+              return <div key={position} className="text-center">
+                    <div className={`w-12 h-12 bg-gradient-to-r ${iconData.bg} rounded-full flex items-center justify-center mx-auto mb-2 shadow-lg`}>
+                      <iconData.icon className="w-6 h-6 text-white" />
                     </div>
-                    <div>
-                      <p className="font-bold text-sm">Sua Posição</p>
-                      <p className="text-xs text-white/80">{ranking.find(p => p.user_id === user.id)?.score.toLocaleString() || 0} pts</p>
+                    <div className="text-2xl mb-1">{iconData.medal}</div>
+                    <div className="text-lg font-bold text-green-600">
+                      R$ {prizeAmount.toFixed(0)}
                     </div>
-                  </div>
-                  {getPrizeAmount(userPosition) > 0 && (
-                    <div className="text-xs font-semibold bg-white/20 rounded-lg px-2 py-1">
-                      💰 R$ {getPrizeAmount(userPosition).toFixed(2)}
+                    <div className="text-xs text-slate-600">
+                      {position}º lugar
                     </div>
-                  )}
-                </div>
-              </div>
-            )}
+                  </div>;
+            })}
+            </div>
           </CardContent>
         </Card>
+
+        {/* User Position Card com animação */}
+        {userPosition && user && <Card className="bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 border-0 shadow-xl animate-fade-in">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between text-white">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                    {getPositionIcon(userPosition)}
+                  </div>
+                  <div>
+                    <p className="font-bold text-lg">#{userPosition}</p>
+                    <p className="text-white/80 text-sm">Sua Posição</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-2xl font-bold">
+                    {ranking.find(p => p.user_id === user.id)?.score.toLocaleString() || 0}
+                  </p>
+                  <p className="text-white/80 text-sm">pontos</p>
+                  {getPrizeAmount(userPosition) > 0 && <div className="text-sm font-semibold bg-white/20 rounded-full px-3 py-1 mt-2 backdrop-blur-sm">
+                      💰 R$ {getPrizeAmount(userPosition).toFixed(2)}
+                    </div>}
+                </div>
+              </div>
+            </CardContent>
+          </Card>}
 
         {/* Error State */}
         {error && <Card className="border-red-200 bg-red-50/80 backdrop-blur-sm animate-fade-in">
