@@ -8,7 +8,7 @@ import { usePhoneVerification } from '@/hooks/usePhoneVerification';
 import DataSectionHeader from './sections/DataSectionHeader';
 import AvatarSection from './sections/AvatarSection';
 import UsernameSection from './sections/UsernameSection';
-import EmailSection from './sections/EmailSection';
+import EmailExchangeSection from './sections/EmailExchangeSection';
 import PhoneSection from './sections/PhoneSection';
 import PixConfigSection from './sections/PixConfigSection';
 import XPProgressSection from './sections/XPProgressSection';
@@ -167,7 +167,7 @@ const MyDataSection = () => {
             onUsernameChange={(username) => setEditData(prev => ({ ...prev, username }))}
           />
 
-          <EmailSection email={user?.email || ''} />
+          <EmailExchangeSection email={user?.email || ''} />
 
           <PhoneSection
             phone={user?.phone || ''}

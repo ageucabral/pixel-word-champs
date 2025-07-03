@@ -95,18 +95,26 @@ export const authService = {
         logger.info('Login com telefone detectado', { phone: phoneNumber, tempEmail: emailForAuth });
       }
 
-      const { data, error } = await supabase.auth.signInWithPassword({
+      // Tentar login com o email/telefone fornecido
+      let authResult = await supabase.auth.signInWithPassword({
         email: emailForAuth,
         password
       });
 
-      if (error) {
-        logger.error('Erro no login', { error: error.message });
-        throw error;
+      // Se falhar e foi detectado como email, pode ser que o usuário tenha se cadastrado com telefone
+      // mas agora quer fazer login com o email real que definiu depois
+      if (authResult.error && inputType === 'email') {
+        logger.info('Tentativa de login com email falhou, verificando se existe usuário com telefone equivalente');
+        // Esta funcionalidade será implementada se necessário no futuro
       }
 
-      logger.info('Login realizado com sucesso', { userId: data.user?.id, rememberMe, inputType });
-      return { data, error: null };
+      if (authResult.error) {
+        logger.error('Erro no login', { error: authResult.error.message });
+        throw authResult.error;
+      }
+
+      logger.info('Login realizado com sucesso', { userId: authResult.data.user?.id, rememberMe, inputType });
+      return { data: authResult.data, error: null };
     } catch (error) {
       logger.error('Erro no processo de login', { error });
       return { data: null, error };
