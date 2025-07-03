@@ -243,6 +243,54 @@ export const productionOptimizations = {
   }
 };
 
+// Virtual scrolling helper para listas grandes
+export const createVirtualizer = <T>(
+  items: T[],
+  containerHeight: number,
+  itemHeight: number,
+  scrollTop: number,
+  overscan = 5
+) => {
+  const startIndex = Math.max(0, Math.floor(scrollTop / itemHeight) - overscan);
+  const endIndex = Math.min(
+    items.length - 1,
+    Math.ceil((scrollTop + containerHeight) / itemHeight) + overscan
+  );
+  
+  return {
+    virtualItems: items.slice(startIndex, endIndex + 1),
+    startIndex,
+    endIndex,
+    totalHeight: items.length * itemHeight,
+    offsetY: startIndex * itemHeight
+  };
+};
+
+// Bundle size optimization
+export const bundleOptimizations = {
+  // Lazy load route components
+  lazyRoutes: () => {
+    const adminRoutes = import('@/pages/AdminPanel');
+    const rankingRoutes = import('@/components/RankingScreen');
+    
+    return { adminRoutes, rankingRoutes };
+  },
+
+  // Code splitting por feature
+  splitByFeature: async (feature: string) => {
+    switch (feature) {
+      case 'admin':
+        return import('@/components/admin/AdminDashboard');
+      case 'game':
+        return import('@/components/game/GameBoardLayout');
+      case 'ranking':
+        return import('@/components/RankingScreen');
+      default:
+        return null;
+    }
+  }
+};
+
 // Initialize production optimizations immediately
 if (import.meta.env.PROD) {
   productionOptimizations.init();
