@@ -3,6 +3,7 @@ import React from 'react';
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { Search, Filter } from 'lucide-react';
 
 interface InviteMonitoringFiltersProps {
@@ -12,6 +13,8 @@ interface InviteMonitoringFiltersProps {
   onStatusFilterChange: (value: 'all' | 'active' | 'banned' | 'suspicious') => void;
   minInvites: number;
   onMinInvitesChange: (value: number) => void;
+  onlyWithInvites: boolean;
+  onOnlyWithInvitesChange: (value: boolean) => void;
 }
 
 export const InviteMonitoringFilters = ({
@@ -20,7 +23,9 @@ export const InviteMonitoringFilters = ({
   statusFilter,
   onStatusFilterChange,
   minInvites,
-  onMinInvitesChange
+  onMinInvitesChange,
+  onlyWithInvites,
+  onOnlyWithInvitesChange
 }: InviteMonitoringFiltersProps) => {
   return (
     <div className="bg-white p-4 rounded-lg border border-slate-200">
@@ -74,14 +79,22 @@ export const InviteMonitoringFilters = ({
           />
         </div>
 
-        {/* Espaço para futuras integrações */}
+        {/* Filtro apenas com indicações */}
         <div className="space-y-2">
-          <Label>FingerprintJS</Label>
-          <div className="text-sm text-slate-500 bg-slate-50 p-2 rounded border">
-            Integração ativa
-            <br />
-            <span className="text-xs">Coletando dados...</span>
+          <Label htmlFor="onlyWithInvites">Apenas com Indicações</Label>
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="onlyWithInvites"
+              checked={onlyWithInvites}
+              onCheckedChange={onOnlyWithInvitesChange}
+            />
+            <span className="text-sm text-slate-600">
+              {onlyWithInvites ? 'Ativo' : 'Inativo'}
+            </span>
           </div>
+          <p className="text-xs text-slate-500">
+            Mostra apenas usuários com indicações
+          </p>
         </div>
       </div>
     </div>

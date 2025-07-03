@@ -7,6 +7,7 @@ interface MonitoringFilters {
   searchTerm: string;
   statusFilter: 'all' | 'active' | 'banned' | 'suspicious';
   minInvites: number;
+  onlyWithInvites: boolean;
 }
 
 interface MonitoringUser {
@@ -120,7 +121,8 @@ export const useInviteMonitoringData = (filters: MonitoringFilters) => {
           // Filtrar convites deste usuário
           const userInvites = invitesData?.filter(invite => invite.invited_by === user.id) || [];
           
-          if (userInvites.length === 0) {
+          // Se filtro "apenas com indicações" está ativo e usuário não tem convites, excluir
+          if (filters.onlyWithInvites && userInvites.length === 0) {
             return null; // Usuário sem convites
           }
 
@@ -263,7 +265,7 @@ export const useInviteMonitoringData = (filters: MonitoringFilters) => {
 
   useEffect(() => {
     fetchMonitoringData();
-  }, [filters.searchTerm, filters.statusFilter, filters.minInvites]);
+  }, [filters.searchTerm, filters.statusFilter, filters.minInvites, filters.onlyWithInvites]);
 
   return {
     data,

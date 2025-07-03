@@ -25,6 +25,7 @@ export const InviteMonitoring = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'banned' | 'suspicious'>('all');
   const [minInvites, setMinInvites] = useState(0);
+  const [onlyWithInvites, setOnlyWithInvites] = useState(true); // Padrão: apenas usuários com indicações
   const { toast } = useToast();
   
   const { 
@@ -35,7 +36,8 @@ export const InviteMonitoring = () => {
   } = useInviteMonitoringData({
     searchTerm,
     statusFilter,
-    minInvites
+    minInvites,
+    onlyWithInvites
   });
 
   const { banUser, isBanningUser } = useUserMutations();
@@ -191,6 +193,8 @@ export const InviteMonitoring = () => {
         onStatusFilterChange={setStatusFilter}
         minInvites={minInvites}
         onMinInvitesChange={setMinInvites}
+        onlyWithInvites={onlyWithInvites}
+        onOnlyWithInvitesChange={setOnlyWithInvites}
       />
 
       {/* Main Content Tabs */}
