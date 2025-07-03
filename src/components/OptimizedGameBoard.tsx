@@ -86,7 +86,16 @@ const OptimizedGameBoard = memo(({
 
   return (
     <GameBoardLayout>
-      <GameBoardContent />
+      <GameBoardContent
+        level={1}
+        timeLeft={300}
+        onTimeUp={() => {}}
+        onLevelComplete={handleGameComplete}
+        onAdvanceLevel={() => {}}
+        onStopGame={handleBack}
+        canRevive={false}
+        onRevive={() => {}}
+      />
     </GameBoardLayout>
   );
 });
