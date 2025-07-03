@@ -12,6 +12,7 @@ import { Loader2, User, Mail, Lock, Eye, EyeOff, UserPlus, Gift } from 'lucide-r
 import { logger } from '@/utils/logger';
 import { useUsernameVerification } from '@/hooks/useUsernameVerification';
 import { useEmailVerification } from '@/hooks/useEmailVerification';
+import { usePhoneVerification } from '@/hooks/usePhoneVerification';
 import { AvailabilityIndicator } from './AvailabilityIndicator';
 import { EmailVerificationModal } from './EmailVerificationModal';
 
@@ -44,6 +45,7 @@ const RegisterForm = () => {
 
   const usernameCheck = useUsernameVerification(watchedUsername);
   const emailCheck = useEmailVerification(inputType === 'email' ? watchedEmailOrPhone : '');
+  const phoneCheck = usePhoneVerification(inputType === 'phone' ? watchedEmailOrPhone : '');
 
   // Função para lidar com mudanças no campo email/telefone
   const handleEmailPhoneChange = (value: string) => {
@@ -60,6 +62,11 @@ const RegisterForm = () => {
 
     if (inputType === 'email' && !emailCheck.available && watchedEmailOrPhone) {
       form.setError('emailOrPhone', { message: 'Este email já está cadastrado' });
+      return;
+    }
+
+    if (inputType === 'phone' && !phoneCheck.available && watchedEmailOrPhone) {
+      form.setError('emailOrPhone', { message: 'Este telefone já está cadastrado' });
       return;
     }
 
@@ -138,9 +145,11 @@ const RegisterForm = () => {
                     <Input 
                       placeholder="seu@email.com ou (11) 99999-9999" 
                       className={`w-full px-4 py-3 bg-gray-50 border-2 rounded-xl focus:border-purple-500 focus:outline-none transition-colors text-gray-800 pl-12 ${
-                        inputType === 'email' && watchedEmailOrPhone && emailCheck.exists 
+                        (inputType === 'email' && watchedEmailOrPhone && emailCheck.exists) ||
+                        (inputType === 'phone' && watchedEmailOrPhone && phoneCheck.exists)
                           ? 'border-red-300 bg-red-50' 
-                          : inputType === 'email' && watchedEmailOrPhone && emailCheck.available 
+                          : (inputType === 'email' && watchedEmailOrPhone && emailCheck.available) ||
+                            (inputType === 'phone' && watchedEmailOrPhone && phoneCheck.available)
                           ? 'border-green-300 bg-green-50' 
                           : 'border-gray-200'
                       }`}
@@ -163,6 +172,15 @@ const RegisterForm = () => {
                     available={emailCheck.available}
                     exists={emailCheck.exists}
                     type="email"
+                    value={watchedEmailOrPhone}
+                  />
+                )}
+                {inputType === 'phone' && (
+                  <AvailabilityIndicator
+                    checking={phoneCheck.checking}
+                    available={phoneCheck.available}
+                    exists={phoneCheck.exists}
+                    type="phone"
                     value={watchedEmailOrPhone}
                   />
                 )}
@@ -262,8 +280,10 @@ const RegisterForm = () => {
               isLoading || 
               (watchedUsername && !usernameCheck.available) ||
               (inputType === 'email' && watchedEmailOrPhone && !emailCheck.available) ||
+              (inputType === 'phone' && watchedEmailOrPhone && !phoneCheck.available) ||
               usernameCheck.checking ||
-              (inputType === 'email' && emailCheck.checking)
+              (inputType === 'email' && emailCheck.checking) ||
+              (inputType === 'phone' && phoneCheck.checking)
             }
             className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 py-3 rounded-xl text-white font-bold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
           >

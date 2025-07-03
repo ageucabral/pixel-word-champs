@@ -1508,6 +1508,15 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      find_user_by_email_or_phone: {
+        Args: { identifier: string }
+        Returns: {
+          user_id: string
+          email: string
+          phone: string
+          username: string
+        }[]
+      }
       fix_orphaned_scores: {
         Args: Record<PropertyKey, never>
         Returns: Json

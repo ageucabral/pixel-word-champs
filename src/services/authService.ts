@@ -1,6 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/utils/logger';
 import { createBrasiliaTimestamp } from '@/utils/brasiliaTimeUnified';
+import { detectInputType, formatPhoneBR } from '@/utils/emailPhoneDetection';
 
 interface AuthData {
   emailOrPhone: string;
@@ -13,8 +14,20 @@ export const authService = {
     try {
       logger.info('Iniciando processo de cadastro', { emailOrPhone: data.emailOrPhone, username: data.username });
 
+      // Detectar se é email ou telefone
+      const inputType = detectInputType(data.emailOrPhone);
+      let emailForAuth = data.emailOrPhone;
+      let phoneNumber = null;
+
+      // Se for telefone, criar email temporário e formatar telefone
+      if (inputType === 'phone') {
+        phoneNumber = formatPhoneBR(data.emailOrPhone);
+        emailForAuth = `${phoneNumber.replace(/\D/g, '')}@phone.app`;
+        logger.info('Cadastro com telefone detectado', { phone: phoneNumber, tempEmail: emailForAuth });
+      }
+
       const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: data.emailOrPhone, // Assumindo que é email para Supabase
+        email: emailForAuth,
         password: data.password,
         options: {
           data: {
@@ -29,13 +42,20 @@ export const authService = {
       }
 
       if (authData.user) {
-        // Atualizar perfil com timestamp de Brasília
+        // Atualizar perfil com dados completos
+        const profileUpdates: any = {
+          username: data.username,
+          updated_at: createBrasiliaTimestamp(new Date().toString())
+        };
+
+        // Se é cadastro com telefone, salvar o telefone no perfil
+        if (phoneNumber) {
+          profileUpdates.phone = phoneNumber;
+        }
+
         const { error: profileError } = await supabase
           .from('profiles')
-          .update({
-            username: data.username,
-            updated_at: createBrasiliaTimestamp(new Date().toString())
-          })
+          .update(profileUpdates)
           .eq('id', authData.user.id);
 
         if (profileError) {
@@ -43,7 +63,7 @@ export const authService = {
         }
       }
 
-      logger.info('Cadastro realizado com sucesso', { userId: authData.user?.id });
+      logger.info('Cadastro realizado com sucesso', { userId: authData.user?.id, inputType });
       return { data: authData, error: null };
     } catch (error) {
       logger.error('Erro no processo de cadastro', { error });
@@ -64,8 +84,19 @@ export const authService = {
         sessionStorage.setItem('use-session-only', 'true');
       }
 
+      // Detectar se é email ou telefone
+      const inputType = detectInputType(emailOrPhone);
+      let emailForAuth = emailOrPhone;
+
+      // Se for telefone, buscar o email temporário correspondente
+      if (inputType === 'phone') {
+        const phoneNumber = formatPhoneBR(emailOrPhone);
+        emailForAuth = `${phoneNumber.replace(/\D/g, '')}@phone.app`;
+        logger.info('Login com telefone detectado', { phone: phoneNumber, tempEmail: emailForAuth });
+      }
+
       const { data, error } = await supabase.auth.signInWithPassword({
-        email: emailOrPhone, // Assumindo que é email para Supabase
+        email: emailForAuth,
         password
       });
 
@@ -74,7 +105,7 @@ export const authService = {
         throw error;
       }
 
-      logger.info('Login realizado com sucesso', { userId: data.user?.id, rememberMe });
+      logger.info('Login realizado com sucesso', { userId: data.user?.id, rememberMe, inputType });
       return { data, error: null };
     } catch (error) {
       logger.error('Erro no processo de login', { error });
@@ -101,11 +132,22 @@ export const authService = {
     }
   },
 
-  async resetPassword(email: string) {
+  async resetPassword(emailOrPhone: string) {
     try {
-      logger.info('Iniciando processo de recuperação de senha', { email }, 'AUTH_SERVICE');
+      logger.info('Iniciando processo de recuperação de senha', { emailOrPhone }, 'AUTH_SERVICE');
 
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      // Detectar se é email ou telefone
+      const inputType = detectInputType(emailOrPhone);
+      let emailForAuth = emailOrPhone;
+
+      // Se for telefone, converter para email temporário
+      if (inputType === 'phone') {
+        const phoneNumber = formatPhoneBR(emailOrPhone);
+        emailForAuth = `${phoneNumber.replace(/\D/g, '')}@phone.app`;
+        logger.info('Recuperação com telefone detectado', { phone: phoneNumber, tempEmail: emailForAuth });
+      }
+
+      const { error } = await supabase.auth.resetPasswordForEmail(emailForAuth, {
         redirectTo: `${window.location.origin}/auth/reset-password`,
       });
 
@@ -114,7 +156,7 @@ export const authService = {
         throw error;
       }
 
-      logger.info('Email de recuperação enviado com sucesso', { email }, 'AUTH_SERVICE');
+      logger.info('Email de recuperação enviado com sucesso', { emailOrPhone, inputType }, 'AUTH_SERVICE');
       return { error: null };
     } catch (error) {
       logger.error('Erro no processo de recuperação de senha', { error }, 'AUTH_SERVICE');

@@ -1,6 +1,8 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { formatPhoneBR } from '@/utils/emailPhoneDetection';
+import { logger } from '@/utils/logger';
 
 interface PhoneCheckState {
   checking: boolean;
@@ -17,18 +19,17 @@ export const usePhoneVerification = (phone: string, currentUserPhone?: string) =
 
   useEffect(() => {
     const checkPhoneAvailability = async () => {
-      // Limpar formato do telefone para comparação
-      const cleanPhone = phone.replace(/\D/g, '');
-      const cleanCurrentPhone = currentUserPhone?.replace(/\D/g, '') || '';
-      
-      // Se não tem telefone ou é muito curto, não verificar
-      if (!cleanPhone || cleanPhone.length < 10) {
+      if (!phone || phone.length < 10) {
         setPhoneCheck({ checking: false, available: true, exists: false });
         return;
       }
 
+      // Formatar telefone corretamente com +55
+      const formattedPhone = formatPhoneBR(phone);
+      const formattedCurrentPhone = currentUserPhone ? formatPhoneBR(currentUserPhone) : '';
+      
       // Se é o mesmo telefone do usuário atual, considerar disponível
-      if (cleanPhone === cleanCurrentPhone) {
+      if (formattedPhone === formattedCurrentPhone) {
         setPhoneCheck({ checking: false, available: true, exists: false });
         return;
       }
@@ -36,20 +37,27 @@ export const usePhoneVerification = (phone: string, currentUserPhone?: string) =
       setPhoneCheck({ checking: true, available: true, exists: false });
       
       try {
-        const { data, error } = await supabase.functions.invoke('check-user-availability', {
-          body: { phone: cleanPhone }
-        });
+        // Buscar diretamente na tabela profiles
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('phone', formattedPhone)
+          .maybeSingle();
 
-        if (error) throw error;
-
-        setPhoneCheck({ 
-          checking: false, 
-          available: data.phone_available || false,
-          exists: data.phone_exists || false
-        });
-        } catch (error) {
-          // Erro silencioso em produção
+        if (error) {
+          logger.error('Erro ao verificar disponibilidade do telefone', { error: error.message });
           setPhoneCheck({ checking: false, available: true, exists: false });
+        } else {
+          const phoneExists = !!data;
+          setPhoneCheck({ 
+            checking: false, 
+            available: !phoneExists,
+            exists: phoneExists
+          });
+        }
+      } catch (error) {
+        logger.error('Erro na verificação de telefone', { error });
+        setPhoneCheck({ checking: false, available: true, exists: false });
       }
     };
 
