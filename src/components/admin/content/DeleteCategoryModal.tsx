@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -10,7 +9,7 @@ import { Trash2, AlertTriangle } from 'lucide-react';
 interface DeleteCategoryModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (password: string) => void;
+  onConfirm: () => void;
   categoryName: string;
   isDeleting: boolean;
 }
@@ -22,28 +21,21 @@ export const DeleteCategoryModal = ({
   categoryName, 
   isDeleting 
 }: DeleteCategoryModalProps) => {
-  const [adminPassword, setAdminPassword] = useState('');
   const [confirmCategoryName, setConfirmCategoryName] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!adminPassword.trim()) {
-      alert('Digite sua senha de administrador');
-      return;
-    }
     
     if (confirmCategoryName !== categoryName) {
       alert('Confirmação do nome da categoria incorreta');
       return;
     }
 
-    onConfirm(adminPassword.trim());
+    onConfirm();
   };
 
   const handleClose = () => {
     if (!isDeleting) {
-      setAdminPassword('');
       setConfirmCategoryName('');
       onClose();
     }
@@ -81,22 +73,6 @@ export const DeleteCategoryModal = ({
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="adminPassword">Sua senha de administrador *</Label>
-            <Input
-              id="adminPassword"
-              type="password"
-              placeholder="Digite sua senha de administrador"
-              value={adminPassword}
-              onChange={(e) => setAdminPassword(e.target.value)}
-              required
-              disabled={isDeleting}
-            />
-            <p className="text-xs text-slate-500">
-              Digite sua senha atual para confirmar esta ação
-            </p>
-          </div>
-
           <div className="flex justify-end space-x-2 pt-4">
             <Button 
               type="button" 
@@ -109,7 +85,7 @@ export const DeleteCategoryModal = ({
             <Button
               type="submit"
               variant="destructive"
-              disabled={isDeleting || confirmCategoryName !== categoryName || !adminPassword.trim()}
+              disabled={isDeleting || confirmCategoryName !== categoryName}
             >
               {isDeleting ? (
                 <div className="flex items-center gap-2">

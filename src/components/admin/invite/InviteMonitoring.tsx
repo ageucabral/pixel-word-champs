@@ -40,9 +40,9 @@ export const InviteMonitoring = () => {
 
   const { banUser, isBanningUser } = useUserMutations();
 
-  const handleBanUser = async (userId: string, reason: string, adminPassword: string) => {
+  const handleBanUser = async (userId: string, reason: string) => {
     try {
-      await banUser({ userId, reason, adminPassword });
+      await banUser({ userId, reason });
       refetch();
     } catch (error) {
       console.error('Erro ao banir usuário:', error);

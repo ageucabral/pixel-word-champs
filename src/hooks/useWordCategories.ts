@@ -125,10 +125,12 @@ export const useWordCategories = () => {
   });
 
   const deleteCategory = useMutation({
-    mutationFn: async ({ id, password }: { id: string; password: string }) => {
-      // Verificar senha (simplificado - em produção seria mais seguro)
-      if (password !== 'admin123') {
-        throw new Error('Senha incorreta');
+    mutationFn: async ({ id }: { id: string }) => {
+      // Verificar se o usuário é admin através da função do banco
+      const { data: isAdmin, error: adminError } = await supabase.rpc('is_admin');
+      
+      if (adminError || !isAdmin) {
+        throw new Error('Acesso negado: apenas administradores podem excluir categorias');
       }
 
       const { data, error } = await supabase

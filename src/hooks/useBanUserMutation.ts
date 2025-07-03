@@ -4,26 +4,28 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/utils/logger';
 
-const validateAdminPassword = async (password: string) => {
+const validateAdminRole = async () => {
   const { data: currentUser } = await supabase.auth.getUser();
   if (!currentUser.user) {
     throw new Error('Usuário não autenticado');
   }
 
-  logger.debug('Validando senha do administrador', { userId: currentUser.user.id }, 'BAN_USER_MUTATION');
+  logger.debug('Verificando role de administrador', { userId: currentUser.user.id }, 'BAN_USER_MUTATION');
 
-  // Criar sessão temporária para validar senha sem afetar a sessão atual
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email: currentUser.user.email!,
-    password: password
-  });
+  // Usar a função is_admin() do banco para verificar permissões
+  const { data: isAdmin, error } = await supabase.rpc('is_admin');
 
   if (error) {
-    logger.error('Senha de administrador incorreta', { error: error.message }, 'BAN_USER_MUTATION');
-    throw new Error('Senha de administrador incorreta');
+    logger.error('Erro ao verificar role de admin', { error: error.message }, 'BAN_USER_MUTATION');
+    throw new Error('Erro ao verificar permissões de administrador');
   }
 
-  logger.debug('Senha validada com sucesso', undefined, 'BAN_USER_MUTATION');
+  if (!isAdmin) {
+    logger.error('Usuário não tem permissão de admin', { userId: currentUser.user.id }, 'BAN_USER_MUTATION');
+    throw new Error('Acesso negado: apenas administradores podem realizar esta ação');
+  }
+
+  logger.debug('Role de admin validada com sucesso', undefined, 'BAN_USER_MUTATION');
   return true;
 };
 
@@ -32,11 +34,11 @@ export const useBanUserMutation = () => {
   const queryClient = useQueryClient();
 
   const banUserMutation = useMutation({
-    mutationFn: async ({ userId, reason, adminPassword }: { userId: string; reason: string; adminPassword: string }) => {
+    mutationFn: async ({ userId, reason }: { userId: string; reason: string }) => {
       logger.info('Iniciando banimento do usuário', { targetUserId: userId }, 'BAN_USER_MUTATION');
       
-      // Validar senha do admin
-      await validateAdminPassword(adminPassword);
+      // Validar role de admin
+      await validateAdminRole();
 
       const { data: currentUser } = await supabase.auth.getUser();
       if (!currentUser.user) {

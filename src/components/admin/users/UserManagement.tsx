@@ -40,13 +40,11 @@ export const UserManagement = () => {
   const bannedUsers = filteredUsers.filter(user => user.is_banned);
 
   const handleBanUser = async (userId: string, reason: string) => {
-    // Note: This will need to be updated to include adminPassword when modal is implemented
-    banUser({ userId, reason, adminPassword: 'temp' });
+    banUser({ userId, reason });
   };
 
   const handleUnbanUser = async (userId: string) => {
-    // Note: This will need to be updated to include adminPassword when modal is implemented
-    unbanUser({ userId, adminPassword: 'temp' });
+    unbanUser({ userId });
   };
 
   const handleResetScores = async (password: string) => {

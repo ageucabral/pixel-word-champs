@@ -1,8 +1,6 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -16,7 +14,6 @@ interface BanUserModalProps {
 }
 
 export const BanUserModal = ({ isOpen, onClose, user }: BanUserModalProps) => {
-  const [adminPassword, setAdminPassword] = useState('');
   const [banReason, setBanReason] = useState('');
   const { banUser, unbanUser, isBanningUser, isUnbanningUser } = useAllUsers();
 
@@ -31,11 +28,6 @@ export const BanUserModal = ({ isOpen, onClose, user }: BanUserModalProps) => {
       onClose();
     } else {
       // Banir usuário
-      if (!adminPassword) {
-        alert('Digite sua senha de administrador');
-        return;
-      }
-      
       if (!banReason.trim()) {
         alert('Digite o motivo do banimento');
         return;
@@ -43,15 +35,13 @@ export const BanUserModal = ({ isOpen, onClose, user }: BanUserModalProps) => {
       
       banUser({
         userId: user.id,
-        reason: banReason.trim(),
-        adminPassword
+        reason: banReason.trim()
       });
       onClose();
     }
   };
 
   const handleClose = () => {
-    setAdminPassword('');
     setBanReason('');
     onClose();
   };
@@ -104,23 +94,6 @@ export const BanUserModal = ({ isOpen, onClose, user }: BanUserModalProps) => {
                 rows={3}
                 required
               />
-            </div>
-          )}
-
-          {!user.is_banned && (
-            <div className="space-y-2">
-              <Label htmlFor="adminPassword">Sua senha de administrador *</Label>
-              <Input
-                id="adminPassword"
-                type="password"
-                placeholder="Digite sua senha de administrador"
-                value={adminPassword}
-                onChange={(e) => setAdminPassword(e.target.value)}
-                required
-              />
-              <p className="text-xs text-slate-500">
-                Digite sua senha atual para confirmar esta ação
-              </p>
             </div>
           )}
 

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -10,7 +9,7 @@ import { Trash2, AlertTriangle } from 'lucide-react';
 interface DeleteAllWordsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (password: string) => void;
+  onConfirm: () => void;
   isDeleting: boolean;
   totalWords: number;
 }
@@ -22,7 +21,6 @@ export const DeleteAllWordsModal = ({
   isDeleting,
   totalWords 
 }: DeleteAllWordsModalProps) => {
-  const [adminPassword, setAdminPassword] = useState('');
   const [confirmation, setConfirmation] = useState('');
 
   const confirmationText = 'EXCLUIR TODAS';
@@ -30,22 +28,16 @@ export const DeleteAllWordsModal = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!adminPassword.trim()) {
-      alert('Digite sua senha de administrador');
-      return;
-    }
-    
     if (confirmation !== confirmationText) {
       alert(`Digite exatamente "${confirmationText}" para confirmar`);
       return;
     }
 
-    onConfirm(adminPassword.trim());
+    onConfirm();
   };
 
   const handleClose = () => {
     if (!isDeleting) {
-      setAdminPassword('');
       setConfirmation('');
       onClose();
     }
@@ -83,22 +75,6 @@ export const DeleteAllWordsModal = ({
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="adminPassword">Sua senha de administrador *</Label>
-            <Input
-              id="adminPassword"
-              type="password"
-              placeholder="Digite sua senha de administrador"
-              value={adminPassword}
-              onChange={(e) => setAdminPassword(e.target.value)}
-              required
-              disabled={isDeleting}
-            />
-            <p className="text-xs text-slate-500">
-              Digite sua senha atual para confirmar esta ação
-            </p>
-          </div>
-
           <div className="flex justify-end space-x-2 pt-4">
             <Button 
               type="button" 
@@ -111,7 +87,7 @@ export const DeleteAllWordsModal = ({
             <Button
               type="submit"
               variant="destructive"
-              disabled={isDeleting || confirmation !== confirmationText || !adminPassword.trim()}
+              disabled={isDeleting || confirmation !== confirmationText}
             >
               {isDeleting ? (
                 <div className="flex items-center gap-2">

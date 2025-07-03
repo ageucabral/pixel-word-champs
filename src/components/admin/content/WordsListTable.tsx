@@ -73,8 +73,8 @@ export const WordsListTable = () => {
     setCurrentPage(1);
   }, [searchTerm, selectedCategory]);
 
-  const handleDeleteAll = (password: string) => {
-    deleteAllWords(password);
+  const handleDeleteAll = () => {
+    deleteAllWords();
     setShowDeleteAllModal(false);
   };
 
