@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Shield, AlertTriangle, Activity, Clock, Refresh } from 'lucide-react';
+import { Shield, AlertTriangle, Activity, Clock, RefreshCw } from 'lucide-react';
 import { securityMonitoring, SecurityMetrics, SecurityEvent } from '@/services/securityMonitoring';
 import { useToast } from "@/hooks/use-toast";
 
@@ -84,7 +84,7 @@ export const SecurityDashboard = () => {
             ))}
           </div>
           <Button onClick={loadSecurityData} variant="outline" size="sm">
-            <Refresh className="h-4 w-4 mr-2" />
+            <RefreshCw className="h-4 w-4 mr-2" />
             Atualizar
           </Button>
         </div>

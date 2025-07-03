@@ -19,7 +19,7 @@ interface CategoryItemProps {
   isDeleting: boolean;
   onEdit: (category: Category) => void;
   onUpdate: (id: string, data: { name: string; description: string }) => void;
-  onDelete: (id: string) => void;
+  onDelete: (id: string, password?: string) => void;
   onCancelEdit: () => void;
 }
 
@@ -56,7 +56,7 @@ export const CategoryItem = ({
   };
 
   const handleDeleteConfirm = () => {
-    onDelete(category.id);
+    onDelete(category.id, '');
     setShowDeleteModal(false);
   };
 

@@ -74,7 +74,7 @@ export const WordsListTable = () => {
   }, [searchTerm, selectedCategory]);
 
   const handleDeleteAll = () => {
-    deleteAllWords();
+    deleteAllWords('');
     setShowDeleteAllModal(false);
   };
 

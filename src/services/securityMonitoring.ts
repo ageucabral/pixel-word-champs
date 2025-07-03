@@ -4,7 +4,7 @@ import { logger } from '@/utils/logger';
 export interface SecurityEvent {
   id?: string;
   event_type: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: string;
   user_id?: string;
   ip_address?: string;
   user_agent?: string;
@@ -92,7 +92,7 @@ export const securityMonitoring = {
       return {
         totalEvents,
         criticalEvents,
-        recentEvents,
+        recentEvents: recentEvents as SecurityEvent[],
         eventsByType,
         eventsBySeverity,
       };
@@ -116,7 +116,7 @@ export const securityMonitoring = {
         return [];
       }
 
-      return data || [];
+      return (data as SecurityEvent[]) || [];
     } catch (error) {
       logger.error('Erro inesperado ao buscar alertas recentes', error, 'SECURITY_MONITORING');
       return [];
