@@ -1,6 +1,18 @@
 import React from 'react';
 import { Gift } from 'lucide-react';
+
 const InviteHeader = () => {
-  return;
+  return (
+    <div className="bg-gradient-to-r from-primary to-primary-darker text-primary-foreground rounded-2xl p-4 mb-4">
+      <div className="flex items-center gap-3">
+        <Gift className="w-6 h-6" />
+        <div>
+          <h1 className="text-lg font-bold">Convide Amigos</h1>
+          <p className="text-primary-foreground/80 text-sm">Ganhe pontos convidando seus amigos</p>
+        </div>
+      </div>
+    </div>
+  );
 };
+
 export default InviteHeader;

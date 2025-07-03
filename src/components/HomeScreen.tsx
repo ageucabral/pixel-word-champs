@@ -1,7 +1,7 @@
 import React from 'react';
 import { Coins, Trophy, Sparkles, Star, Zap } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { useUserStats } from '@/hooks/useUserStats';
+import { useOptimizedUserStats } from '@/hooks/useOptimizedUserStats';
 import { useProfile } from '@/hooks/useProfile';
 import { usePlayerLevel } from '@/hooks/usePlayerLevel';
 import { useWeeklyCompetitionAutoParticipation } from '@/hooks/useWeeklyCompetitionAutoParticipation';
@@ -34,7 +34,7 @@ const HomeScreen = ({
   const {
     stats,
     isLoading: statsLoading
-  } = useUserStats();
+  } = useOptimizedUserStats();
   const {
     profile,
     isLoading: profileLoading
@@ -222,8 +222,8 @@ const HomeScreen = ({
           </div>
         </div>
 
-        {/* Card de Ranking Global aprimorado - só exibe se tiver posição válida */}
-        {stats?.position && stats.position > 0 && (
+        {/* Card de Ranking Global aprimorado - só exibe se tiver posição válida e atual */}
+        {stats?.position && stats.position > 0 && !statsLoading && (
           <div className="bg-card rounded-2xl p-4 shadow-lg border border-border transition-all duration-200 hover:shadow-xl">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary-darker rounded-full flex items-center justify-center text-primary-foreground font-bold text-lg shadow-sm">
