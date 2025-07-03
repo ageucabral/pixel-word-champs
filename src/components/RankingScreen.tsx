@@ -194,52 +194,81 @@ const RankingScreen = () => {
         </div>
       </div>;
   }
-  return <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50 p-2 pb-20">
-      <div className="max-w-md mx-auto space-y-2">
-        {/* Header compacto com premiação e posição do usuário combinados */}
-        <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg animate-fade-in">
-          <CardContent className="p-3">
-            {/* Premiação compacta inline */}
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">
-                <Trophy className="w-4 h-4 text-yellow-500" />
-                Premiação
-              </h3>
-              <div className="flex gap-2">
-                {[1, 2, 3].map(position => {
-                  const prizeAmount = getPrizeAmount(position);
-                  const medals = ['🥇', '🥈', '🥉'];
-                  return <div key={position} className="text-center">
-                    <div className="text-sm">{medals[position - 1]}</div>
-                    <div className="text-xs font-bold text-green-600">R$ {prizeAmount.toFixed(0)}</div>
-                  </div>;
-                })}
-              </div>
+  return <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50 p-3 pb-20">
+      <div className="max-w-md mx-auto space-y-4">
+        {/* Header com mesmo estilo do HomeScreen */}
+        
+
+        {/* Premiação dos 3 primeiros colocados */}
+        <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 animate-fade-in">
+          <CardContent className="p-4">
+            <div className="text-center mb-4">
+              <h3 className="text-lg font-bold text-slate-800 mb-2">🏆 Premiação</h3>
+              <p className="text-sm text-slate-600">Prêmios para os primeiros colocados</p>
             </div>
             
-            {/* Posição do usuário integrada */}
-            {userPosition && user && (
-              <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-lg p-3 border-l-4 border-purple-500">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
-                      {getPositionIcon(userPosition)}
+            <div className="grid grid-cols-3 gap-3">
+              {[1, 2, 3].map(position => {
+              const prizeAmount = getPrizeAmount(position);
+              const icons = [{
+                icon: Crown,
+                color: 'text-yellow-500',
+                bg: 'from-yellow-400 to-yellow-500',
+                medal: '🥇'
+              }, {
+                icon: Medal,
+                color: 'text-gray-400',
+                bg: 'from-gray-400 to-gray-500',
+                medal: '🥈'
+              }, {
+                icon: Award,
+                color: 'text-orange-500',
+                bg: 'from-orange-400 to-orange-500',
+                medal: '🥉'
+              }];
+              const iconData = icons[position - 1];
+              return <div key={position} className="text-center">
+                    <div className={`w-12 h-12 bg-gradient-to-r ${iconData.bg} rounded-full flex items-center justify-center mx-auto mb-2 shadow-lg`}>
+                      <iconData.icon className="w-6 h-6 text-white" />
                     </div>
-                    <div>
-                      <p className="font-bold text-sm text-purple-900">#{userPosition} • Sua Posição</p>
-                      <p className="text-xs text-purple-700">{ranking.find(p => p.user_id === user.id)?.score.toLocaleString() || 0} pontos</p>
+                    <div className="text-2xl mb-1">{iconData.medal}</div>
+                    <div className="text-lg font-bold text-green-600">
+                      R$ {prizeAmount.toFixed(0)}
                     </div>
-                  </div>
-                  {getPrizeAmount(userPosition) > 0 && (
-                    <div className="text-xs font-semibold bg-green-100 text-green-700 rounded-full px-2 py-1">
-                      💰 R$ {getPrizeAmount(userPosition).toFixed(2)}
+                    <div className="text-xs text-slate-600">
+                      {position}º lugar
                     </div>
-                  )}
-                </div>
-              </div>
-            )}
+                  </div>;
+            })}
+            </div>
           </CardContent>
         </Card>
+
+        {/* User Position Card com animação */}
+        {userPosition && user && <Card className="bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 border-0 shadow-xl animate-fade-in">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between text-white">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                    {getPositionIcon(userPosition)}
+                  </div>
+                  <div>
+                    <p className="font-bold text-lg">#{userPosition}</p>
+                    <p className="text-white/80 text-sm">Sua Posição</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-2xl font-bold">
+                    {ranking.find(p => p.user_id === user.id)?.score.toLocaleString() || 0}
+                  </p>
+                  <p className="text-white/80 text-sm">pontos</p>
+                  {getPrizeAmount(userPosition) > 0 && <div className="text-sm font-semibold bg-white/20 rounded-full px-3 py-1 mt-2 backdrop-blur-sm">
+                      💰 R$ {getPrizeAmount(userPosition).toFixed(2)}
+                    </div>}
+                </div>
+              </div>
+            </CardContent>
+          </Card>}
 
         {/* Error State */}
         {error && <Card className="border-red-200 bg-red-50/80 backdrop-blur-sm animate-fade-in">
@@ -254,49 +283,59 @@ const RankingScreen = () => {
             </CardContent>
           </Card>}
 
-        {/* Ranking List compacto */}
+        {/* Ranking List com estilo melhorado */}
         <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg animate-fade-in">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-xl font-bold text-slate-800 flex items-center gap-2">
+              <div className="w-8 h-8 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
+                <Star className="w-4 h-4 text-white" />
+              </div>
+              Classificação
+            </CardTitle>
+          </CardHeader>
           <CardContent className="p-0">
-            {/* Header inline do ranking */}
-            <div className="p-3 pb-2 border-b border-slate-200">
-              <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">
-                <Star className="w-4 h-4 text-yellow-500" />
-                Classificação
-              </h3>
-            </div>
-            
-            {ranking.length === 0 ? <div className="text-center py-8 text-slate-500">
-                <Trophy className="w-12 h-12 text-slate-400 mx-auto mb-2" />
-                <p className="font-semibold mb-1">Arena Vazia!</p>
-                <p className="text-xs">Seja o primeiro campeão! 🎯</p>
-              </div> : <div>
+            {ranking.length === 0 ? <div className="text-center py-12 text-slate-500">
+                <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Trophy className="w-10 h-10 text-slate-400" />
+                </div>
+                <p className="font-semibold text-lg mb-2">Arena Vazia!</p>
+                <p className="text-sm">Seja o primeiro campeão! 🎯</p>
+              </div> : <div className="space-y-1">
                 {ranking.map((player, index) => {
               const isCurrentUser = user?.id === player.user_id;
               const prizeAmount = getPrizeAmount(player.pos);
-              return <div key={player.user_id} className={`flex items-center justify-between p-3 border-b border-slate-100 last:border-b-0 transition-all hover:bg-slate-50 ${isCurrentUser ? 'bg-gradient-to-r from-purple-50 to-pink-50 border-l-4 border-purple-500' : ''} ${player.pos <= 3 ? 'bg-gradient-to-r from-yellow-50 to-orange-50' : ''}`}>
-                      <div className="flex items-center gap-3">
-                        <div className="flex items-center justify-center w-8 h-8">
+              return <div key={player.user_id} className={`flex items-center justify-between p-4 transition-all hover:bg-slate-50 ${isCurrentUser ? 'bg-gradient-to-r from-purple-50 to-pink-50 border-l-4 border-purple-500' : ''} ${player.pos <= 3 ? 'bg-gradient-to-r from-yellow-50 to-orange-50' : ''}`} style={{
+                animationDelay: `${index * 50}ms`
+              }}>
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center justify-center w-12 h-12">
                           {getPositionIcon(player.pos)}
                         </div>
                         
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-blue-500 flex items-center justify-center text-white font-bold text-sm">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-400 to-blue-500 flex items-center justify-center text-white font-bold text-lg shadow-lg">
                           {player.name?.charAt(0).toUpperCase() || 'U'}
                         </div>
                         
-                        <div className="min-w-0 flex-1">
-                          <p className="font-bold text-sm text-slate-900 flex items-center gap-1 truncate">
+                        <div>
+                          <p className="font-bold text-slate-900 flex items-center gap-2">
                             <span>{isCurrentUser ? 'Você' : player.name}</span>
                             {player.pos === 1 && <span>👑</span>}
                             {player.pos === 2 && <span>🥈</span>}
                             {player.pos === 3 && <span>🥉</span>}
                           </p>
-                          <p className="text-xs text-slate-500">{player.score.toLocaleString()} pts</p>
+                          <p className="text-sm text-slate-500 font-medium">
+                            {player.score.toLocaleString()} pontos
+                          </p>
                         </div>
                       </div>
                       
-                      <div className="text-right flex-shrink-0">
-                        <div className="font-bold text-sm text-purple-700">#{player.pos}</div>
-                        {prizeAmount > 0 && <div className="text-xs text-green-600 font-semibold bg-green-100 rounded px-1">R$ {prizeAmount.toFixed(0)}</div>}
+                      <div className="text-right">
+                        <div className="font-bold text-lg text-purple-700">
+                          #{player.pos}
+                        </div>
+                        {prizeAmount > 0 && <div className="text-xs text-green-600 font-semibold bg-green-100 rounded-full px-2 py-1 mt-1">
+                            R$ {prizeAmount.toFixed(2)}
+                          </div>}
                       </div>
                     </div>;
             })}
