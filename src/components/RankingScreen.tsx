@@ -197,17 +197,7 @@ const RankingScreen = () => {
   return <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50 p-3 pb-20">
       <div className="max-w-md mx-auto space-y-3">
         {/* Header compacto */}
-        <div className="text-center mb-4 relative">
-          <div className="relative mb-2">
-            <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-yellow-400 via-orange-500 to-red-500 rounded-xl shadow-lg">
-              <Trophy className="w-6 h-6 text-white" />
-            </div>
-          </div>
-          <h1 className="text-2xl font-black text-transparent bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text mb-1">
-            🏆 Ranking Geral
-          </h1>
-          <p className="text-slate-600 text-sm">🌟 Classificação por pontuação total</p>
-        </div>
+        
 
         {/* Premiação compacta */}
         <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg animate-fade-in">
