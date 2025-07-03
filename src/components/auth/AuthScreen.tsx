@@ -5,7 +5,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Link, useNavigate } from 'react-router-dom';
 import LoginForm from './LoginForm';
 import RegisterForm from './RegisterForm';
-import SocialLogin from './SocialLogin';
 import DailyCompetitionCard from './DailyCompetitionCard';
 import { Crown } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
@@ -85,20 +84,6 @@ const AuthScreen = () => {
                 </div>
 
                 <LoginForm />
-                
-                {/* Social Login - apenas na aba de login */}
-                <div className="mt-6">
-                  <div className="relative">
-                    <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-gray-300"></div>
-                    </div>
-                    <div className="relative flex justify-center text-sm">
-                      <span className="px-4 bg-white text-gray-500">ou continue com</span>
-                    </div>
-                  </div>
-
-                  <SocialLogin />
-                </div>
               </TabsContent>
               
               <TabsContent value="register" className="space-y-4">
