@@ -194,8 +194,61 @@ const RankingScreen = () => {
         </div>
       </div>;
   }
-  return <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50 p-2 pb-20">
-      <div className="max-w-md mx-auto space-y-2">
+  return <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50 p-3 pb-20">
+      <div className="max-w-md mx-auto space-y-3">
+        {/* Header compacto */}
+        <div className="text-center mb-4 relative">
+          <div className="relative mb-2">
+            <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-yellow-400 via-orange-500 to-red-500 rounded-xl shadow-lg">
+              <Trophy className="w-6 h-6 text-white" />
+            </div>
+          </div>
+          <h1 className="text-2xl font-black text-transparent bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text mb-1">
+            🏆 Ranking Geral
+          </h1>
+          <p className="text-slate-600 text-sm">🌟 Classificação por pontuação total</p>
+        </div>
+
+        {/* Premiação compacta */}
+        <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg animate-fade-in">
+          <CardContent className="p-3">
+            <div className="text-center mb-2">
+              <h3 className="text-sm font-bold text-slate-800 mb-1">🏆 Premiação</h3>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              {[1, 2, 3].map(position => {
+              const prizeAmount = getPrizeAmount(position);
+              const icons = [{
+                icon: Crown,
+                bg: 'from-yellow-400 to-yellow-500',
+                medal: '🥇'
+              }, {
+                icon: Medal,
+                bg: 'from-gray-400 to-gray-500',
+                medal: '🥈'
+              }, {
+                icon: Award,
+                bg: 'from-orange-400 to-orange-500',
+                medal: '🥉'
+              }];
+              const iconData = icons[position - 1];
+              return <div key={position} className="text-center">
+                    <div className={`w-8 h-8 bg-gradient-to-r ${iconData.bg} rounded-full flex items-center justify-center mx-auto mb-1 shadow-md`}>
+                      <iconData.icon className="w-4 h-4 text-white" />
+                    </div>
+                    <div className="text-lg mb-1">{iconData.medal}</div>
+                    <div className="text-sm font-bold text-green-600">
+                      R$ {prizeAmount.toFixed(0)}
+                    </div>
+                    <div className="text-xs text-slate-600">
+                      {position}º lugar
+                    </div>
+                  </div>;
+            })}
+            </div>
+          </CardContent>
+        </Card>
+
         {/* User Position Card compacto */}
         {userPosition && user && <Card className="bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 border-0 shadow-lg animate-fade-in">
             <CardContent className="p-3">
