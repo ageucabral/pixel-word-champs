@@ -200,7 +200,7 @@ const RankingScreen = () => {
         
 
         {/* Premiação compacta */}
-        <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg animate-fade-in">
+        <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg animate-fade-in">
           <CardContent className="p-3">
             <div className="text-center mb-2">
               <h3 className="text-sm font-bold text-slate-800 mb-1">🏆 Premiação</h3>
