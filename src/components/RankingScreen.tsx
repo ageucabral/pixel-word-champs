@@ -188,22 +188,61 @@ const RankingScreen = () => {
   };
 
   const getTimeRemaining = () => {
-    if (!competition?.end_date) return 'Finalizada';
+    if (!competition?.end_date) {
+      console.log('🔍 [RankingScreen] No end_date found');
+      return 'Finalizada';
+    }
+    
+    console.log('🔍 [RankingScreen] Competition data:', {
+      end_date: competition.end_date,
+      end_date_type: typeof competition.end_date,
+      end_date_length: competition.end_date.length,
+      status: competition.status
+    });
     
     const now = new Date();
     const endDate = new Date(competition.end_date);
     
-    // Se a data não inclui horário (apenas YYYY-MM-DD), definir como final do dia
-    if (competition.end_date.length === 10) {
+    console.log('🔍 [RankingScreen] Initial dates:', {
+      now: now.toISOString(),
+      endDate_before: endDate.toISOString(),
+      now_time: now.getTime(),
+      endDate_time: endDate.getTime()
+    });
+    
+    // Detectar se é apenas data (sem horário) usando regex mais robusta
+    const isDateOnly = /^\d{4}-\d{2}-\d{2}$/.test(competition.end_date.trim());
+    
+    if (isDateOnly) {
+      // Definir como final do dia no horário de Brasília
       endDate.setHours(23, 59, 59, 999);
+      console.log('🔍 [RankingScreen] Date-only detected, set to end of day:', {
+        endDate_after: endDate.toISOString(),
+        endDate_time_after: endDate.getTime()
+      });
     }
     
     const timeDiff = endDate.getTime() - now.getTime();
     
-    if (timeDiff <= 0) return 'Finalizada';
+    console.log('🔍 [RankingScreen] Time calculation:', {
+      timeDiff,
+      timeDiff_hours: timeDiff / (1000 * 60 * 60),
+      is_past: timeDiff <= 0
+    });
+    
+    if (timeDiff <= 0) {
+      console.log('🔍 [RankingScreen] Competition marked as finished');
+      return 'Finalizada';
+    }
     
     const hours = Math.floor(timeDiff / (1000 * 60 * 60));
     const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+    
+    console.log('🔍 [RankingScreen] Time remaining calculated:', {
+      hours,
+      minutes,
+      display: hours > 24 ? `${Math.floor(hours / 24)}d ${hours % 24}h ${minutes}m` : `${hours}h ${minutes}m`
+    });
     
     if (hours > 24) {
       const days = Math.floor(hours / 24);
