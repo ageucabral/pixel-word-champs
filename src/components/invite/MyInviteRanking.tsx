@@ -5,20 +5,14 @@ import { Badge } from "@/components/ui/badge";
 import { Trophy, TrendingUp, Medal } from 'lucide-react';
 import { useMonthlyInviteCompetition } from '@/hooks/useMonthlyInviteCompetition';
 import { useAuth } from '@/hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
 
 const MyInviteRanking = () => {
   const { user } = useAuth();
   const { data } = useMonthlyInviteCompetition();
-  const navigate = useNavigate();
 
   // Encontrar a posição do usuário atual
   const userPosition = data?.rankings?.find(ranking => ranking.user_id === user?.id);
   const currentMonth = new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
-
-  const handleViewRanking = () => {
-    navigate('/ranking-mensal');
-  };
 
   const getRankingColor = (position: number) => {
     if (position === 1) return 'from-yellow-400 to-yellow-600';
@@ -38,21 +32,15 @@ const MyInviteRanking = () => {
 
   if (!userPosition) {
     return (
-      <Card 
-        className="border-0 bg-gradient-to-r from-slate-100 to-slate-200 shadow-lg cursor-pointer hover:shadow-xl transition-all transform hover:scale-105"
-        onClick={handleViewRanking}
-      >
+      <Card className="border-0 bg-gradient-to-r from-slate-100 to-slate-200 shadow-lg">
         <CardContent className="p-4 text-center">
           <div className="flex items-center justify-center mb-3">
             <Trophy className="w-8 h-8 text-slate-500 mr-2" />
             <TrendingUp className="w-8 h-8 text-slate-500" />
           </div>
           <p className="text-slate-700 font-medium mb-1">Ranking de {currentMonth}</p>
-          <p className="text-sm text-slate-600 mb-2">
+          <p className="text-sm text-slate-600">
             Faça suas primeiras indicações para entrar no ranking!
-          </p>
-          <p className="text-xs text-slate-500 font-medium">
-            Clique para ver o ranking completo →
           </p>
         </CardContent>
       </Card>
@@ -60,10 +48,7 @@ const MyInviteRanking = () => {
   }
 
   return (
-    <Card 
-      className={`border-0 bg-gradient-to-r ${getRankingColor(userPosition.position)} text-white shadow-xl cursor-pointer hover:shadow-2xl transition-all transform hover:scale-105`}
-      onClick={handleViewRanking}
-    >
+    <Card className={`border-0 bg-gradient-to-r ${getRankingColor(userPosition.position)} text-white shadow-xl`}>
       <CardContent className="p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
@@ -108,12 +93,6 @@ const MyInviteRanking = () => {
             </span>
           </div>
         )}
-        
-        <div className="mt-3 text-center">
-          <p className="text-xs opacity-75 font-medium">
-            Clique para ver o ranking completo →
-          </p>
-        </div>
       </CardContent>
     </Card>
   );
