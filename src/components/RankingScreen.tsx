@@ -305,9 +305,7 @@ const RankingScreen = () => {
           background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
         }}>
           <div className="flex items-center justify-between p-4">
-            <button className="p-2">
-              <ArrowLeft className="w-5 h-5" />
-            </button>
+            <div></div>
             <h1 className="text-lg font-bold">Ranking</h1>
             <button className="p-2">
               <Trophy className="w-5 h-5 text-yellow-300" />
