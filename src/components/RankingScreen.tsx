@@ -191,7 +191,10 @@ const RankingScreen = () => {
     if (!competition?.end_date) return 'Finalizada';
     
     const now = new Date();
+    // Definir o fim da competição como 23:59:59 do dia final
     const endDate = new Date(competition.end_date);
+    endDate.setHours(23, 59, 59, 999);
+    
     const timeDiff = endDate.getTime() - now.getTime();
     
     if (timeDiff <= 0) return 'Finalizada';
@@ -199,7 +202,7 @@ const RankingScreen = () => {
     const hours = Math.floor(timeDiff / (1000 * 60 * 60));
     const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
     
-    if (hours > 24) {
+    if (hours >= 24) {
       const days = Math.floor(hours / 24);
       const remainingHours = hours % 24;
       return `${days}d ${remainingHours}h ${minutes}m`;
