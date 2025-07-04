@@ -114,19 +114,17 @@ export const useOptimizedUserStats = () => {
       const weekStart = new Date(today.setDate(diff));
       const weekStartStr = weekStart.toISOString().split('T')[0];
 
-      // Buscar ranking semanal (com timeout menor)
-      const { data: weeklyRanking } = await Promise.race([
-        supabase
-          .from('weekly_rankings')
-          .select('position')
-          .eq('user_id', user.id)
-          .eq('week_start', weekStartStr)
-          .abortSignal(abortControllerRef.current.signal)
-          .maybeSingle(),
-        new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Weekly ranking timeout')), 3000)
-        )
-      ]) as any;
+      // Calcular posição atual baseada na pontuação total
+      let currentPosition = null;
+      if (profile.total_score > 0) {
+        const { count } = await supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true })
+          .gt('total_score', profile.total_score)
+          .abortSignal(abortControllerRef.current.signal);
+        
+        currentPosition = (count || 0) + 1;
+      }
 
       // Calcular streak de forma mais eficiente
       const sevenDaysAgo = getCurrentBrasiliaDate();
@@ -169,7 +167,7 @@ export const useOptimizedUserStats = () => {
       }
 
       const userStats: UserStats = {
-        position: weeklyRanking?.position || null,
+        position: currentPosition,
         totalScore: profile.total_score || 0,
         gamesPlayed: profile.games_played || 0,
         winStreak: streak,
