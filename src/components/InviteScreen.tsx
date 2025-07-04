@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Trophy, Sparkles, Star, Zap } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { useInvites } from '@/hooks/useInvites';
@@ -14,11 +14,9 @@ import MyInviteRanking from './invite/MyInviteRanking';
 import MyInvitedFriends from './invite/MyInvitedFriends';
 import MonthlyPrizeDisplay from './invite/MonthlyPrizeDisplay';
 import CompactInviteInfo from './invite/CompactInviteInfo';
-import MonthlyRankingModal from './invite/MonthlyRankingModal';
 import { useMonthlyInviteCompetitionSimplified } from '@/hooks/useMonthlyInviteCompetitionSimplified';
 
 const InviteScreen = () => {
-  const [showRankingModal, setShowRankingModal] = useState(false);
   const { toast } = useToast();
   const { isAuthenticated, user } = useAuth();
   const {
@@ -107,7 +105,7 @@ const InviteScreen = () => {
         />
 
         {/* Minha Posição no Ranking */}
-        <MyInviteRanking onClick={() => setShowRankingModal(true)} />
+        <MyInviteRanking />
 
         {/* Estatísticas Compactas com Código de Convite */}
         <CompactInviteInfo 
@@ -124,12 +122,6 @@ const InviteScreen = () => {
         {/* Meus Amigos Indicados */}
         <MyInvitedFriends invitedFriends={invitedFriends} />
       </div>
-
-      {/* Modal do Ranking Mensal */}
-      <MonthlyRankingModal 
-        open={showRankingModal}
-        onOpenChange={setShowRankingModal}
-      />
     </div>
   );
 };

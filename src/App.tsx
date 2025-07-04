@@ -16,6 +16,7 @@ const AdminPanel = lazy(() => import('./pages/AdminPanel'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 const TermsOfService = lazy(() => import('./pages/TermsOfService'));
+const MonthlyRankingPage = lazy(() => import('./pages/MonthlyRankingPage'));
 
 // Componente de loading otimizado
 const PageLoadingFallback = () => (
@@ -52,6 +53,11 @@ function App() {
                 <Route path="/" element={
                   <ProtectedRoute>
                     <Index />
+                  </ProtectedRoute>
+                } />
+                <Route path="/ranking-mensal" element={
+                  <ProtectedRoute>
+                    <MonthlyRankingPage />
                   </ProtectedRoute>
                 } />
                 <Route path="/admin" element={

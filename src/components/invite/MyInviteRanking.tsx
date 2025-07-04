@@ -5,12 +5,10 @@ import { Badge } from "@/components/ui/badge";
 import { Trophy, TrendingUp, Medal } from 'lucide-react';
 import { useMonthlyInviteCompetition } from '@/hooks/useMonthlyInviteCompetition';
 import { useAuth } from '@/hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 
-interface MyInviteRankingProps {
-  onClick: () => void;
-}
-
-const MyInviteRanking = ({ onClick }: MyInviteRankingProps) => {
+const MyInviteRanking = () => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { data } = useMonthlyInviteCompetition();
 
@@ -38,7 +36,7 @@ const MyInviteRanking = ({ onClick }: MyInviteRankingProps) => {
     return (
       <Card 
         className="border-0 bg-gradient-to-r from-slate-100 to-slate-200 shadow-lg cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
-        onClick={onClick}
+        onClick={() => navigate('/ranking-mensal')}
       >
         <CardContent className="p-4 text-center">
           <div className="flex items-center justify-center mb-3">
@@ -60,7 +58,7 @@ const MyInviteRanking = ({ onClick }: MyInviteRankingProps) => {
   return (
     <Card 
       className={`border-0 bg-gradient-to-r ${getRankingColor(userPosition.position)} text-white shadow-xl cursor-pointer hover:shadow-2xl transition-all duration-300 hover:scale-[1.02]`}
-      onClick={onClick}
+      onClick={() => navigate('/ranking-mensal')}
     >
       <CardContent className="p-6">
         <div className="flex items-center justify-between mb-4">
