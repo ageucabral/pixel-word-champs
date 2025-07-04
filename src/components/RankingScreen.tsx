@@ -9,6 +9,7 @@ interface RankingPlayer {
   user_id: string;
   name: string;
   score: number;
+  avatar_url?: string;
 }
 
 interface PrizeConfig {
@@ -16,11 +17,21 @@ interface PrizeConfig {
   prize_amount: number;
 }
 
+interface CompetitionData {
+  id: string;
+  title: string;
+  end_date: string;
+  total_participants: number;
+  total_prize_pool: number;
+  status: string;
+}
+
 const RankingScreen = () => {
   const { user } = useAuth();
   const [ranking, setRanking] = useState<RankingPlayer[]>([]);
   const [userPosition, setUserPosition] = useState<number | null>(null);
   const [prizeConfigs, setPrizeConfigs] = useState<PrizeConfig[]>([]);
+  const [competition, setCompetition] = useState<CompetitionData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -52,6 +63,64 @@ const RankingScreen = () => {
     }
   };
 
+  const loadActiveCompetition = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('weekly_config')
+        .select('*')
+        .eq('status', 'active')
+        .single();
+
+      if (error) {
+        // Se não há competição ativa, buscar a última competição
+        const { data: lastCompetition } = await supabase
+          .from('weekly_config')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single();
+        
+        if (lastCompetition) {
+          setCompetition({
+            id: lastCompetition.id,
+            title: 'Competição Semanal',
+            end_date: lastCompetition.end_date,
+            total_participants: 0,
+            total_prize_pool: 0,
+            status: lastCompetition.status
+          });
+        }
+        return;
+      }
+
+      if (data) {
+        // Calcular total de prêmios e participantes
+        const { data: prizeData } = await supabase
+          .from('prize_configurations')
+          .select('prize_amount')
+          .eq('active', true);
+        
+        const totalPrizePool = prizeData?.reduce((sum, prize) => sum + Number(prize.prize_amount), 0) || 0;
+        
+        const { count } = await supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true })
+          .gt('total_score', 0);
+
+        setCompetition({
+          id: data.id,
+          title: 'Caça Palavras Royale',
+          end_date: data.end_date,
+          total_participants: count || 0,
+          total_prize_pool: totalPrizePool,
+          status: data.status
+        });
+      }
+    } catch (err) {
+      console.error('Erro ao carregar competição:', err);
+    }
+  };
+
   const loadRanking = async () => {
     try {
       setIsLoading(true);
@@ -59,7 +128,7 @@ const RankingScreen = () => {
 
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, username, total_score')
+        .select('id, username, total_score, avatar_url')
         .gt('total_score', 0)
         .order('total_score', { ascending: false })
         .limit(50);
@@ -70,7 +139,8 @@ const RankingScreen = () => {
         pos: index + 1,
         user_id: profile.id,
         name: profile.username || 'Usuário',
-        score: profile.total_score || 0
+        score: profile.total_score || 0,
+        avatar_url: profile.avatar_url
       }));
 
       setRanking(players);
@@ -88,7 +158,7 @@ const RankingScreen = () => {
   };
 
   useEffect(() => {
-    Promise.all([loadPrizeConfigurations(), loadRanking()]);
+    Promise.all([loadPrizeConfigurations(), loadActiveCompetition(), loadRanking()]);
   }, [user?.id]);
 
   // Configurar atualizações em tempo real
@@ -117,10 +187,43 @@ const RankingScreen = () => {
     return prizeConfig?.prize_amount || 0;
   };
 
-  const getPlayerAvatar = (name: string) => {
-    const firstLetter = name?.charAt(0).toUpperCase() || 'U';
+  const getTimeRemaining = () => {
+    if (!competition?.end_date) return 'Finalizada';
+    
+    const now = new Date();
+    const endDate = new Date(competition.end_date);
+    const timeDiff = endDate.getTime() - now.getTime();
+    
+    if (timeDiff <= 0) return 'Finalizada';
+    
+    const hours = Math.floor(timeDiff / (1000 * 60 * 60));
+    const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+    
+    if (hours > 24) {
+      const days = Math.floor(hours / 24);
+      const remainingHours = hours % 24;
+      return `${days}d ${remainingHours}h ${minutes}m`;
+    }
+    
+    return `${hours}h ${minutes}m`;
+  };
+
+  const getPlayerAvatar = (player: RankingPlayer, size: 'small' | 'medium' = 'medium') => {
+    const firstLetter = player.name?.charAt(0).toUpperCase() || 'U';
+    const sizeClasses = size === 'small' ? 'w-10 h-10' : 'w-12 h-12';
+    
+    if (player.avatar_url) {
+      return (
+        <img 
+          src={player.avatar_url} 
+          alt={player.name}
+          className={`${sizeClasses} rounded-full object-cover border-2 border-white/30`}
+        />
+      );
+    }
+    
     return (
-      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center text-white font-bold">
+      <div className={`${sizeClasses} rounded-full bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center text-white font-bold`}>
         {firstLetter}
       </div>
     );
@@ -184,15 +287,15 @@ const RankingScreen = () => {
         {/* Competition Info */}
         <div className="px-4 pb-6">
           <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 mb-4">
-            <h2 className="text-xl font-bold mb-2">Caça Palavras Royale</h2>
+            <h2 className="text-xl font-bold mb-2">{competition?.title || 'Caça Palavras Royale'}</h2>
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <Clock className="text-yellow-300" size={16} />
-                <span className="text-sm">Termina em 2h 45m</span>
+                <span className="text-sm">Termina em {getTimeRemaining()}</span>
               </div>
               <div className="flex items-center space-x-2">
                 <Users className="text-green-300" size={16} />
-                <span className="text-sm">{ranking.length} jogadores</span>
+                <span className="text-sm">{competition?.total_participants || ranking.length} jogadores</span>
               </div>
             </div>
           </div>
@@ -241,12 +344,14 @@ const RankingScreen = () => {
                   <span className="text-3xl font-bold">#{currentUser.pos}</span>
                   <div className="text-sm opacity-90">
                     <div>{currentUser.score.toLocaleString()} pontos</div>
-                    <div>+12 desde ontem</div>
+                    {getPrizeAmount(currentUser.pos) > 0 && (
+                      <div>Prêmio: R$ {getPrizeAmount(currentUser.pos)}</div>
+                    )}
                   </div>
                 </div>
               </div>
               <div className="text-right">
-                {getPlayerAvatar(currentUser.name)}
+                {getPlayerAvatar(currentUser)}
               </div>
             </div>
           </div>
@@ -266,7 +371,7 @@ const RankingScreen = () => {
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 <div className="relative">
-                  {getPlayerAvatar(player.name)}
+                  {getPlayerAvatar(player)}
                   {player.pos <= 3 && (
                     <div className={`absolute -top-1 -right-1 rounded-full w-6 h-6 flex items-center justify-center ${
                       player.pos === 1 ? 'bg-yellow-500' : 
@@ -288,9 +393,11 @@ const RankingScreen = () => {
                 }`}>
                   #{player.pos}
                 </span>
-                <div className="text-xs text-green-600 font-medium">
-                  <ArrowUp className="inline mr-1" size={12} />+45
-                </div>
+                {getPrizeAmount(player.pos) > 0 && (
+                  <div className="text-xs text-green-600 font-medium">
+                    R$ {getPrizeAmount(player.pos)}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -301,9 +408,7 @@ const RankingScreen = () => {
           <div key={player.user_id} className="bg-white rounded-xl shadow-md p-3 mb-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center text-white font-bold text-sm">
-                  {player.name?.charAt(0).toUpperCase() || 'U'}
-                </div>
+                {getPlayerAvatar(player, 'small')}
                 <div>
                   <h4 className="font-semibold text-gray-800">{player.name}</h4>
                   <p className="text-sm text-gray-600">{player.score.toLocaleString()} pontos</p>
