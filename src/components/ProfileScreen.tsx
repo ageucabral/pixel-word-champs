@@ -11,6 +11,7 @@ import MyDataSection from './profile/MyDataSection';
 import ProfileHeader from './profile/ProfileHeader';
 import ProfileStatsGrid from './profile/ProfileStatsGrid';
 import ProfileMenu from './profile/ProfileMenu';
+import { ProfileSyncIndicator } from './ui/ProfileSyncIndicator';
 interface ProfileScreenProps {
   onNavigateToSettings?: () => void;
   onNavigateToHelp?: () => void;
@@ -123,6 +124,9 @@ const ProfileScreen = ({
 
         {/* Card principal do jogador com novo sistema XP */}
         <ProfileHeader user={user} currentAvatar={currentAvatar} currentLevel={currentLevel} nextLevel={nextLevel} progress={progress} onAvatarUpdate={handleAvatarUpdate} getAvatarFallback={getAvatarFallback} formatXP={formatXP} />
+        
+        {/* Indicador de sincronização de perfil */}
+        <ProfileSyncIndicator />
 
         {/* Estatísticas compactas */}
         <ProfileStatsGrid user={user} />

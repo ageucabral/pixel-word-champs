@@ -4,6 +4,133 @@ import { createFallbackUser, createTimeoutPromise } from './authHelpers';
 import { mapUserFromProfile } from './userMapper';
 import { logger } from './logger';
 
+// Função auxiliar para buscar perfil com retry
+const fetchProfileWithRetry = async (
+  session: any,
+  callbacks: AuthCallbacks,
+  isMountedRef: React.MutableRefObject<boolean>,
+  maxRetries = 3
+) => {
+  const { setUser, setIsLoading } = callbacks;
+  
+  logger.debug('📊 Iniciando busca de perfil com retry', { 
+    maxRetries, 
+    userId: session.user.id 
+  }, 'AUTH_PROCESSOR');
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    if (!isMountedRef.current) return;
+
+    try {
+      logger.debug(`🔄 Tentativa ${attempt}/${maxRetries} de busca de perfil`, undefined, 'AUTH_PROCESSOR');
+
+      const profilePromise = supabase
+        .from('profiles')
+        .select(`
+          id,
+          username,
+          avatar_url,
+          total_score,
+          games_played,
+          best_daily_position,
+          best_weekly_position,
+          pix_key,
+          pix_holder_name,
+          phone,
+          experience_points,
+          created_at,
+          updated_at
+        `)
+        .eq('id', session.user.id)
+        .maybeSingle();
+
+      const { data: profile, error: profileError } = await Promise.race([
+        profilePromise,
+        createTimeoutPromise(15000) // Aumentado para 15 segundos
+      ]);
+
+      if (!isMountedRef.current) return;
+
+      if (profileError && profileError.code !== 'PGRST116') {
+        logger.warn(`⚠️ Erro na tentativa ${attempt}/${maxRetries}`, { 
+          error: profileError.message,
+          code: profileError.code
+        }, 'AUTH_PROCESSOR');
+        
+        if (attempt === maxRetries) {
+          logger.error('❌ Todas as tentativas de busca de perfil falharam', { 
+            error: profileError.message 
+          }, 'AUTH_PROCESSOR');
+          return;
+        }
+        continue; // Tentar novamente
+      }
+
+      if (profile) {
+        const fullUserData = mapUserFromProfile(profile, session.user);
+        
+        // Verificar se perfil está completo
+        const isProfileComplete = fullUserData.username && 
+                                 fullUserData.experience_points !== undefined &&
+                                 fullUserData.total_score !== undefined;
+
+        if (isProfileComplete) {
+          setUser(fullUserData);
+          
+          logger.info('🎯 PERFIL COMPLETO CARREGADO COM SUCESSO', { 
+            userId: fullUserData.id,
+            username: fullUserData.username,
+            experiencePoints: fullUserData.experience_points,
+            totalScore: fullUserData.total_score,
+            attempt
+          }, 'AUTH_PROCESSOR');
+          return; // Sucesso, sair do loop
+        } else {
+          logger.warn(`⚠️ Perfil incompleto na tentativa ${attempt}`, { 
+            hasUsername: !!fullUserData.username,
+            hasXP: fullUserData.experience_points !== undefined,
+            hasScore: fullUserData.total_score !== undefined
+          }, 'AUTH_PROCESSOR');
+          
+          if (attempt === maxRetries) {
+            // Na última tentativa, usar dados mesmo que incompletos
+            setUser(fullUserData);
+            logger.warn('📝 USANDO PERFIL INCOMPLETO - todas as tentativas esgotadas', undefined, 'AUTH_PROCESSOR');
+          }
+        }
+      } else {
+        logger.warn(`📝 Perfil não encontrado na tentativa ${attempt}/${maxRetries}`, undefined, 'AUTH_PROCESSOR');
+        
+        if (attempt === maxRetries) {
+          logger.info('📝 MANTENDO DADOS FALLBACK - perfil não encontrado após todas as tentativas', undefined, 'AUTH_PROCESSOR');
+        }
+      }
+
+      // Delay antes da próxima tentativa (exceto na última)
+      if (attempt < maxRetries) {
+        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+      }
+
+    } catch (timeoutError) {
+      logger.warn(`⏰ TIMEOUT na tentativa ${attempt}/${maxRetries}`, { 
+        error: timeoutError instanceof Error ? timeoutError.message : 'Timeout após 15s',
+        attempt
+      }, 'AUTH_PROCESSOR');
+
+      if (attempt === maxRetries) {
+        logger.warn('⏰ TIMEOUT FINAL - mantendo autenticação ativa com dados fallback', { 
+          fallbackActive: true
+        }, 'AUTH_PROCESSOR');
+      }
+
+      // Delay antes da próxima tentativa (exceto na última)
+      if (attempt < maxRetries) {
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+    }
+  }
+};
+
 interface AuthCallbacks {
   setUser: (user: any) => void;
   setIsAuthenticated: (auth: boolean) => void;
@@ -45,71 +172,8 @@ export const processUserAuthentication = async (
       }, 'AUTH_PROCESSOR');
     }
 
-    // PRIORIDADE 2: Buscar perfil completo em background (timeout 10s)
-    logger.debug('📊 Iniciando busca de perfil completo...', undefined, 'AUTH_PROCESSOR');
-    
-    const profilePromise = supabase
-      .from('profiles')
-      .select(`
-        id,
-        username,
-        avatar_url,
-        total_score,
-        games_played,
-        best_daily_position,
-        best_weekly_position,
-        pix_key,
-        pix_holder_name,
-        phone,
-        experience_points,
-        created_at,
-        updated_at
-      `)
-      .eq('id', session.user.id)
-      .maybeSingle();
-
-    try {
-      const { data: profile, error: profileError } = await Promise.race([
-        profilePromise,
-        createTimeoutPromise(10000) // Aumentado para 10 segundos
-      ]);
-
-      if (!isMountedRef.current) {
-        logger.debug('⚠️ Componente desmontado durante busca de perfil', undefined, 'AUTH_PROCESSOR');
-        return;
-      }
-
-      if (profileError && profileError.code !== 'PGRST116') {
-        logger.warn('⚠️ Erro ao buscar perfil, mantendo fallback', { 
-          error: profileError.message,
-          code: profileError.code
-        }, 'AUTH_PROCESSOR');
-      }
-
-      // PRIORIDADE 3: Atualizar com dados completos do perfil se disponível
-      if (profile) {
-        const fullUserData = mapUserFromProfile(profile, session.user);
-        setUser(fullUserData);
-        
-        logger.info('🎯 PERFIL COMPLETO CARREGADO', { 
-          userId: fullUserData.id,
-          username: fullUserData.username,
-          experiencePoints: fullUserData.experience_points,
-          totalScore: fullUserData.total_score
-        }, 'AUTH_PROCESSOR');
-      } else {
-        logger.info('📝 MANTENDO DADOS FALLBACK - perfil não encontrado', undefined, 'AUTH_PROCESSOR');
-      }
-
-    } catch (timeoutError) {
-      logger.warn('⏰ TIMEOUT NA BUSCA DE PERFIL - mantendo autenticação ativa', { 
-        error: timeoutError instanceof Error ? timeoutError.message : 'Timeout após 10s',
-        fallbackActive: true
-      }, 'AUTH_PROCESSOR');
-
-      // Usuário continua autenticado com dados fallback
-      if (!isMountedRef.current) return;
-    }
+    // PRIORIDADE 2: Buscar perfil completo com retry e timeout maior
+    await fetchProfileWithRetry(session, callbacks, isMountedRef);
 
   } catch (error: any) {
     logger.error('❌ ERRO CRÍTICO NA AUTENTICAÇÃO', { 

@@ -45,7 +45,7 @@ export const createTimeoutPromise = (timeoutMs: number): Promise<never> => {
         timeoutSeconds: timeoutMs / 1000,
         timestamp: new Date().toISOString()
       }, 'AUTH_HELPERS');
-      reject(new Error(`Timeout após ${timeoutMs / 1000}s`));
+      reject(new Error(`Timeout após ${timeoutMs / 1000}s - operação cancelada`));
     }, timeoutMs)
   );
 };

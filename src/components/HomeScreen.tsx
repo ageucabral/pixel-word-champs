@@ -18,6 +18,7 @@ import ErrorState from './home/ErrorState';
 import { UserCardSkeleton } from '@/components/ui/SkeletonLoader';
 import { UserAvatar } from '@/components/ui/UserAvatar';
 import { StatsCard } from '@/components/ui/StatsCard';
+import { ProfileSyncIndicator } from '@/components/ui/ProfileSyncIndicator';
 import { logger } from '@/utils/logger';
 interface HomeScreenProps {
   onStartChallenge: (challengeId: string) => void;
@@ -221,6 +222,9 @@ const HomeScreen = ({
             </div>
           </div>
         </div>
+
+        {/* Indicador de sincronização de perfil */}
+        <ProfileSyncIndicator className="mb-2" />
 
         {/* Card de Ranking Global aprimorado - só exibe se tiver posição válida e atual */}
         {stats?.position && stats.position > 0 && !statsLoading && (
