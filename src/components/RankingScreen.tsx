@@ -306,9 +306,6 @@ const RankingScreen = () => {
     <div className="bg-gray-50 min-h-screen">
       {/* Header */}
       <header className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white relative">
-        <div className="flex items-center justify-center p-4">
-          <h1 className="text-lg font-bold">Ranking</h1>
-        </div>
         
         {/* Competition Info */}
         <div className="px-4 pb-6">
