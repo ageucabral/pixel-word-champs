@@ -13,6 +13,7 @@ import { initializeCacheWarming } from '@/utils/cacheWarming';
 // Lazy loading de páginas para code splitting - Fase 4
 const Index = lazy(() => import('./pages/Index'));
 const AdminPanel = lazy(() => import('./pages/AdminPanel'));
+const MonthlyRanking = lazy(() => import('./pages/MonthlyRanking'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 const TermsOfService = lazy(() => import('./pages/TermsOfService'));
@@ -52,6 +53,11 @@ function App() {
                 <Route path="/" element={
                   <ProtectedRoute>
                     <Index />
+                  </ProtectedRoute>
+                } />
+                <Route path="/ranking-mensal" element={
+                  <ProtectedRoute>
+                    <MonthlyRanking />
                   </ProtectedRoute>
                 } />
                 <Route path="/admin" element={
