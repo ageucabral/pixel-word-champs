@@ -14,6 +14,7 @@ import MyInviteRanking from './invite/MyInviteRanking';
 import MyInvitedFriends from './invite/MyInvitedFriends';
 import MonthlyPrizeDisplay from './invite/MonthlyPrizeDisplay';
 import CompactInviteInfo from './invite/CompactInviteInfo';
+import MonthlyRankingTable from './invite/MonthlyRankingTable';
 import { useMonthlyInviteCompetitionSimplified } from '@/hooks/useMonthlyInviteCompetitionSimplified';
 
 const InviteScreen = () => {
@@ -118,6 +119,9 @@ const InviteScreen = () => {
         <div className="mb-6">
           <MonthlyInviteCompetition suppressLoading={true} />
         </div>
+
+        {/* Ranking da Competição Mensal */}
+        <MonthlyRankingTable />
 
         {/* Meus Amigos Indicados */}
         <MyInvitedFriends invitedFriends={invitedFriends} />
