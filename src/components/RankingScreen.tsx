@@ -298,152 +298,182 @@ const RankingScreen = () => {
       setCurrentPage(page);
     }
   };
-  return <div className="min-h-screen bg-gray-50 p-4 pb-20">
-      <div className="max-w-md mx-auto space-y-4">
+  return <div className="min-h-screen bg-gray-50 pb-20">
+      <div className="max-w-md mx-auto">
         {/* Header */}
-        <header className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white rounded-2xl shadow-lg overflow-hidden">
-          {/* Top Bar */}
+        <header className="text-white relative" style={{
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+        }}>
           <div className="flex items-center justify-between p-4">
-            <ArrowLeft className="w-6 h-6 text-white" />
-            <h1 className="text-xl font-bold">Ranking</h1>
-            <Trophy className="w-6 h-6 text-yellow-300" />
+            <button className="p-2">
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <h1 className="text-lg font-bold">Ranking</h1>
+            <button className="p-2">
+              <Trophy className="w-5 h-5 text-yellow-300" />
+            </button>
           </div>
           
           {/* Competition Info */}
-          <div className="px-4 pb-4">
-            <h2 className="text-2xl font-bold mb-3">Caça Palavras Royale</h2>
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <Clock className="text-yellow-300" size={16} />
-                <span className="text-sm">Termina em {getTimeRemaining()}</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Users className="text-green-300" size={16} />
-                <span className="text-sm">{competition?.total_participants || ranking.length} jogadores</span>
+          <div className="px-4 pb-6">
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 mb-4">
+              <h2 className="text-xl font-bold mb-2">Caça Palavras Royale</h2>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <Clock className="text-yellow-300 w-4 h-4" />
+                  <span className="text-sm">Termina em {getTimeRemaining()}</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Users className="text-green-300 w-4 h-4" />
+                  <span className="text-sm">{competition?.total_participants || ranking.length} jogadores</span>
+                </div>
               </div>
             </div>
           </div>
         </header>
 
         {/* Prize Pool */}
-        <div className="bg-white rounded-2xl shadow-sm p-4">
-          <div className="flex items-center justify-center mb-4">
-            <Gift className="text-purple-600 mr-2" size={18} />
-            <h3 className="font-bold text-gray-800 text-base">Prêmios da Competição</h3>
+        <section className="px-4 -mt-4 relative z-10">
+          <div className="bg-white rounded-xl shadow-lg p-4 mb-4">
+            <h3 className="text-center font-bold text-gray-800 mb-3">
+              <Gift className="text-purple-600 mr-2 inline w-4 h-4" />
+              Prêmios da Competição
+            </h3>
+            <div className="grid grid-cols-3 gap-2">
+              {[1, 2, 3].map(position => {
+                const prizeAmount = getPrizeAmount(position);
+                const configs = [{
+                  icon: Crown,
+                  bg: 'bg-gradient-to-b from-yellow-400 to-yellow-600',
+                  label: '1°',
+                  shadow: 'shadow-[0_0_20px_rgba(255,215,0,0.5)]'
+                }, {
+                  icon: Medal,
+                  bg: 'bg-gradient-to-b from-gray-300 to-gray-500',
+                  label: '2°',
+                  shadow: ''
+                }, {
+                  icon: Award,
+                  bg: 'bg-gradient-to-b from-orange-400 to-orange-600',
+                  label: '3°',
+                  shadow: ''
+                }];
+                const config = configs[position - 1];
+                return (
+                  <div key={position} className="text-center">
+                    <div className={`${config.bg} rounded-lg p-3 ${config.shadow}`}>
+                      <config.icon className="text-white text-xl mb-1 mx-auto w-5 h-5" />
+                      <div className="text-white text-xs font-bold">{config.label}</div>
+                      <div className="text-white text-sm font-bold">R$ {prizeAmount}</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-          <div className="grid grid-cols-3 gap-3">
-            {[1, 2, 3].map(position => {
-              const prizeAmount = getPrizeAmount(position);
-              const configs = [{
-                icon: Crown,
-                bg: 'bg-gradient-to-br from-yellow-400 to-yellow-500',
-                label: '1°',
-                textColor: 'text-white'
-              }, {
-                icon: Medal,
-                bg: 'bg-gradient-to-br from-gray-400 to-gray-500',
-                label: '2°',
-                textColor: 'text-white'
-              }, {
-                icon: Award,
-                bg: 'bg-gradient-to-br from-orange-400 to-orange-500',
-                label: '3°',
-                textColor: 'text-white'
-              }];
-              const config = configs[position - 1];
-              return <div key={position} className="text-center">
-                <div className={`${config.bg} rounded-xl p-3 shadow-md`}>
-                  <config.icon className={`${config.textColor} text-xl mb-2 mx-auto`} />
-                  <div className={`${config.textColor} text-sm font-bold mb-1`}>{config.label}</div>
-                  <div className={`${config.textColor} text-sm font-bold`}>R$ {prizeAmount}</div>
-                </div>
-              </div>;
-            })}
-          </div>
-        </div>
+        </section>
 
         {/* Your Position */}
-        {userPosition && <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl p-4 text-white shadow-lg">
-          <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <h4 className="font-bold text-lg mb-2">Sua Posição</h4>
-              <div className="flex items-center space-x-3">
-                <span className="text-3xl font-bold">#{userPosition}</span>
-                <div className="text-sm">
-                  <div className="font-medium">{user?.total_score?.toLocaleString() || 0} pontos</div>
-                  <div className="text-xs opacity-90">+12 desde ontem</div>
+        {userPosition && (
+          <section className="px-4 mb-4">
+            <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl p-4 text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-bold text-lg">Sua Posição</h4>
+                  <div className="flex items-center space-x-2 mt-1">
+                    <span className="text-3xl font-bold">#{userPosition}</span>
+                    <div className="text-sm opacity-90">
+                      <div>{user?.total_score?.toLocaleString() || 0} pontos</div>
+                      <div>+12 desde ontem</div>
+                    </div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="w-16 h-16 rounded-full border-4 border-white/30 bg-gradient-to-br from-purple-400 to-blue-500 flex items-center justify-center text-white font-bold text-xl">
+                    {user?.username?.charAt(0).toUpperCase() || 'U'}
+                  </div>
                 </div>
               </div>
             </div>
-            <div className="ml-4">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-400 to-blue-500 flex items-center justify-center text-white font-bold text-xl border-2 border-white/30">
-                {user?.username?.charAt(0).toUpperCase() || 'U'}
-              </div>
-            </div>
-          </div>
-        </div>}
+          </section>
+        )}
 
         {/* Top Players */}
-        <div className="space-y-3">
-          <h3 className="text-lg font-bold text-gray-800 mb-3">Top Jogadores</h3>
+        <section className="px-4 mb-20">
+          <h3 className="text-lg font-bold text-gray-800 mb-4">Top Jogadores</h3>
           
           {/* Top 3 */}
-          {topThree.map(player => <div key={player.user_id} className={`bg-white rounded-2xl shadow-sm p-4 ${getRankBorderColor(player.pos)}`}>
+          {topThree.map(player => (
+            <div key={player.user_id} className={`bg-white rounded-xl shadow-md p-4 mb-3 ${getRankBorderColor(player.pos)}`}>
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3 flex-1 min-w-0">
-                  <div className="relative flex-shrink-0">
+                <div className="flex items-center space-x-3">
+                  <div className="relative">
                     {getPlayerAvatar(player)}
-                    {player.pos <= 3 && <div className={`absolute -top-1 -right-1 rounded-full w-6 h-6 flex items-center justify-center ${player.pos === 1 ? 'bg-yellow-500' : player.pos === 2 ? 'bg-gray-500' : 'bg-orange-500'}`}>
-                        {getRankIcon(player.pos)}
-                      </div>}
+                    <div className={`absolute -top-1 -right-1 rounded-full w-6 h-6 flex items-center justify-center ${
+                      player.pos === 1 ? 'bg-yellow-500' : 
+                      player.pos === 2 ? 'bg-gray-500' : 
+                      'bg-orange-500'
+                    }`}>
+                      {getRankIcon(player.pos)}
+                    </div>
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <h4 className="font-bold text-gray-800 text-base truncate">{player.name}</h4>
+                  <div>
+                    <h4 className="font-bold text-gray-800">{player.name}</h4>
                     <p className="text-sm text-gray-600">{player.score.toLocaleString()} pontos</p>
                   </div>
                 </div>
-                <div className="text-right flex-shrink-0 ml-2 flex items-center space-x-2">
-                  <div className="flex items-center">
-                    <ArrowUp className="w-4 h-4 text-green-500" />
-                    <span className="text-sm text-green-500 font-medium">+{Math.floor(Math.random() * 50) + 10}</span>
-                  </div>
-                  <span className={`text-2xl font-bold ${player.pos === 1 ? 'text-yellow-600' : player.pos === 2 ? 'text-gray-600' : 'text-orange-600'}`}>
+                <div className="text-right">
+                  <span className={`text-2xl font-bold ${
+                    player.pos === 1 ? 'text-yellow-600' : 
+                    player.pos === 2 ? 'text-gray-600' : 
+                    'text-orange-600'
+                  }`}>
                     #{player.pos}
                   </span>
-                </div>
-              </div>
-            </div>)}
-
-          {/* Ranks 4+ */}
-          {remainingPlayers.map((player, index) => {
-            const randomChange = Math.floor(Math.random() * 20) - 10; // Entre -10 e +10
-            const isPositive = randomChange > 0;
-            const isNegative = randomChange < 0;
-            
-            return <div key={player.user_id} className="bg-white rounded-2xl shadow-sm p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3 flex-1 min-w-0">
-                  {getPlayerAvatar(player, 'small')}
-                  <div className="min-w-0 flex-1">
-                    <h4 className="font-semibold text-gray-800 text-base truncate">{player.name}</h4>
-                    <p className="text-sm text-gray-600">{player.score.toLocaleString()} pontos</p>
+                  <div className={`text-xs font-medium ${
+                    player.pos === 1 ? 'text-green-600' : 
+                    player.pos === 2 ? 'text-green-600' : 
+                    'text-red-600'
+                  }`}>
+                    {player.pos === 1 && (
+                      <>
+                        <ArrowUp className="w-3 h-3 inline mr-1" />
+                        +45
+                      </>
+                    )}
+                    {player.pos === 2 && (
+                      <>
+                        <ArrowUp className="w-3 h-3 inline mr-1" />
+                        +23
+                      </>
+                    )}
+                    {player.pos === 3 && (
+                      <>
+                        <ArrowDown className="w-3 h-3 inline mr-1" />
+                        -5
+                      </>
+                    )}
                   </div>
-                </div>
-                <div className="text-right flex-shrink-0 ml-2 flex items-center space-x-2">
-                  {randomChange !== 0 && (
-                    <div className="flex items-center">
-                      {isPositive && <ArrowUp className="w-4 h-4 text-green-500" />}
-                      {isNegative && <ArrowDown className="w-4 h-4 text-red-500" />}
-                      <span className={`text-sm font-medium ${isPositive ? 'text-green-500' : 'text-red-500'}`}>
-                        {isPositive ? '+' : ''}{randomChange}
-                      </span>
-                    </div>
-                  )}
-                  <span className="text-xl font-bold text-gray-700">#{player.pos}</span>
                 </div>
               </div>
             </div>
-          })}
+          ))}
+
+          {/* Ranks 4+ */}
+          {remainingPlayers.map(player => (
+            <div key={player.user_id} className="bg-white rounded-xl shadow-md p-3 mb-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  {getPlayerAvatar(player, 'small')}
+                  <div>
+                    <h4 className="font-semibold text-gray-800">{player.name}</h4>
+                    <p className="text-sm text-gray-600">{player.score.toLocaleString()} pontos</p>
+                  </div>
+                </div>
+                <span className="text-xl font-bold text-gray-700">#{player.pos}</span>
+              </div>
+            </div>
+          ))}
           
           {/* Paginação */}
           {totalPages > 1 && <div className="flex items-center justify-center space-x-1 mt-4">
@@ -480,7 +510,7 @@ const RankingScreen = () => {
           <div className="text-center text-xs text-gray-500 mt-2">
             Página {currentPage} de {totalPages}
           </div>
-        </div>
+        </section>
       </div>
     </div>;
 };
