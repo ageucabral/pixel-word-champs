@@ -4,6 +4,7 @@ import { ChevronRight } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { usePlayerLevel } from '@/hooks/usePlayerLevel';
+import { useOptimizedProfile } from '@/hooks/useOptimizedProfile';
 import { useWeeklyPositionManager } from '@/hooks/useWeeklyPositionManager';
 import { logger } from '@/utils/logger';
 import { formatBrasiliaDate } from '@/utils/brasiliaTimeUnified';
@@ -11,7 +12,7 @@ import MyDataSection from './profile/MyDataSection';
 import ProfileHeader from './profile/ProfileHeader';
 import ProfileStatsGrid from './profile/ProfileStatsGrid';
 import ProfileMenu from './profile/ProfileMenu';
-import { ProfileSyncIndicator } from './ui/ProfileSyncIndicator';
+
 interface ProfileScreenProps {
   onNavigateToSettings?: () => void;
   onNavigateToHelp?: () => void;
@@ -29,13 +30,17 @@ const ProfileScreen = ({
   const navigate = useNavigate();
   const [currentAvatar, setCurrentAvatar] = useState(user?.avatar_url);
   const [showMyData, setShowMyData] = useState(false);
+  
+  const {
+    profile: profileData
+  } = useOptimizedProfile();
 
-  // Usar o novo sistema de XP baseado nos experience_points
+  // Usar o novo sistema de XP baseado nos experience_points do perfil otimizado
   const {
     currentLevel,
     nextLevel,
     progress
-  } = usePlayerLevel(user?.experience_points || 0);
+  } = usePlayerLevel(profileData?.experience_points || user?.experience_points || 0);
 
   // Integrar gerenciamento automático das melhores posições
   const {
@@ -125,11 +130,9 @@ const ProfileScreen = ({
         {/* Card principal do jogador com novo sistema XP */}
         <ProfileHeader user={user} currentAvatar={currentAvatar} currentLevel={currentLevel} nextLevel={nextLevel} progress={progress} onAvatarUpdate={handleAvatarUpdate} getAvatarFallback={getAvatarFallback} formatXP={formatXP} />
         
-        {/* Indicador de sincronização de perfil */}
-        <ProfileSyncIndicator />
 
         {/* Estatísticas compactas */}
-        <ProfileStatsGrid user={user} />
+        <ProfileStatsGrid user={profileData || user} />
 
         {/* Menu de ações */}
         <ProfileMenu onMyData={handleMyData} onAchievements={handleAchievements} onSettings={onNavigateToSettings} onHelp={handleHelp} onLogout={handleLogout} />

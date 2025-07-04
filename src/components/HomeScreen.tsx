@@ -2,7 +2,7 @@ import React from 'react';
 import { Coins, Trophy, Sparkles, Star, Zap } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useOptimizedUserStats } from '@/hooks/useOptimizedUserStats';
-import { useProfile } from '@/hooks/useProfile';
+import { useOptimizedProfile } from '@/hooks/useOptimizedProfile';
 import { usePlayerLevel } from '@/hooks/usePlayerLevel';
 import { useWeeklyCompetitionAutoParticipation } from '@/hooks/useWeeklyCompetitionAutoParticipation';
 import { useWeeklyRankingUpdater } from '@/hooks/useWeeklyRankingUpdater';
@@ -18,7 +18,7 @@ import ErrorState from './home/ErrorState';
 import { UserCardSkeleton } from '@/components/ui/SkeletonLoader';
 import { UserAvatar } from '@/components/ui/UserAvatar';
 import { StatsCard } from '@/components/ui/StatsCard';
-import { ProfileSyncIndicator } from '@/components/ui/ProfileSyncIndicator';
+
 import { logger } from '@/utils/logger';
 interface HomeScreenProps {
   onStartChallenge: (challengeId: string) => void;
@@ -39,7 +39,7 @@ const HomeScreen = ({
   const {
     profile,
     isLoading: profileLoading
-  } = useProfile();
+  } = useOptimizedProfile();
   const {
     setActiveTab,
     handleNavigateToSettings
@@ -223,8 +223,6 @@ const HomeScreen = ({
           </div>
         </div>
 
-        {/* Indicador de sincronização de perfil */}
-        <ProfileSyncIndicator className="mb-2" />
 
         {/* Card de Ranking Global aprimorado - só exibe se tiver posição válida e atual */}
         {stats?.position && stats.position > 0 && !statsLoading && (
