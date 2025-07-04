@@ -351,7 +351,7 @@ const RankingScreen = () => {
         
         {/* Competition Info */}
         <div className="px-4 pb-6">
-          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 mb-4 mt-4">
+          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 mb-4">
             <h2 className="text-xl font-bold mb-2">{competition?.title || 'Caça Palavras Royale'}</h2>
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
