@@ -6,7 +6,11 @@ import { Trophy, TrendingUp, Medal } from 'lucide-react';
 import { useMonthlyInviteCompetition } from '@/hooks/useMonthlyInviteCompetition';
 import { useAuth } from '@/hooks/useAuth';
 
-const MyInviteRanking = () => {
+interface MyInviteRankingProps {
+  onClick: () => void;
+}
+
+const MyInviteRanking = ({ onClick }: MyInviteRankingProps) => {
   const { user } = useAuth();
   const { data } = useMonthlyInviteCompetition();
 
@@ -32,7 +36,10 @@ const MyInviteRanking = () => {
 
   if (!userPosition) {
     return (
-      <Card className="border-0 bg-gradient-to-r from-slate-100 to-slate-200 shadow-lg">
+      <Card 
+        className="border-0 bg-gradient-to-r from-slate-100 to-slate-200 shadow-lg cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-[1.02]"
+        onClick={onClick}
+      >
         <CardContent className="p-4 text-center">
           <div className="flex items-center justify-center mb-3">
             <Trophy className="w-8 h-8 text-slate-500 mr-2" />
@@ -42,13 +49,19 @@ const MyInviteRanking = () => {
           <p className="text-sm text-slate-600">
             Faça suas primeiras indicações para entrar no ranking!
           </p>
+          <p className="text-xs text-slate-500 mt-2 opacity-80">
+            👆 Clique para ver o ranking completo
+          </p>
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <Card className={`border-0 bg-gradient-to-r ${getRankingColor(userPosition.position)} text-white shadow-xl`}>
+    <Card 
+      className={`border-0 bg-gradient-to-r ${getRankingColor(userPosition.position)} text-white shadow-xl cursor-pointer hover:shadow-2xl transition-all duration-300 hover:scale-[1.02]`}
+      onClick={onClick}
+    >
       <CardContent className="p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
@@ -93,6 +106,12 @@ const MyInviteRanking = () => {
             </span>
           </div>
         )}
+        
+        <div className="mt-3 text-center">
+          <p className="text-xs opacity-80">
+            👆 Clique para ver o ranking completo
+          </p>
+        </div>
       </CardContent>
     </Card>
   );
