@@ -175,7 +175,7 @@ const HomeScreen = ({
   return <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50 p-3 pb-20">
       <div className="max-w-md mx-auto space-y-4">
         {/* Header compacto roxo com informações do usuário */}
-        <div className="bg-gradient-to-br from-primary to-primary-darker rounded-2xl p-4 text-white shadow-lg ring-1 ring-white/10">
+        <div className="bg-gradient-to-br from-purple-600 via-violet-600 to-pink-600 rounded-2xl p-4 text-white shadow-lg ring-1 ring-white/10">
           {/* Topo do header com avatar, nome e nível */}
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-3">
