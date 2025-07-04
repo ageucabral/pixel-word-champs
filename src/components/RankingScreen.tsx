@@ -345,22 +345,22 @@ const RankingScreen = () => {
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="bg-background min-h-screen">
       {/* Header */}
       <header className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white relative">
         
         {/* Competition Info */}
-        <div className="px-4 pb-6">
-          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 mb-4">
-            <h2 className="text-xl font-bold mb-2">{competition?.title || 'Caça Palavras Royale'}</h2>
-            <div className="flex items-center justify-between">
+        <div className="px-4 pb-4 pt-6">
+          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 sm:p-4 mb-4">
+            <h2 className="text-lg sm:text-xl font-bold mb-2">{competition?.title || 'Caça Palavras Royale'}</h2>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
               <div className="flex items-center space-x-2">
                 <Clock className="text-yellow-300" size={16} />
-                <span className="text-sm">Termina em {getTimeRemaining()}</span>
+                <span className="text-xs sm:text-sm">Termina em {getTimeRemaining()}</span>
               </div>
               <div className="flex items-center space-x-2">
                 <Users className="text-green-300" size={16} />
-                <span className="text-sm">{competition?.total_participants || ranking.length} jogadores</span>
+                <span className="text-xs sm:text-sm">{competition?.total_participants || ranking.length} jogadores</span>
               </div>
             </div>
           </div>
@@ -369,9 +369,9 @@ const RankingScreen = () => {
 
       {/* Prize Pool */}
       <section className="px-4 -mt-4 relative z-10">
-        <div className="bg-white rounded-xl shadow-lg p-4 mb-4">
-          <h3 className="text-center font-bold text-gray-800 mb-3">
-            <Gift className="inline mr-2 text-purple-600" size={20} />
+        <div className="bg-white rounded-xl shadow-lg p-3 sm:p-4 mb-4">
+          <h3 className="text-center font-bold text-gray-800 mb-3 text-sm sm:text-base">
+            <Gift className="inline mr-2 text-purple-600" size={18} />
             Prêmios da Competição
           </h3>
           <div className="grid grid-cols-3 gap-2">
@@ -386,10 +386,10 @@ const RankingScreen = () => {
               
               return (
                 <div key={position} className="text-center">
-                  <div className={`bg-gradient-to-b ${config.bg} rounded-lg p-3 ${position === 1 ? 'shadow-lg shadow-yellow-400/50' : ''}`}>
-                    <config.icon className="text-white text-xl mb-1 mx-auto" />
+                  <div className={`bg-gradient-to-b ${config.bg} rounded-lg p-2 sm:p-3 ${position === 1 ? 'shadow-lg shadow-yellow-400/50' : ''}`}>
+                    <config.icon className="text-white text-lg sm:text-xl mb-1 mx-auto" />
                     <div className="text-white text-xs font-bold">{config.label}</div>
-                    <div className="text-white text-sm font-bold">R$ {prizeAmount}</div>
+                    <div className="text-white text-xs sm:text-sm font-bold">R$ {prizeAmount}</div>
                   </div>
                 </div>
               );
@@ -401,13 +401,13 @@ const RankingScreen = () => {
       {/* Your Position */}
       {currentUser && (
         <section className="px-4 mb-4">
-          <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl p-4 text-white">
+          <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl p-3 sm:p-4 text-white">
             <div className="flex items-center justify-between">
-              <div>
-                <h4 className="font-bold text-lg">Sua Posição</h4>
+              <div className="flex-1">
+                <h4 className="font-bold text-base sm:text-lg">Sua Posição</h4>
                 <div className="flex items-center space-x-2 mt-1">
-                  <span className="text-3xl font-bold">#{currentUser.pos}</span>
-                  <div className="text-sm opacity-90">
+                  <span className="text-2xl sm:text-3xl font-bold">#{currentUser.pos}</span>
+                  <div className="text-xs sm:text-sm opacity-90">
                     <div>{currentUser.score.toLocaleString()} pontos</div>
                     {getPrizeAmount(currentUser.pos) > 0 && (
                       <div>Prêmio: R$ {getPrizeAmount(currentUser.pos)}</div>
@@ -415,7 +415,7 @@ const RankingScreen = () => {
                   </div>
                 </div>
               </div>
-              <div className="text-right">
+              <div className="text-right ml-2">
                 {getPlayerAvatar(currentUser)}
               </div>
             </div>
@@ -425,17 +425,17 @@ const RankingScreen = () => {
 
       {/* Top Players */}
       <section className="px-4 mb-20">
-        <h3 className="text-lg font-bold text-gray-800 mb-4">Top Jogadores</h3>
+        <h3 className="text-base sm:text-lg font-bold text-gray-800 mb-4">Top Jogadores</h3>
         
         {/* Top 3 */}
         {topThree.map((player) => (
           <div 
             key={player.user_id} 
-            className={`bg-white rounded-xl shadow-md p-4 mb-3 ${getRankBorderColor(player.pos)}`}
+            className={`bg-white rounded-xl shadow-md p-3 sm:p-4 mb-3 ${getRankBorderColor(player.pos)}`}
           >
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="relative">
+              <div className="flex items-center space-x-3 flex-1 min-w-0">
+                <div className="relative flex-shrink-0">
                   {getPlayerAvatar(player)}
                   {player.pos <= 3 && (
                     <div className={`absolute -top-1 -right-1 rounded-full w-6 h-6 flex items-center justify-center ${
@@ -446,13 +446,13 @@ const RankingScreen = () => {
                     </div>
                   )}
                 </div>
-                <div>
-                  <h4 className="font-bold text-gray-800">{player.name}</h4>
-                  <p className="text-sm text-gray-600">{player.score.toLocaleString()} pontos</p>
+                <div className="min-w-0 flex-1">
+                  <h4 className="font-bold text-gray-800 text-sm sm:text-base truncate">{player.name}</h4>
+                  <p className="text-xs sm:text-sm text-gray-600">{player.score.toLocaleString()} pontos</p>
                 </div>
               </div>
-              <div className="text-right">
-                <span className={`text-2xl font-bold ${
+              <div className="text-right flex-shrink-0 ml-2">
+                <span className={`text-xl sm:text-2xl font-bold ${
                   player.pos === 1 ? 'text-yellow-600' : 
                   player.pos === 2 ? 'text-gray-600' : 'text-orange-600'
                 }`}>
@@ -472,47 +472,47 @@ const RankingScreen = () => {
         {remainingPlayers.map((player) => (
           <div key={player.user_id} className="bg-white rounded-xl shadow-md p-3 mb-2">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-3 flex-1 min-w-0">
                 {getPlayerAvatar(player, 'small')}
-                <div>
-                  <h4 className="font-semibold text-gray-800">{player.name}</h4>
-                  <p className="text-sm text-gray-600">{player.score.toLocaleString()} pontos</p>
+                <div className="min-w-0 flex-1">
+                  <h4 className="font-semibold text-gray-800 text-sm truncate">{player.name}</h4>
+                  <p className="text-xs text-gray-600">{player.score.toLocaleString()} pontos</p>
                 </div>
               </div>
-              <span className="text-xl font-bold text-gray-700">#{player.pos}</span>
+              <span className="text-lg sm:text-xl font-bold text-gray-700 flex-shrink-0 ml-2">#{player.pos}</span>
             </div>
           </div>
         ))}
         
         {/* Paginação */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-center space-x-2 mt-6">
+          <div className="flex items-center justify-center space-x-1 sm:space-x-2 mt-6">
             <button
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}
-              className="px-3 py-2 rounded-lg bg-white shadow-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              className="px-2 sm:px-3 py-2 rounded-lg bg-white shadow-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
             >
               <ArrowLeft className="w-4 h-4" />
             </button>
             
             <div className="flex items-center space-x-1">
-              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+              {Array.from({ length: Math.min(3, totalPages) }, (_, i) => {
                 let pageNum;
-                if (totalPages <= 5) {
+                if (totalPages <= 3) {
                   pageNum = i + 1;
-                } else if (currentPage <= 3) {
+                } else if (currentPage <= 2) {
                   pageNum = i + 1;
-                } else if (currentPage >= totalPages - 2) {
-                  pageNum = totalPages - 4 + i;
+                } else if (currentPage >= totalPages - 1) {
+                  pageNum = totalPages - 2 + i;
                 } else {
-                  pageNum = currentPage - 2 + i;
+                  pageNum = currentPage - 1 + i;
                 }
                 
                 return (
                   <button
                     key={pageNum}
                     onClick={() => handlePageChange(pageNum)}
-                    className={`px-3 py-2 rounded-lg shadow-md ${
+                    className={`px-2 sm:px-3 py-2 rounded-lg shadow-md text-sm ${
                       currentPage === pageNum
                         ? 'bg-purple-600 text-white'
                         : 'bg-white text-gray-700 hover:bg-gray-50'
@@ -527,7 +527,7 @@ const RankingScreen = () => {
             <button
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
-              className="px-3 py-2 rounded-lg bg-white shadow-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              className="px-2 sm:px-3 py-2 rounded-lg bg-white shadow-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
             >
               <ArrowUp className="w-4 h-4 rotate-90" />
             </button>
@@ -535,8 +535,8 @@ const RankingScreen = () => {
         )}
         
         {/* Informações da página */}
-        <div className="text-center text-sm text-gray-500 mt-4">
-          Página {currentPage} de {totalPages} • {itemsPerPage} jogadores por página
+        <div className="text-center text-xs sm:text-sm text-gray-500 mt-4">
+          Página {currentPage} de {totalPages}
         </div>
       </section>
     </div>
