@@ -264,10 +264,10 @@ const RankingScreen = () => {
 
   if (isLoading) {
     return (
-      <div className="bg-gray-50 min-h-screen flex items-center justify-center">
+      <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <Trophy className="w-16 h-16 text-purple-600 mx-auto mb-4 animate-pulse" />
-          <p className="text-gray-600 font-medium">Carregando ranking...</p>
+          <Trophy className="w-16 h-16 text-yellow-300 mx-auto mb-4 animate-pulse" />
+          <p className="text-white font-medium">Carregando ranking...</p>
         </div>
       </div>
     );
