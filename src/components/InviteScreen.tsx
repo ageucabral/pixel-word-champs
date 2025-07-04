@@ -95,32 +95,35 @@ const InviteScreen = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 p-3 pb-20">
-      <div className="max-w-md mx-auto space-y-4">
+    <div className="min-h-screen bg-gray-50 pb-20">
+      <div className="max-w-md mx-auto">
         <InviteHeader />
+        
+        {/* Content with padding to account for overlapping header */}
+        <div className="px-4 -mt-4 relative z-10 space-y-4">
+          {/* Premiação do Mês - SEMPRE exibir, mesmo durante carregamento */}
+          <MonthlyPrizeDisplay 
+            configuredPrizes={monthlyData?.stats?.configuredPrizes || []}
+          />
 
-        {/* Premiação do Mês - SEMPRE exibir, mesmo durante carregamento */}
-        <MonthlyPrizeDisplay 
-          configuredPrizes={monthlyData?.stats?.configuredPrizes || []}
-        />
+          {/* Minha Posição no Ranking */}
+          <MyInviteRanking />
 
-        {/* Minha Posição no Ranking */}
-        <MyInviteRanking />
+          {/* Estatísticas Compactas com Código de Convite */}
+          <CompactInviteInfo 
+            stats={stats}
+            inviteCode={inviteCode}
+            onCopyCode={handleCopyCode}
+          />
 
-        {/* Estatísticas Compactas com Código de Convite */}
-        <CompactInviteInfo 
-          stats={stats}
-          inviteCode={inviteCode}
-          onCopyCode={handleCopyCode}
-        />
+          {/* Competição Mensal */}
+          <div className="mb-6">
+            <MonthlyInviteCompetition suppressLoading={true} />
+          </div>
 
-        {/* Competição Mensal */}
-        <div className="mb-6">
-          <MonthlyInviteCompetition suppressLoading={true} />
+          {/* Meus Amigos Indicados */}
+          <MyInvitedFriends invitedFriends={invitedFriends} />
         </div>
-
-        {/* Meus Amigos Indicados */}
-        <MyInvitedFriends invitedFriends={invitedFriends} />
       </div>
     </div>
   );
