@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Trophy, Star, Medal, Award, Crown, Zap, Sparkles } from 'lucide-react';
+import { Trophy, Star, Medal, Award, Crown, Zap, Sparkles, ArrowLeft, Play, Share } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { logger } from '@/utils/logger';
@@ -159,13 +158,36 @@ const RankingScreen = () => {
     const prizeConfig = prizeConfigs.find(config => config.position === position);
     return prizeConfig?.prize_amount || 0;
   };
+
+  const formatTimeRemaining = () => {
+    // Mock time remaining - in real app would calculate based on competition end date
+    return "2d 14h 32m";
+  };
+
+  const getTotalParticipants = () => {
+    return ranking.length.toLocaleString();
+  };
+
+  const getTotalPrizePool = () => {
+    const total = prizeConfigs.reduce((sum, config) => sum + config.prize_amount, 0);
+    return `R$ ${total.toLocaleString()}`;
+  };
+
+  const getTop3Players = () => {
+    return ranking.slice(0, 3);
+  };
+
+  const getCurrentUser = () => {
+    return ranking.find(p => p.user_id === user?.id);
+  };
+
   if (isLoading) {
-    return <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center relative overflow-hidden">
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800 flex items-center justify-center relative overflow-hidden">
         <div className="absolute inset-0 opacity-20" style={{
-        backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
-      }}></div>
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+        }}></div>
         
-        {/* Floating elements */}
         <div className="absolute top-20 left-16 w-32 h-32 bg-gradient-to-br from-yellow-400/20 to-orange-500/20 rounded-full blur-xl animate-pulse"></div>
         <div className="absolute bottom-32 right-20 w-40 h-40 bg-gradient-to-br from-pink-400/20 to-purple-500/20 rounded-full blur-xl animate-pulse delay-1000"></div>
         
@@ -192,139 +214,205 @@ const RankingScreen = () => {
             Carregando ranking épico...
           </p>
         </div>
-      </div>;
+      </div>
+    );
   }
-  return <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50 p-3 pb-20">
-      <div className="max-w-md mx-auto space-y-3">
-        {/* Header compacto */}
-        
 
-        {/* Premiação compacta */}
-        <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg animate-fade-in">
-          <CardContent className="p-3">
-            <div className="text-center mb-2">
-              <h3 className="text-sm font-bold text-slate-800 mb-1">🏆 Premiação</h3>
-            </div>
-            <div className="grid grid-cols-3 gap-2">
-              {[1, 2, 3].map(position => {
-              const prizeAmount = getPrizeAmount(position);
-              const icons = [{
-                icon: Crown,
-                bg: 'from-yellow-400 to-yellow-500',
-                medal: '🥇'
-              }, {
-                icon: Medal,
-                bg: 'from-gray-400 to-gray-500',
-                medal: '🥈'
-              }, {
-                icon: Award,
-                bg: 'from-orange-400 to-orange-500',
-                medal: '🥉'
-              }];
-              const iconData = icons[position - 1];
-              return <div key={position} className="text-center">
-                    <div className={`w-8 h-8 bg-gradient-to-r ${iconData.bg} rounded-full flex items-center justify-center mx-auto mb-1 shadow-md`}>
-                      <iconData.icon className="w-4 h-4 text-white" />
-                    </div>
-                    <div className="text-lg mb-1">{iconData.medal}</div>
-                    <div className="text-sm font-bold text-green-600">
-                      R$ {prizeAmount.toFixed(0)}
-                    </div>
-                    <div className="text-xs text-slate-600">
-                      {position}º lugar
-                    </div>
-                  </div>;
-            })}
-            </div>
-          </CardContent>
-        </Card>
+  const top3Players = getTop3Players();
+  const currentUser = getCurrentUser();
 
-        {/* User Position Card compacto */}
-        {userPosition && user && <Card className="bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 border-0 shadow-lg animate-fade-in">
-            <CardContent className="p-3">
-              <div className="flex items-center justify-between text-white">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-                    <div className="text-lg font-bold">#{userPosition}</div>
+  return (
+    <div className="bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800 min-h-screen">
+      {/* Header */}
+      <header className="bg-black/20 backdrop-blur-lg border-b border-white/10 sticky top-0 z-50">
+        <div className="flex items-center justify-between px-4 py-3">
+          <button className="text-white p-2">
+            <ArrowLeft className="text-lg" />
+          </button>
+          <h1 className="text-white font-bold text-lg">Ranking</h1>
+          <button className="text-white p-2">
+            <Trophy className="text-lg text-yellow-400" />
+          </button>
+        </div>
+      </header>
+
+      <main className="px-4 py-6">
+        {/* Competition Info */}
+        <section className="mb-6">
+          <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-4 border border-white/20">
+            <div className="text-center mb-4">
+              <h2 className="text-white font-bold text-xl mb-2">Caça Palavras Royale</h2>
+              <div className="flex items-center justify-center space-x-2 text-yellow-400">
+                <Crown className="text-lg" />
+                <span className="font-semibold">Competição Semanal</span>
+              </div>
+            </div>
+            
+            <div className="flex justify-between items-center bg-black/20 rounded-xl p-3">
+              <div className="text-center">
+                <div className="text-white/70 text-xs">Tempo Restante</div>
+                <div className="text-white font-bold">{formatTimeRemaining()}</div>
+              </div>
+              <div className="text-center">
+                <div className="text-white/70 text-xs">Participantes</div>
+                <div className="text-white font-bold">{getTotalParticipants()}</div>
+              </div>
+              <div className="text-center">
+                <div className="text-white/70 text-xs">Premio Total</div>
+                <div className="text-yellow-400 font-bold">{getTotalPrizePool()}</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Prize Podium */}
+        <section className="mb-6">
+          <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-4 border border-white/20">
+            <h3 className="text-white font-bold text-lg mb-4 text-center">Top 3 Premiados</h3>
+            
+            <div className="flex items-end justify-center space-x-2 mb-4">
+              {/* Second Place */}
+              {top3Players[1] && (
+                <div className="text-center">
+                  <div className="w-16 h-16 rounded-full border-4 border-gray-400 overflow-hidden mb-2 mx-auto bg-gradient-to-br from-purple-400 to-blue-500 flex items-center justify-center text-white font-bold">
+                    {top3Players[1].name?.charAt(0)?.toUpperCase() || 'U'}
                   </div>
-                  <div>
-                    <p className="text-sm font-medium">Sua Posição</p>
-                    <p className="text-lg font-bold">
-                      {ranking.find(p => p.user_id === user.id)?.score.toLocaleString() || 0} pts
-                    </p>
+                  <div className="bg-gray-400 text-white text-xs font-bold px-2 py-1 rounded-full mb-1">2°</div>
+                  <div className="text-white text-sm font-semibold">{top3Players[1].name}</div>
+                  <div className="text-yellow-400 text-xs font-bold">R$ {getPrizeAmount(2)}</div>
+                  <div className="bg-gray-600 h-16 w-12 rounded-t-lg mt-2 mx-auto"></div>
+                </div>
+              )}
+              
+              {/* First Place */}
+              {top3Players[0] && (
+                <div className="text-center">
+                  <div className="w-20 h-20 rounded-full border-4 border-yellow-400 overflow-hidden mb-2 mx-auto relative bg-gradient-to-br from-purple-400 to-blue-500 flex items-center justify-center text-white font-bold">
+                    {top3Players[0].name?.charAt(0)?.toUpperCase() || 'U'}
+                    <div className="absolute -top-2 -right-1">
+                      <Crown className="text-yellow-400 text-lg" />
+                    </div>
+                  </div>
+                  <div className="bg-yellow-400 text-black text-xs font-bold px-2 py-1 rounded-full mb-1">1°</div>
+                  <div className="text-white text-sm font-semibold">{top3Players[0].name}</div>
+                  <div className="text-yellow-400 text-xs font-bold">R$ {getPrizeAmount(1)}</div>
+                  <div className="bg-yellow-500 h-20 w-12 rounded-t-lg mt-2 mx-auto"></div>
+                </div>
+              )}
+              
+              {/* Third Place */}
+              {top3Players[2] && (
+                <div className="text-center">
+                  <div className="w-16 h-16 rounded-full border-4 border-orange-600 overflow-hidden mb-2 mx-auto bg-gradient-to-br from-purple-400 to-blue-500 flex items-center justify-center text-white font-bold">
+                    {top3Players[2].name?.charAt(0)?.toUpperCase() || 'U'}
+                  </div>
+                  <div className="bg-orange-600 text-white text-xs font-bold px-2 py-1 rounded-full mb-1">3°</div>
+                  <div className="text-white text-sm font-semibold">{top3Players[2].name}</div>
+                  <div className="text-yellow-400 text-xs font-bold">R$ {getPrizeAmount(3)}</div>
+                  <div className="bg-orange-700 h-12 w-12 rounded-t-lg mt-2 mx-auto"></div>
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* Ranking List */}
+        <section className="mb-6">
+          <div className="bg-white/10 backdrop-blur-lg rounded-2xl border border-white/20 overflow-hidden">
+            <div className="bg-black/20 px-4 py-3 border-b border-white/10">
+              <h3 className="text-white font-bold text-lg">Classificação Geral</h3>
+            </div>
+            
+            {/* User Position (if not in top visible) */}
+            {currentUser && currentUser.pos > 5 && (
+              <div className="bg-blue-600/20 border-b border-white/10 px-4 py-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">
+                      {currentUser.pos}
+                    </div>
+                    <div className="w-10 h-10 rounded-full border-2 border-blue-600 overflow-hidden bg-gradient-to-br from-purple-400 to-blue-500 flex items-center justify-center text-white font-bold">
+                      {currentUser.name?.charAt(0)?.toUpperCase() || 'U'}
+                    </div>
+                    <div>
+                      <div className="text-white font-semibold">Você</div>
+                      <div className="text-white/70 text-sm">{currentUser.score.toLocaleString()} pts</div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    {getPrizeAmount(currentUser.pos) > 0 && (
+                      <>
+                        <div className="text-yellow-400 font-bold text-sm">R$ {getPrizeAmount(currentUser.pos)}</div>
+                        <div className="text-white/70 text-xs">Premio</div>
+                      </>
+                    )}
                   </div>
                 </div>
-                {getPrizeAmount(userPosition) > 0 && <div className="text-right">
-                    <div className="text-xs text-white/80">💰 Prêmio</div>
-                    <div className="text-lg font-bold">R$ {getPrizeAmount(userPosition).toFixed(0)}</div>
-                  </div>}
               </div>
-            </CardContent>
-          </Card>}
+            )}
 
-        {/* Error State */}
-        {error && <Card className="border-red-200 bg-red-50/80 backdrop-blur-sm animate-fade-in">
-            <CardContent className="p-4 text-center">
-              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                <Trophy className="w-6 h-6 text-red-500" />
-              </div>
-              <p className="text-red-700 font-medium mb-3">{error}</p>
-              <Button onClick={loadRanking} variant="outline" className="border-red-300 text-red-700 hover:bg-red-100 bg-white/50 backdrop-blur-sm">
-                🔄 Tentar novamente
-              </Button>
-            </CardContent>
-          </Card>}
-
-        {/* Ranking List compacto */}
-        <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg animate-fade-in">
-          <CardHeader className="pb-2 pt-3">
-            <CardTitle className="text-lg font-bold text-slate-800 flex items-center gap-2">
-              <Star className="w-5 h-5 text-orange-500" />
-              Classificação
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            {ranking.length === 0 ? <div className="text-center py-8 text-slate-500">
-                <Trophy className="w-12 h-12 text-slate-400 mx-auto mb-2" />
-                <p className="font-semibold mb-1">Arena Vazia!</p>
-                <p className="text-xs">Seja o primeiro campeão! 🎯</p>
-              </div> : <div className="space-y-0">
-                {ranking.map((player, index) => {
-              const isCurrentUser = user?.id === player.user_id;
-              const prizeAmount = getPrizeAmount(player.pos);
-              return <div key={player.user_id} className={`flex items-center justify-between p-3 transition-all hover:bg-slate-50 ${isCurrentUser ? 'bg-gradient-to-r from-purple-50 to-pink-50 border-l-2 border-purple-500' : ''} ${player.pos <= 3 ? 'bg-gradient-to-r from-yellow-50 to-orange-50' : ''}`}>
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-blue-500 flex items-center justify-center text-white font-bold text-sm shadow-md">
-                          {player.name?.charAt(0).toUpperCase() || 'U'}
+            <div className="max-h-80 overflow-y-auto">
+              {ranking.slice(0, 20).map((player) => {
+                const isCurrentUser = user?.id === player.user_id;
+                const prizeAmount = getPrizeAmount(player.pos);
+                
+                return (
+                  <div key={player.user_id} className={`border-b border-white/10 px-4 py-3 ${isCurrentUser ? 'bg-blue-600/20' : ''}`}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className={`rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold ${
+                          player.pos === 1 ? 'bg-yellow-400 text-black' :
+                          player.pos === 2 ? 'bg-gray-400 text-white' :
+                          player.pos === 3 ? 'bg-orange-600 text-white' :
+                          'bg-white/20 text-white'
+                        }`}>
+                          {player.pos}
                         </div>
-                        
+                        <div className={`w-10 h-10 rounded-full border-2 overflow-hidden bg-gradient-to-br from-purple-400 to-blue-500 flex items-center justify-center text-white font-bold ${
+                          player.pos === 1 ? 'border-yellow-400' :
+                          player.pos === 2 ? 'border-gray-400' :
+                          player.pos === 3 ? 'border-orange-600' :
+                          'border-white/30'
+                        }`}>
+                          {player.name?.charAt(0)?.toUpperCase() || 'U'}
+                        </div>
                         <div>
-                          <p className="font-bold text-slate-900 text-sm flex items-center gap-1">
-                            <span>{isCurrentUser ? 'Você' : player.name}</span>
-                            {player.pos === 1 && <span className="text-xs">👑</span>}
-                            {player.pos === 2 && <span className="text-xs">🥈</span>}
-                            {player.pos === 3 && <span className="text-xs">🥉</span>}
-                          </p>
-                          <p className="text-xs text-slate-500 font-medium">
-                            {player.score.toLocaleString()} pontos
-                          </p>
+                          <div className="text-white font-semibold">
+                            {isCurrentUser ? 'Você' : player.name}
+                          </div>
+                          <div className="text-white/70 text-sm">{player.score.toLocaleString()} pts</div>
                         </div>
                       </div>
-                      
                       <div className="text-right">
-                        <div className="font-bold text-sm text-purple-700">
-                          #{player.pos}
-                        </div>
-                        {prizeAmount > 0 && <div className="text-xs text-green-600 font-semibold">
-                            R$ {prizeAmount.toFixed(0)}
-                          </div>}
+                        {prizeAmount > 0 && (
+                          <div className="text-yellow-400 font-bold">R$ {prizeAmount}</div>
+                        )}
+                        {player.pos === 1 && <Crown className="text-yellow-400 text-sm" />}
+                        {player.pos === 2 && <Medal className="text-gray-400 text-sm" />}
+                        {player.pos === 3 && <Medal className="text-orange-600 text-sm" />}
                       </div>
-                    </div>;
-            })}
-              </div>}
-          </CardContent>
-        </Card>
-      </div>
-    </div>;
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* Action Buttons */}
+        <section className="space-y-3 mb-20">
+          <button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold py-4 rounded-2xl shadow-lg">
+            <Play className="inline mr-2" />
+            Continuar Jogando
+          </button>
+          
+          <button className="w-full bg-white/10 backdrop-blur-lg border border-white/20 text-white font-semibold py-3 rounded-2xl">
+            <Share className="inline mr-2" />
+            Compartilhar Ranking
+          </button>
+        </section>
+      </main>
+    </div>
+  );
 };
 export default RankingScreen;
