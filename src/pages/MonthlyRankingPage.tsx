@@ -43,7 +43,7 @@ const MonthlyRankingPage = () => {
       <div className="min-h-screen bg-background px-4 py-6">
         <div className="max-w-md mx-auto">
           <div className="flex items-center justify-between mb-6">
-            <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
+            <Button variant="ghost" size="sm" onClick={() => navigate('/')}>
               <ArrowLeft className="w-4 h-4" />
             </Button>
             <h1 className="text-lg font-semibold">Ranking Mensal de Indicação</h1>
@@ -62,7 +62,7 @@ const MonthlyRankingPage = () => {
       <div className="min-h-screen bg-background px-4 py-6">
         <div className="max-w-md mx-auto">
           <div className="flex items-center justify-between mb-6">
-            <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
+            <Button variant="ghost" size="sm" onClick={() => navigate('/')}>
               <ArrowLeft className="w-4 h-4" />
             </Button>
             <h1 className="text-lg font-semibold">Ranking Mensal de Indicação</h1>
@@ -94,7 +94,7 @@ const MonthlyRankingPage = () => {
       <div className="max-w-md mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
+          <Button variant="ghost" size="sm" onClick={() => navigate('/')}>
             <ArrowLeft className="w-4 h-4" />
           </Button>
           <h1 className="text-lg font-semibold">Ranking Mensal de Indicação</h1>
