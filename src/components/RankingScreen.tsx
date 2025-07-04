@@ -192,6 +192,12 @@ const RankingScreen = () => {
     
     const now = new Date();
     const endDate = new Date(competition.end_date);
+    
+    // Se a data não inclui horário (apenas YYYY-MM-DD), definir como final do dia
+    if (competition.end_date.length === 10) {
+      endDate.setHours(23, 59, 59, 999);
+    }
+    
     const timeDiff = endDate.getTime() - now.getTime();
     
     if (timeDiff <= 0) return 'Finalizada';
