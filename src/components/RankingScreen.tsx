@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Trophy, Clock, Users, Gift, Crown, Medal, Award, ArrowLeft, ArrowUp, ArrowDown, Minus, Sparkles, Star, Zap } from 'lucide-react';
+import { Trophy, Clock, Users, Gift, Crown, Medal, Award, ArrowLeft, ArrowUp, Sparkles, Star, Zap } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { usePrizeConfigurations } from '@/hooks/usePrizeConfigurations';
 import { logger } from '@/utils/logger';
+
 interface RankingPlayer {
   pos: number;
   user_id: string;
   name: string;
   score: number;
   avatar_url?: string;
-  previous_position?: number;
 }
 interface PrizeConfig {
   position: number;
@@ -27,6 +28,7 @@ const RankingScreen = () => {
   const {
     user
   } = useAuth();
+  const { data: prizeConfigurations } = usePrizeConfigurations();
   const [ranking, setRanking] = useState<RankingPlayer[]>([]);
   const [userPosition, setUserPosition] = useState<number | null>(null);
   const [prizeConfigs, setPrizeConfigs] = useState<PrizeConfig[]>([]);
@@ -147,9 +149,7 @@ const RankingScreen = () => {
         user_id: profile.id,
         name: profile.username || 'Usuário',
         score: profile.total_score || 0,
-        avatar_url: profile.avatar_url,
-        // Simular posições anteriores para demonstração
-        previous_position: Math.random() > 0.3 ? Math.max(1, (offset + index + 1) + Math.floor(Math.random() * 6 - 3)) : undefined
+        avatar_url: profile.avatar_url
       }));
       setRanking(players);
 
@@ -250,41 +250,43 @@ const RankingScreen = () => {
     }
   };
 
-  // Função para calcular mudança de posição
-  const getPositionChange = (currentPosition: number, previousPosition?: number) => {
-    if (!previousPosition) return 0;
-    return previousPosition - currentPosition; // Positivo = subiu, Negativo = desceu
-  };
-
-  // Função para renderizar indicador de mudança de posição
-  const renderPositionChangeIndicator = (player: RankingPlayer) => {
-    const change = getPositionChange(player.pos, player.previous_position);
+  // Função para renderizar prêmio da posição
+  const renderPrizeAmount = (position: number) => {
+    if (!prizeConfigurations) return null;
     
-    if (change > 0) {
-      // Subiu no ranking
+    // Buscar prêmio individual para a posição específica
+    const individualPrize = prizeConfigurations.find(config => 
+      config.type === 'individual' && config.position === position
+    );
+    
+    if (individualPrize) {
       return (
-        <div className="text-xs font-medium text-green-600">
-          <ArrowUp className="w-3 h-3 inline mr-1" />
-          +{change}
-        </div>
-      );
-    } else if (change < 0) {
-      // Desceu no ranking
-      return (
-        <div className="text-xs font-medium text-red-600">
-          <ArrowDown className="w-3 h-3 inline mr-1" />
-          {change}
-        </div>
-      );
-    } else {
-      // Manteve a posição
-      return (
-        <div className="text-xs font-medium text-gray-600">
-          <Minus className="w-3 h-3 inline mr-1" />
-          0
+        <div className="text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">
+          R$ {individualPrize.prize_amount.toFixed(0)}
         </div>
       );
     }
+    
+    // Buscar prêmio de grupo que inclua esta posição
+    const groupPrize = prizeConfigurations.find(config => {
+      if (config.type !== 'group' || !config.position_range) return false;
+      const [start, end] = config.position_range.split('-').map(Number);
+      return position >= start && position <= end;
+    });
+    
+    if (groupPrize) {
+      return (
+        <div className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
+          R$ {groupPrize.prize_amount.toFixed(0)}
+        </div>
+      );
+    }
+    
+    return (
+      <div className="text-xs font-medium text-gray-500 bg-gray-50 px-2 py-1 rounded-full">
+        Sem prêmio
+      </div>
+    );
   };
   if (isLoading) {
     return <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center relative overflow-hidden">
@@ -468,7 +470,7 @@ const RankingScreen = () => {
                   }`}>
                     #{player.pos}
                   </span>
-                  {renderPositionChangeIndicator(player)}
+                  {renderPrizeAmount(player.pos)}
                 </div>
               </div>
             </div>
@@ -487,7 +489,7 @@ const RankingScreen = () => {
                 </div>
                 <div className="text-right">
                   <span className="text-xl font-bold text-gray-700">#{player.pos}</span>
-                  {renderPositionChangeIndicator(player)}
+                  {renderPrizeAmount(player.pos)}
                 </div>
               </div>
             </div>
