@@ -48,17 +48,21 @@ const MonthlyRankingPage = () => {
     }
   };
 
-  const getPaymentStatusBadge = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200">Pendente</Badge>;
-      case 'paid':
-        return <Badge className="bg-green-100 text-green-800 border-green-200">Pago</Badge>;
-      case 'not_eligible':
-        return <Badge variant="outline">Sem prêmio</Badge>;
-      default:
-        return <Badge variant="outline">{status}</Badge>;
-    }
+  const getPrizeDisplay = (amount: number, position: number) => {
+    if (amount <= 0) return null;
+    
+    const getBadgeStyle = () => {
+      if (position === 1) return 'bg-gradient-to-r from-yellow-400 to-yellow-600 text-white border-0 shadow-lg';
+      if (position === 2) return 'bg-gradient-to-r from-gray-300 to-gray-500 text-white border-0 shadow-lg';
+      if (position === 3) return 'bg-gradient-to-r from-orange-400 to-orange-600 text-white border-0 shadow-lg';
+      return 'bg-gradient-to-r from-green-400 to-green-600 text-white border-0 shadow-lg';
+    };
+
+    return (
+      <Badge className={`${getBadgeStyle()} animate-pulse`}>
+        💰 R$ {amount.toFixed(2)}
+      </Badge>
+    );
   };
 
   const isCurrentUser = (entryUserId: string) => entryUserId === user?.id;
@@ -160,71 +164,93 @@ const MonthlyRankingPage = () => {
         </div>
 
         {/* Mobile Card Layout */}
-        <div className="space-y-3">
+        <div className="space-y-4">
           {data.rankings.map((entry: MonthlyRankingEntry) => {
             const userIsCurrentUser = isCurrentUser(entry.user_id);
+            const cardStyle = userIsCurrentUser 
+              ? 'border-2 border-blue-400 bg-gradient-to-r from-blue-50 to-indigo-50 shadow-xl scale-105 transform hover:scale-110' 
+              : entry.position <= 3 
+                ? 'border-2 bg-gradient-to-r shadow-xl hover:shadow-2xl hover:scale-105 transform' 
+                : 'border bg-white shadow-lg hover:shadow-xl hover:scale-105 transform';
+            
+            const getBorderGradient = () => {
+              if (userIsCurrentUser) return '';
+              if (entry.position === 1) return 'border-yellow-400 from-yellow-50 to-amber-50';
+              if (entry.position === 2) return 'border-gray-400 from-gray-50 to-slate-50';
+              if (entry.position === 3) return 'border-orange-400 from-orange-50 to-amber-50';
+              return '';
+            };
+
             return (
               <Card 
                 key={entry.user_id}
-                className={`border-2 transition-all duration-200 ${getRankingColor(entry.position, userIsCurrentUser)}`}
+                className={`${cardStyle} ${getBorderGradient()} transition-all duration-300 animate-fade-in relative overflow-hidden`}
               >
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-3">
-                    {/* Position and Icon */}
-                    <div className="flex flex-col items-center min-w-[60px]">
-                      <div className="text-2xl mb-1">{getRankingIcon(entry.position)}</div>
+                {/* Sparkle effect for top 3 */}
+                {entry.position <= 3 && (
+                  <div className="absolute top-2 right-2 animate-pulse">
+                    <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                  </div>
+                )}
+                
+                <CardContent className="p-5">
+                  <div className="flex items-center gap-4">
+                    {/* Enhanced Position Display */}
+                    <div className="flex flex-col items-center min-w-[70px]">
+                      <div className="text-4xl mb-2 animate-bounce">
+                        {getRankingIcon(entry.position)}
+                      </div>
                       <Badge 
-                        className={`text-xs px-2 py-1 ${
-                          entry.position === 1 ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
-                          entry.position === 2 ? 'bg-gray-100 text-gray-700 border-gray-200' :
-                          entry.position === 3 ? 'bg-orange-100 text-orange-700 border-orange-200' :
-                          'bg-slate-100 text-slate-700 border-slate-200'
+                        className={`text-sm px-3 py-1 font-bold shadow-md ${
+                          entry.position === 1 ? 'bg-gradient-to-r from-yellow-400 to-yellow-600 text-white border-0' :
+                          entry.position === 2 ? 'bg-gradient-to-r from-gray-400 to-gray-600 text-white border-0' :
+                          entry.position === 3 ? 'bg-gradient-to-r from-orange-400 to-orange-600 text-white border-0' :
+                          'bg-gradient-to-r from-purple-400 to-blue-500 text-white border-0'
                         }`}
                       >
-                        {entry.position}º
+                        #{entry.position}
                       </Badge>
                     </div>
 
-                    {/* User Info */}
+                    {/* Enhanced User Info */}
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <div className="w-8 h-8 bg-gradient-to-br from-purple-400 to-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
-                          {entry.username?.charAt(0)?.toUpperCase() || 'U'}
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="relative">
+                          <div className="w-12 h-12 bg-gradient-to-br from-purple-500 via-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-lg font-bold shadow-lg">
+                            {entry.username?.charAt(0)?.toUpperCase() || 'U'}
+                          </div>
+                          {entry.position <= 3 && (
+                            <div className="absolute -top-1 -right-1 w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center animate-pulse">
+                              <Medal className="w-3 h-3 text-yellow-800" />
+                            </div>
+                          )}
                         </div>
+                        
                         <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium text-slate-900 truncate">{entry.username}</span>
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-bold text-lg text-slate-900 truncate">{entry.username}</span>
                             {userIsCurrentUser && (
-                              <Badge variant="outline" className="text-xs px-1.5 py-0.5">
-                                Você
+                              <Badge className="bg-blue-500 text-white text-xs px-2 py-1 animate-pulse">
+                                🎮 VOCÊ
                               </Badge>
                             )}
                           </div>
+                          
+                          {/* Simplified Points Display */}
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="text-sm font-semibold">
+                              ⭐ {entry.invite_points} pontos
+                            </Badge>
+                          </div>
                         </div>
-                      </div>
-                      
-                      {/* Stats Row */}
-                      <div className="flex items-center justify-between text-xs text-slate-600 mb-2">
-                        <span>{entry.invite_points} pontos</span>
-                        <span>{entry.invites_count} convites</span>
-                        <span>{entry.active_invites_count} ativos</span>
                       </div>
 
-                      {/* Prize and Status */}
-                      <div className="flex items-center justify-between">
-                        <div>
-                          {entry.prize_amount > 0 ? (
-                            <div className="text-sm font-bold text-green-600">
-                              R$ {entry.prize_amount.toFixed(2)}
-                            </div>
-                          ) : (
-                            <span className="text-xs text-slate-400">Sem prêmio</span>
-                          )}
+                      {/* Prize Display */}
+                      {entry.prize_amount > 0 && (
+                        <div className="mt-3 text-center">
+                          {getPrizeDisplay(entry.prize_amount, entry.position)}
                         </div>
-                        <div>
-                          {getPaymentStatusBadge(entry.payment_status)}
-                        </div>
-                      </div>
+                      )}
                     </div>
                   </div>
                 </CardContent>
@@ -233,7 +259,7 @@ const MonthlyRankingPage = () => {
           })}
         </div>
 
-        {/* Desktop Table - Hidden on mobile, shown on larger screens */}
+        {/* Desktop Table - Simplified for gamification */}
         <div className="hidden lg:block mt-8">
           <Card className="bg-white border-0 shadow-lg">
             <CardContent className="p-0">
@@ -244,9 +270,7 @@ const MonthlyRankingPage = () => {
                       <TableHead className="w-24">Posição</TableHead>
                       <TableHead>Usuário</TableHead>
                       <TableHead className="text-center">Pontos</TableHead>
-                      <TableHead className="text-center">Convites</TableHead>
                       <TableHead className="text-center">Prêmio</TableHead>
-                      <TableHead className="text-center">Status</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -255,53 +279,58 @@ const MonthlyRankingPage = () => {
                       return (
                         <TableRow 
                           key={entry.user_id}
-                          className={userIsCurrentUser ? "bg-blue-50 border-blue-200" : ""}
+                          className={`${userIsCurrentUser ? "bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 shadow-md" : ""} hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 transition-all duration-200`}
                         >
                           <TableCell>
-                            {getPositionBadge(entry.position)}
+                            <div className="flex items-center gap-2">
+                              <div className="text-2xl">{getRankingIcon(entry.position)}</div>
+                              <Badge 
+                                className={`font-bold ${
+                                  entry.position === 1 ? 'bg-gradient-to-r from-yellow-400 to-yellow-600 text-white border-0' :
+                                  entry.position === 2 ? 'bg-gradient-to-r from-gray-400 to-gray-600 text-white border-0' :
+                                  entry.position === 3 ? 'bg-gradient-to-r from-orange-400 to-orange-600 text-white border-0' :
+                                  'bg-gradient-to-r from-purple-400 to-blue-500 text-white border-0'
+                                }`}
+                              >
+                                #{entry.position}
+                              </Badge>
+                            </div>
                           </TableCell>
                           <TableCell>
-                            <div className="flex items-center gap-2">
-                              <div className="w-8 h-8 bg-gradient-to-br from-purple-400 to-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
-                                {entry.username?.charAt(0)?.toUpperCase() || 'U'}
+                            <div className="flex items-center gap-3">
+                              <div className="relative">
+                                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 via-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-lg">
+                                  {entry.username?.charAt(0)?.toUpperCase() || 'U'}
+                                </div>
+                                {entry.position <= 3 && (
+                                  <div className="absolute -top-1 -right-1 w-5 h-5 bg-yellow-400 rounded-full flex items-center justify-center">
+                                    <Medal className="w-2.5 h-2.5 text-yellow-800" />
+                                  </div>
+                                )}
                               </div>
                               <div>
-                                <div className="font-medium text-slate-900">
+                                <div className="font-bold text-lg text-slate-900">
                                   {entry.username}
                                   {userIsCurrentUser && (
-                                    <Badge variant="outline" className="ml-2 text-xs">
-                                      Você
+                                    <Badge className="ml-2 bg-blue-500 text-white text-xs animate-pulse">
+                                      🎮 VOCÊ
                                     </Badge>
                                   )}
                                 </div>
-                                <div className="text-xs text-slate-500">
-                                  {entry.active_invites_count} ativos de {entry.invites_count} convites
-                                </div>
                               </div>
                             </div>
                           </TableCell>
                           <TableCell className="text-center">
-                            <div className="font-bold text-slate-800">
-                              {entry.invite_points}
-                            </div>
-                            <div className="text-xs text-slate-500">pontos</div>
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <div className="font-medium text-slate-700">
-                              {entry.invites_count}
-                            </div>
+                            <Badge variant="outline" className="text-lg font-bold px-4 py-2">
+                              ⭐ {entry.invite_points}
+                            </Badge>
                           </TableCell>
                           <TableCell className="text-center">
                             {entry.prize_amount > 0 ? (
-                              <div className="font-bold text-green-600">
-                                R$ {entry.prize_amount.toFixed(2)}
-                              </div>
+                              getPrizeDisplay(entry.prize_amount, entry.position)
                             ) : (
                               <span className="text-slate-400 text-sm">-</span>
                             )}
-                          </TableCell>
-                          <TableCell className="text-center">
-                            {getPaymentStatusBadge(entry.payment_status)}
                           </TableCell>
                         </TableRow>
                       );
