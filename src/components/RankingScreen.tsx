@@ -340,43 +340,41 @@ const RankingScreen = () => {
       setCurrentPage(page);
     }
   };
-  return <div className="min-h-screen bg-gray-50 pb-20">
+  return <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50 pb-20">
       <div className="max-w-md mx-auto">
-        {/* Header */}
-        <header className="text-white relative" style={{
+        {/* Header Compacto */}
+        <header className="text-white relative animate-fade-in" style={{
           background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
         }}>
-          <div className="flex items-center justify-between p-4">
+          <div className="flex items-center justify-between p-3">
             <div></div>
-            <h1 className="text-lg font-bold">Ranking</h1>
-            <button className="p-2">
-              <Trophy className="w-5 h-5 text-yellow-300" />
-            </button>
+            <h1 className="text-lg font-bold">🏆 Ranking</h1>
+            <Trophy className="w-5 h-5 text-yellow-300" />
           </div>
           
-          {/* Competition Info */}
-          <div className="px-4 pb-6">
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 mb-4">
-              <h2 className="text-xl font-bold mb-2">Caça Palavras Royale</h2>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <Clock className="text-yellow-300 w-4 h-4" />
-                  <span className="text-sm">Termina em {getTimeRemaining()}</span>
+          {/* Competition Info Compacto */}
+          <div className="px-3 pb-4">
+            <div className="bg-white/15 backdrop-blur-sm rounded-lg p-3">
+              <h2 className="text-lg font-bold mb-2">Caça Palavras Royale</h2>
+              <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center space-x-1">
+                  <Clock className="text-yellow-300 w-3 h-3" />
+                  <span>Termina em {getTimeRemaining()}</span>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <Users className="text-green-300 w-4 h-4" />
-                  <span className="text-sm">{competition?.total_participants || ranking.length} jogadores</span>
+                <div className="flex items-center space-x-1">
+                  <Users className="text-green-300 w-3 h-3" />
+                  <span>{competition?.total_participants || ranking.length} jogadores</span>
                 </div>
               </div>
             </div>
           </div>
         </header>
 
-        {/* Prize Pool */}
-        <section className="px-4 -mt-4 relative z-10">
-          <div className="bg-white rounded-xl shadow-lg p-4 mb-4">
-            <h3 className="text-center font-bold text-gray-800 mb-3">
-              <Gift className="text-purple-600 mr-2 inline w-4 h-4" />
+        {/* Prize Pool Compacto */}
+        <section className="px-3 -mt-3 relative z-10 animate-scale-in">
+          <div className="bg-white rounded-xl shadow-sm p-3 mb-3">
+            <h3 className="text-center font-semibold text-gray-800 mb-2 text-sm">
+              <Gift className="text-purple-600 mr-1 inline w-3 h-3" />
               Prêmios da Competição
             </h3>
             <div className="grid grid-cols-3 gap-2">
@@ -386,25 +384,25 @@ const RankingScreen = () => {
                   icon: Crown,
                   bg: 'bg-gradient-to-b from-yellow-400 to-yellow-600',
                   label: '1°',
-                  shadow: 'shadow-[0_0_20px_rgba(255,215,0,0.5)]'
+                  shadow: 'shadow-md'
                 }, {
                   icon: Medal,
                   bg: 'bg-gradient-to-b from-gray-300 to-gray-500',
                   label: '2°',
-                  shadow: ''
+                  shadow: 'shadow-sm'
                 }, {
                   icon: Award,
                   bg: 'bg-gradient-to-b from-orange-400 to-orange-600',
                   label: '3°',
-                  shadow: ''
+                  shadow: 'shadow-sm'
                 }];
                 const config = configs[position - 1];
                 return (
-                  <div key={position} className="text-center">
-                    <div className={`${config.bg} rounded-lg p-3 ${config.shadow}`}>
-                      <config.icon className="text-white text-xl mb-1 mx-auto w-5 h-5" />
+                  <div key={position} className="text-center hover-scale">
+                    <div className={`${config.bg} rounded-lg p-2 ${config.shadow}`}>
+                      <config.icon className="text-white mb-1 mx-auto w-4 h-4" />
                       <div className="text-white text-xs font-bold">{config.label}</div>
-                      <div className="text-white text-sm font-bold">R$ {prizeAmount}</div>
+                      <div className="text-white text-xs font-semibold">R$ {prizeAmount}</div>
                     </div>
                   </div>
                 );
@@ -413,43 +411,43 @@ const RankingScreen = () => {
           </div>
         </section>
 
-        {/* Your Position */}
+        {/* Your Position Compacto */}
         {userPosition && (
-          <section className="px-4 mb-4">
-            <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl p-4 text-white">
+          <section className="px-3 mb-3 animate-fade-in">
+            <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl p-3 text-white shadow-md">
               <div className="flex items-center justify-between">
-                <div>
-                  <h4 className="font-bold text-lg">Sua Posição</h4>
-                  <div className="flex items-center space-x-2 mt-1">
-                    <span className="text-3xl font-bold">#{userPosition}</span>
-                    <div className="text-sm opacity-90">
-                      <div>{user?.total_score?.toLocaleString() || 0} pontos</div>
-                      <div>+12 desde ontem</div>
+                <div className="flex-1">
+                  <h4 className="font-semibold text-sm opacity-90">Sua Posição</h4>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-2xl font-bold">#{userPosition}</span>
+                    <div className="text-xs opacity-80">
+                      <div>{user?.total_score?.toLocaleString() || 0} pts</div>
                     </div>
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className="w-16 h-16 rounded-full border-4 border-white/30 bg-gradient-to-br from-purple-400 to-blue-500 flex items-center justify-center text-white font-bold text-xl">
-                    {user?.username?.charAt(0).toUpperCase() || 'U'}
-                  </div>
+                <div className="w-12 h-12 rounded-full border-2 border-white/30 bg-gradient-to-br from-purple-400 to-blue-500 flex items-center justify-center text-white font-bold">
+                  {user?.username?.charAt(0).toUpperCase() || 'U'}
                 </div>
               </div>
             </div>
           </section>
         )}
 
-        {/* Top Players */}
-        <section className="px-4 mb-20">
-          <h3 className="text-lg font-bold text-gray-800 mb-4">Top Jogadores</h3>
+        {/* Top Players Compacto */}
+        <section className="px-3 mb-20">
+          <h3 className="text-base font-bold text-gray-800 mb-3 flex items-center">
+            <Sparkles className="w-4 h-4 mr-2 text-purple-600" />
+            Top Jogadores
+          </h3>
           
-          {/* Top 3 */}
-          {topThree.map(player => (
-            <div key={player.user_id} className={`bg-white rounded-xl shadow-md p-4 mb-3 ${getRankBorderColor(player.pos)}`}>
+          {/* Top 3 Compacto */}
+          {topThree.map((player, index) => (
+            <div key={player.user_id} className={`bg-white rounded-lg shadow-sm p-3 mb-2 ${getRankBorderColor(player.pos)} hover-scale animate-fade-in`} style={{ animationDelay: `${index * 100}ms` }}>
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-2">
                   <div className="relative">
-                    {getPlayerAvatar(player)}
-                    <div className={`absolute -top-1 -right-1 rounded-full w-6 h-6 flex items-center justify-center ${
+                    {getPlayerAvatar(player, 'small')}
+                    <div className={`absolute -top-1 -right-1 rounded-full w-5 h-5 flex items-center justify-center ${
                       player.pos === 1 ? 'bg-yellow-500' : 
                       player.pos === 2 ? 'bg-gray-500' : 
                       'bg-orange-500'
@@ -457,13 +455,13 @@ const RankingScreen = () => {
                       {getRankIcon(player.pos)}
                     </div>
                   </div>
-                  <div>
-                    <h4 className="font-bold text-gray-800">{player.name}</h4>
-                    <p className="text-sm text-gray-600">{player.score.toLocaleString()} pontos</p>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-semibold text-gray-800 text-sm truncate">{player.name}</h4>
+                    <p className="text-xs text-gray-600">{player.score.toLocaleString()} pts</p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <span className={`text-2xl font-bold ${
+                <div className="text-right flex-shrink-0 ml-2">
+                  <span className={`text-lg font-bold ${
                     player.pos === 1 ? 'text-yellow-600' : 
                     player.pos === 2 ? 'text-gray-600' : 
                     'text-orange-600'
@@ -476,60 +474,80 @@ const RankingScreen = () => {
             </div>
           ))}
 
-          {/* Ranks 4+ */}
-          {remainingPlayers.map(player => (
-            <div key={player.user_id} className="bg-white rounded-xl shadow-md p-3 mb-2">
+          {/* Ranks 4+ Compacto */}
+          {remainingPlayers.map((player, index) => (
+            <div key={player.user_id} className="bg-white rounded-lg shadow-sm p-2.5 mb-1.5 hover-scale animate-fade-in" style={{ animationDelay: `${(topThree.length + index) * 50}ms` }}>
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-2">
                   {getPlayerAvatar(player, 'small')}
-                  <div>
-                    <h4 className="font-semibold text-gray-800">{player.name}</h4>
-                    <p className="text-sm text-gray-600">{player.score.toLocaleString()} pontos</p>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-medium text-gray-800 text-sm truncate">{player.name}</h4>
+                    <p className="text-xs text-gray-600">{player.score.toLocaleString()} pts</p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <span className="text-xl font-bold text-gray-700">#{player.pos}</span>
+                <div className="text-right flex-shrink-0 ml-2">
+                  <span className="text-base font-bold text-gray-700">#{player.pos}</span>
                   {renderPrizeAmount(player.pos)}
                 </div>
               </div>
             </div>
           ))}
           
-          {/* Paginação */}
-          {totalPages > 1 && <div className="flex items-center justify-center space-x-1 mt-4">
-              <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} className="px-3 py-2 rounded-lg bg-white shadow-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 border border-gray-200">
-                <ArrowLeft className="w-4 h-4" />
-              </button>
-              
-              <div className="flex items-center space-x-1">
-                {Array.from({
-              length: Math.min(3, totalPages)
-            }, (_, i) => {
-              let pageNum;
-              if (totalPages <= 3) {
-                pageNum = i + 1;
-              } else if (currentPage <= 2) {
-                pageNum = i + 1;
-              } else if (currentPage >= totalPages - 1) {
-                pageNum = totalPages - 2 + i;
-              } else {
-                pageNum = currentPage - 1 + i;
-              }
-              return <button key={pageNum} onClick={() => handlePageChange(pageNum)} className={`px-3 py-2 rounded-lg shadow-sm text-sm border ${currentPage === pageNum ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 hover:bg-gray-50 border-gray-200'}`}>
-                      {pageNum}
-                    </button>;
-            })}
+          {/* Paginação Compacta */}
+          {totalPages > 1 && (
+            <div className="mt-4 animate-fade-in">
+              <div className="flex items-center justify-center space-x-1 mb-2">
+                <button 
+                  onClick={() => handlePageChange(currentPage - 1)} 
+                  disabled={currentPage === 1} 
+                  className="p-2 rounded-lg bg-white shadow-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 border border-gray-200 hover-scale"
+                >
+                  <ArrowLeft className="w-3 h-3" />
+                </button>
+                
+                <div className="flex items-center space-x-1">
+                  {Array.from({ length: Math.min(3, totalPages) }, (_, i) => {
+                    let pageNum;
+                    if (totalPages <= 3) {
+                      pageNum = i + 1;
+                    } else if (currentPage <= 2) {
+                      pageNum = i + 1;
+                    } else if (currentPage >= totalPages - 1) {
+                      pageNum = totalPages - 2 + i;
+                    } else {
+                      pageNum = currentPage - 1 + i;
+                    }
+                    return (
+                      <button 
+                        key={pageNum} 
+                        onClick={() => handlePageChange(pageNum)} 
+                        className={`px-2.5 py-1.5 rounded-lg shadow-sm text-xs border hover-scale ${
+                          currentPage === pageNum 
+                            ? 'bg-indigo-600 text-white border-indigo-600' 
+                            : 'bg-white text-gray-700 hover:bg-gray-50 border-gray-200'
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+                </div>
+                
+                <button 
+                  onClick={() => handlePageChange(currentPage + 1)} 
+                  disabled={currentPage === totalPages} 
+                  className="p-2 rounded-lg bg-white shadow-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 border border-gray-200 hover-scale"
+                >
+                  <ArrowUp className="w-3 h-3 rotate-90" />
+                </button>
               </div>
               
-              <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} className="px-3 py-2 rounded-lg bg-white shadow-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 border border-gray-200">
-                <ArrowUp className="w-4 h-4 rotate-90" />
-              </button>
-            </div>}
-          
-          {/* Informações da página */}
-          <div className="text-center text-xs text-gray-500 mt-2">
-            Página {currentPage} de {totalPages}
-          </div>
+              {/* Informações da página compactas */}
+              <div className="text-center text-xs text-gray-500">
+                Página {currentPage} de {totalPages}
+              </div>
+            </div>
+          )}
         </section>
       </div>
     </div>;
