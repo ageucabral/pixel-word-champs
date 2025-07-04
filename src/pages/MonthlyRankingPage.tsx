@@ -40,13 +40,13 @@ const MonthlyRankingPage = () => {
 
   if (isLoading) {
     return (
-    <div className="min-h-screen bg-background px-3 sm:px-4 py-4 sm:py-6">
-      <div className="max-w-lg sm:max-w-2xl mx-auto">
+      <div className="min-h-screen bg-background px-4 py-6">
+        <div className="max-w-md mx-auto">
           <div className="flex items-center justify-between mb-6">
             <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
               <ArrowLeft className="w-4 h-4" />
             </Button>
-          <h1 className="text-base sm:text-lg font-semibold text-center leading-tight">Ranking Mensal de Indicação</h1>
+            <h1 className="text-lg font-semibold">Ranking Mensal de Indicação</h1>
             <div className="w-9" />
           </div>
           <div className="flex justify-center py-12">
@@ -59,18 +59,18 @@ const MonthlyRankingPage = () => {
 
   if (!data?.rankings?.length) {
     return (
-      <div className="min-h-screen bg-background px-3 sm:px-4 py-4 sm:py-6">
-        <div className="max-w-lg sm:max-w-2xl mx-auto">
+      <div className="min-h-screen bg-background px-4 py-6">
+        <div className="max-w-md mx-auto">
           <div className="flex items-center justify-between mb-6">
             <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
               <ArrowLeft className="w-4 h-4" />
             </Button>
-            <h1 className="text-base sm:text-lg font-semibold text-center leading-tight">Ranking Mensal de Indicação</h1>
+            <h1 className="text-lg font-semibold">Ranking Mensal de Indicação</h1>
             <div className="w-9" />
           </div>
           
           <Card>
-            <CardContent className="p-12 text-center">
+            <CardContent className="p-8 text-center">
               <div className="flex flex-col items-center gap-4">
                 <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center">
                   <Users className="h-6 w-6 text-muted-foreground" />
@@ -90,21 +90,21 @@ const MonthlyRankingPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background px-3 sm:px-4 py-4 sm:py-6">
-      <div className="max-w-lg sm:max-w-2xl mx-auto">
+    <div className="min-h-screen bg-background px-4 py-6">
+      <div className="max-w-md mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
             <ArrowLeft className="w-4 h-4" />
           </Button>
-          <h1 className="text-base sm:text-lg font-semibold text-center leading-tight">Ranking Mensal de Indicação</h1>
+          <h1 className="text-lg font-semibold">Ranking Mensal de Indicação</h1>
           <div className="w-9" />
         </div>
 
         {/* Stats Card */}
         <Card className="mb-6">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center justify-between">
+            <CardTitle className="text-sm flex items-center justify-between">
               <span className="flex items-center gap-2">
                 <Trophy className="h-4 w-4 text-primary" />
                 {currentMonth}
@@ -117,7 +117,7 @@ const MonthlyRankingPage = () => {
         </Card>
 
         {/* Ranking List */}
-        <div className="space-y-2 sm:space-y-3">
+        <div className="space-y-3">
           {data.rankings.map((entry: MonthlyRankingEntry) => {
             const userIsCurrentUser = isCurrentUser(entry.user_id);
             
@@ -126,24 +126,24 @@ const MonthlyRankingPage = () => {
                 key={entry.user_id}
                 className={`${userIsCurrentUser ? 'border-primary bg-primary/5' : ''} transition-colors`}
               >
-                <CardContent className="p-3 sm:p-4">
-                  <div className="flex items-center gap-3 sm:gap-4">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
                     {/* Position */}
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold ${getPositionColor(entry.position)}`}>
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-sm font-bold ${getPositionColor(entry.position)}`}>
                       {getPositionIcon(entry.position)}
                     </div>
 
                     {/* User Info */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="font-medium truncate text-sm sm:text-base">{entry.username}</span>
+                        <span className="font-medium truncate">{entry.username}</span>
                         {userIsCurrentUser && (
                           <Badge variant="default" className="text-xs px-2 py-0">
                             Você
                           </Badge>
                         )}
                       </div>
-                      <div className="text-xs sm:text-sm text-muted-foreground">
+                      <div className="text-sm text-muted-foreground">
                         {entry.invite_points} pontos
                       </div>
                     </div>
@@ -151,7 +151,7 @@ const MonthlyRankingPage = () => {
                     {/* Prize */}
                     {entry.prize_amount > 0 && (
                       <div className="text-right">
-                        <div className="text-sm font-medium text-green-600">
+                        <div className="text-sm font-semibold text-green-600">
                           R$ {entry.prize_amount.toFixed(2)}
                         </div>
                       </div>
