@@ -6,6 +6,7 @@ import { Eye, Download } from 'lucide-react';
 import { CompetitionStatusBadge } from './CompetitionStatusBadge';
 import { CompetitionTypeBadge } from './CompetitionTypeBadge';
 import { formatDate, getWeekFromDate } from './competitionUtils';
+import { formatISOToBrazilian } from '@/utils/brazilianDateFormatter';
 import { CompetitionHistoryItem } from './types';
 
 interface CompetitionTableRowProps {
@@ -44,8 +45,8 @@ export const CompetitionTableRow: React.FC<CompetitionTableRowProps> = ({
       <TableCell className="text-sm">
         <div>
           {/* CORRIGIDO: Usar formatDate que já converte UTC → Brasília */}
-          <p>{formatDate(competition.start_date)} -</p>
-          <p>{formatDate(competition.end_date)}</p>
+          <p>{formatISOToBrazilian(competition.start_date)} -</p>
+          <p>{formatISOToBrazilian(competition.end_date)}</p>
         </div>
       </TableCell>
       <TableCell className="font-semibold text-green-600">

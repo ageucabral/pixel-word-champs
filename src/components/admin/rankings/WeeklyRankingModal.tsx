@@ -7,6 +7,7 @@ import PlayerAvatar from '@/components/ui/PlayerAvatar';
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from '@/integrations/supabase/client';
 import { rankingQueryService } from '@/services/rankingQueryService';
+import { formatISOToBrazilian } from '@/utils/brazilianDateFormatter';
 import {
   Table,
   TableBody,
@@ -168,16 +169,9 @@ export const WeeklyRankingModal: React.FC<WeeklyRankingModalProps> = ({
     }
   };
 
-  // Formatação simples de data sem conversão de fuso horário
+  // Usar formatador brasileiro centralizado
   const formatSimpleDate = (dateString: string) => {
-    if (!dateString) return '';
-    
-    // Se for uma data ISO com hora, extrair apenas a parte da data
-    const dateOnly = dateString.includes('T') ? dateString.split('T')[0] : dateString;
-    
-    // Converter YYYY-MM-DD para DD/MM/YYYY
-    const [year, month, day] = dateOnly.split('-');
-    return `${day}/${month}/${year}`;
+    return formatISOToBrazilian(dateString);
   };
 
   const formatDateTime = (dateString: string, isEndDate: boolean = false) => {
