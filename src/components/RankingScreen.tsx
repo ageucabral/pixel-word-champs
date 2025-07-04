@@ -304,17 +304,17 @@ const RankingScreen = () => {
         <header className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white rounded-2xl shadow-lg">
           
           {/* Competition Info */}
-          <div className="p-4">
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 mb-4">
+          <div className="p-5">
+            <div className="bg-white/20 backdrop-blur-md rounded-xl p-5 mb-4 border border-white/20 shadow-lg">
               
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center space-x-2">
-                  <Clock className="text-yellow-300" size={16} />
-                  <span className="text-xs">Termina em {getTimeRemaining()}</span>
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center space-x-3">
+                  <Clock className="text-yellow-300" size={20} />
+                  <span className="text-sm font-medium">Termina em {getTimeRemaining()}</span>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <Users className="text-green-300" size={16} />
-                  <span className="text-xs">{competition?.total_participants || ranking.length} jogadores</span>
+                <div className="flex items-center space-x-3">
+                  <Users className="text-green-300" size={20} />
+                  <span className="text-sm font-medium">{competition?.total_participants || ranking.length} jogadores</span>
                 </div>
               </div>
             </div>
