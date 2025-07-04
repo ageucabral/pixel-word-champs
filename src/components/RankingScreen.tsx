@@ -354,7 +354,7 @@ const RankingScreen = () => {
           <div className="p-4">
             <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 mb-4">
               <h2 className="text-lg font-bold mb-2">{competition?.title || 'Caça Palavras Royale'}</h2>
-              <div className="flex flex-col gap-2">
+              <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center space-x-2">
                   <Clock className="text-yellow-300" size={16} />
                   <span className="text-xs">Termina em {getTimeRemaining()}</span>
