@@ -199,7 +199,6 @@ export const InviteMonthlyCompetition = () => {
         stats={stats}
         rankings={rankings}
         competition={competition}
-        onRefresh={refetch}
       />
 
       {/* Tabela de ranking */}

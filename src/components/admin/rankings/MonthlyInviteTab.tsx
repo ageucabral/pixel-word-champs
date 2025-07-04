@@ -198,7 +198,6 @@ export const MonthlyInviteTab = () => {
         stats={stats}
         rankings={rankings}
         competition={competition}
-        onRefresh={refetch}
       />
 
       {/* Tabela de ranking */}
