@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Trophy, Clock, Users, Gift, Crown, Medal, Award, ArrowLeft, ArrowUp, ArrowDown, Sparkles, Star, Zap } from 'lucide-react';
+import { Trophy, Clock, Users, Gift, Crown, Medal, Award, ArrowLeft, ArrowUp, ArrowDown, Minus, Sparkles, Star, Zap } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { logger } from '@/utils/logger';
@@ -9,6 +9,7 @@ interface RankingPlayer {
   name: string;
   score: number;
   avatar_url?: string;
+  previous_position?: number;
 }
 interface PrizeConfig {
   position: number;
@@ -146,7 +147,9 @@ const RankingScreen = () => {
         user_id: profile.id,
         name: profile.username || 'Usuário',
         score: profile.total_score || 0,
-        avatar_url: profile.avatar_url
+        avatar_url: profile.avatar_url,
+        // Simular posições anteriores para demonstração
+        previous_position: Math.random() > 0.3 ? Math.max(1, (offset + index + 1) + Math.floor(Math.random() * 6 - 3)) : undefined
       }));
       setRanking(players);
 
@@ -244,6 +247,43 @@ const RankingScreen = () => {
         return 'border-l-4 border-orange-500';
       default:
         return '';
+    }
+  };
+
+  // Função para calcular mudança de posição
+  const getPositionChange = (currentPosition: number, previousPosition?: number) => {
+    if (!previousPosition) return 0;
+    return previousPosition - currentPosition; // Positivo = subiu, Negativo = desceu
+  };
+
+  // Função para renderizar indicador de mudança de posição
+  const renderPositionChangeIndicator = (player: RankingPlayer) => {
+    const change = getPositionChange(player.pos, player.previous_position);
+    
+    if (change > 0) {
+      // Subiu no ranking
+      return (
+        <div className="text-xs font-medium text-green-600">
+          <ArrowUp className="w-3 h-3 inline mr-1" />
+          +{change}
+        </div>
+      );
+    } else if (change < 0) {
+      // Desceu no ranking
+      return (
+        <div className="text-xs font-medium text-red-600">
+          <ArrowDown className="w-3 h-3 inline mr-1" />
+          {change}
+        </div>
+      );
+    } else {
+      // Manteve a posição
+      return (
+        <div className="text-xs font-medium text-gray-600">
+          <Minus className="w-3 h-3 inline mr-1" />
+          0
+        </div>
+      );
     }
   };
   if (isLoading) {
@@ -428,30 +468,7 @@ const RankingScreen = () => {
                   }`}>
                     #{player.pos}
                   </span>
-                  <div className={`text-xs font-medium ${
-                    player.pos === 1 ? 'text-green-600' : 
-                    player.pos === 2 ? 'text-green-600' : 
-                    'text-red-600'
-                  }`}>
-                    {player.pos === 1 && (
-                      <>
-                        <ArrowUp className="w-3 h-3 inline mr-1" />
-                        +45
-                      </>
-                    )}
-                    {player.pos === 2 && (
-                      <>
-                        <ArrowUp className="w-3 h-3 inline mr-1" />
-                        +23
-                      </>
-                    )}
-                    {player.pos === 3 && (
-                      <>
-                        <ArrowDown className="w-3 h-3 inline mr-1" />
-                        -5
-                      </>
-                    )}
-                  </div>
+                  {renderPositionChangeIndicator(player)}
                 </div>
               </div>
             </div>
@@ -468,7 +485,10 @@ const RankingScreen = () => {
                     <p className="text-sm text-gray-600">{player.score.toLocaleString()} pontos</p>
                   </div>
                 </div>
-                <span className="text-xl font-bold text-gray-700">#{player.pos}</span>
+                <div className="text-right">
+                  <span className="text-xl font-bold text-gray-700">#{player.pos}</span>
+                  {renderPositionChangeIndicator(player)}
+                </div>
               </div>
             </div>
           ))}
