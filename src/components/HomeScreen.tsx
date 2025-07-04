@@ -173,138 +173,125 @@ const HomeScreen = ({
       </div>
     );
   }
-  return <div className="min-h-screen bg-gray-50 pb-20">
-      <div className="max-w-md mx-auto">
-        <HomeHeader />
-        
-        {/* User Stats Card - moved down with padding */}
-        <div className="px-4 -mt-4 relative z-10">
-          {/* Header compacto roxo com informações do usuário */}
-          <div className="bg-white rounded-xl shadow-lg p-4 mb-4">
-            {/* Topo do header com avatar, nome e nível */}
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center space-x-3">
-                <UserAvatar 
-                  src={profile?.avatar_url}
-                  alt={`Avatar de ${user?.username || 'Usuário'}`}
-                  size="md"
-                />
-                <div className="min-w-0 flex-1">
-                  <h2 className="text-lg font-bold text-gray-800 truncate">
-                    {user?.username || 'Usuário'}
-                  </h2>
-                  <div className="flex items-center space-x-2 mt-0.5">
-                    <p className="text-gray-600 text-xs font-medium">
-                      Nv. {currentLevel.level}
-                    </p>
-                    <span className="bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full text-xs font-bold shadow-sm">
-                      {currentLevel.title}
-                    </span>
-                  </div>
+  return <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50 p-3 pb-20">
+      <div className="max-w-md mx-auto space-y-4">
+        {/* Header compacto roxo com informações do usuário */}
+        <div className="bg-gradient-to-br from-purple-600 via-violet-600 to-pink-600 rounded-2xl p-4 text-white shadow-lg ring-1 ring-white/10">
+          {/* Topo do header com avatar, nome e nível */}
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-3">
+              <UserAvatar 
+                src={profile?.avatar_url}
+                alt={`Avatar de ${user?.username || 'Usuário'}`}
+                size="md"
+              />
+              <div className="min-w-0 flex-1">
+                <h2 className="text-lg font-bold text-white truncate">
+                  {user?.username || 'Usuário'}
+                </h2>
+                <div className="flex items-center space-x-2 mt-0.5">
+                  <p className="text-white/80 text-xs font-medium">
+                    Nv. {currentLevel.level}
+                  </p>
+                  <span className="bg-accent text-accent-foreground px-2 py-0.5 rounded-full text-xs font-bold shadow-sm">
+                    {currentLevel.title}
+                  </span>
                 </div>
               </div>
             </div>
-            
-            {/* User Stats - agora em card branco */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="bg-white/90 backdrop-blur-sm rounded-xl p-3 shadow-sm">
-                <div className="flex items-center space-x-2">
-                  <Coins className="w-4 h-4 text-purple-600" />
-                  <div>
-                    <p className="text-xs text-gray-600 font-medium">Pontos</p>
-                    <p className="text-lg font-bold text-gray-800">
-                      {statsLoading ? '...' : (stats?.totalScore || 0).toLocaleString()}
-                    </p>
-                  </div>
-                </div>
+          </div>
+          
+          {/* Estatísticas em linha única */}
+          <div className="bg-white/20 backdrop-blur-sm rounded-xl p-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Coins className="w-4 h-4 text-accent" />
+                <span className="text-xs text-white/90 font-medium">Pontos Totais</span>
+                <span className="text-lg font-bold text-white">
+                  {statsLoading ? '...' : (stats?.totalScore || 0).toLocaleString()}
+                </span>
               </div>
               
-              <div className="bg-white/90 backdrop-blur-sm rounded-xl p-3 shadow-sm">
-                <div className="flex items-center space-x-2">
-                  <Trophy className="w-4 h-4 text-purple-600" />
-                  <div>
-                    <p className="text-xs text-gray-600 font-medium">Ranking</p>
-                    <p className="text-lg font-bold text-gray-800">
-                      {statsLoading ? '...' : (stats?.position ? `#${stats.position}` : 'N/A')}
-                    </p>
-                  </div>
-                </div>
+              <div className="flex items-center space-x-2">
+                <Trophy className="w-4 h-4 text-accent" />
+                <span className="text-xs text-white/90 font-medium">Ranking</span>
+                <span className="text-lg font-bold text-white">
+                  {statsLoading ? '...' : (stats?.position ? `#${stats.position}` : 'N/A')}
+                </span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Competições e conteúdo principal */}
-        <div className="px-4 space-y-4">
-          {/* Card de Ranking Global aprimorado - só exibe se tiver posição válida e atual */}
-          {stats?.position && stats.position > 0 && !statsLoading && (
-            <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-pink-600 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-sm">
-                  #{stats.position}
-                </div>
-                
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs text-gray-600 font-medium">Posição atual</p>
-                      <p className="text-lg font-bold text-gray-800 truncate">
-                        {stats.position}º lugar mundial
-                      </p>
-                    </div>
-                    
-                    {/* Informação de Premiação compacta */}
-                    {!prizesLoading && (
-                      <div className="text-right flex-shrink-0 ml-2">
-                        {(() => {
-                          const position = stats.position;
-                          const prizeInfo = calculatePrizeForPosition(position);
-                          return (
-                            <div 
-                              className={`px-2 py-1 rounded-lg text-xs font-medium transition-colors ${
-                                prizeInfo.amount > 0 
-                                  ? 'bg-green-50 text-green-700 border border-green-200' 
-                                  : 'bg-gray-100 text-gray-600'
-                              }`}
-                              title={prizeInfo.amount > 0 ? `Premiação: ${prizeInfo.text}` : 'Sem premiação nesta posição'}
-                            >
-                              {prizeInfo.amount > 0 ? `🎁 ${prizeInfo.text}` : '💰 Sem premiação'}
-                            </div>
-                          );
-                        })()}
-                      </div>
-                    )}
-                  </div>
-                  
-                  {/* Barra de progresso aprimorada */}
-                  <div className="space-y-1">
-                    <div className="bg-gray-200 rounded-full h-2 overflow-hidden">
-                      <div 
-                        className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-full h-2 transition-all duration-500 ease-out" 
-                        style={{ width: '65%' }}
-                        role="progressbar"
-                        aria-valuenow={65}
-                        aria-valuemin={0}
-                        aria-valuemax={100}
-                        aria-label="Progresso no ranking"
-                      />
-                    </div>
-                    <p className="text-xs text-gray-600">
-                      {stats.position > 1 
-                        ? `${calculatePointsToNextPosition().toLocaleString()} pts para subir no ranking` 
-                        : 'Você está no topo!'
-                      }
+
+        {/* Card de Ranking Global aprimorado - só exibe se tiver posição válida e atual */}
+        {stats?.position && stats.position > 0 && !statsLoading && (
+          <div className="bg-card rounded-2xl p-4 shadow-lg border border-border transition-all duration-200 hover:shadow-xl">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary-darker rounded-full flex items-center justify-center text-primary-foreground font-bold text-lg shadow-sm">
+                #{stats.position}
+              </div>
+              
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs text-muted-foreground font-medium">Posição atual</p>
+                    <p className="text-lg font-bold text-foreground truncate">
+                      {stats.position}º lugar mundial
                     </p>
                   </div>
+                  
+                  {/* Informação de Premiação compacta */}
+                  {!prizesLoading && (
+                    <div className="text-right flex-shrink-0 ml-2">
+                      {(() => {
+                        const position = stats.position;
+                        const prizeInfo = calculatePrizeForPosition(position);
+                        return (
+                          <div 
+                            className={`px-2 py-1 rounded-lg text-xs font-medium transition-colors ${
+                              prizeInfo.amount > 0 
+                                ? 'bg-green-50 text-green-700 border border-green-200' 
+                                : 'bg-muted text-muted-foreground'
+                            }`}
+                            title={prizeInfo.amount > 0 ? `Premiação: ${prizeInfo.text}` : 'Sem premiação nesta posição'}
+                          >
+                            {prizeInfo.amount > 0 ? `🎁 ${prizeInfo.text}` : '💰 Sem premiação'}
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  )}
+                </div>
+                
+                {/* Barra de progresso aprimorada */}
+                <div className="space-y-1">
+                  <div className="bg-secondary rounded-full h-2 overflow-hidden">
+                    <div 
+                      className="bg-gradient-to-r from-primary to-primary-darker rounded-full h-2 transition-all duration-500 ease-out" 
+                      style={{ width: '65%' }}
+                      role="progressbar"
+                      aria-valuenow={65}
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-label="Progresso no ranking"
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {stats.position > 1 
+                      ? `${calculatePointsToNextPosition().toLocaleString()} pts para subir no ranking` 
+                      : 'Você está no topo!'
+                    }
+                  </p>
                 </div>
               </div>
             </div>
-          )}
+          </div>
+        )}
 
-          {error && <ErrorState error={error} onRetry={refetch} />}
+        {error && <ErrorState error={error} onRetry={refetch} />}
 
-          <CompetitionsList competitions={competitions} onStartChallenge={onStartChallenge} onRefresh={refetch} />
-        </div>
+        <CompetitionsList competitions={competitions} onStartChallenge={onStartChallenge} onRefresh={refetch} />
       </div>
     </div>;
 };
