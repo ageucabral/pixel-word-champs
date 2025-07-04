@@ -345,33 +345,33 @@ const RankingScreen = () => {
   };
 
   return (
-    <div className="bg-background min-h-screen">
-      {/* Header */}
-      <header className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white relative">
-        
-        {/* Competition Info */}
-        <div className="px-4 pb-4 pt-6">
-          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 sm:p-4 mb-4">
-            <h2 className="text-lg sm:text-xl font-bold mb-2">{competition?.title || 'Caça Palavras Royale'}</h2>
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
-              <div className="flex items-center space-x-2">
-                <Clock className="text-yellow-300" size={16} />
-                <span className="text-xs sm:text-sm">Termina em {getTimeRemaining()}</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Users className="text-green-300" size={16} />
-                <span className="text-xs sm:text-sm">{competition?.total_participants || ranking.length} jogadores</span>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50 p-3 pb-20">
+      <div className="max-w-md mx-auto space-y-4">
+        {/* Header */}
+        <header className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white rounded-2xl shadow-lg">
+          
+          {/* Competition Info */}
+          <div className="p-4">
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 mb-4">
+              <h2 className="text-lg font-bold mb-2">{competition?.title || 'Caça Palavras Royale'}</h2>
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center space-x-2">
+                  <Clock className="text-yellow-300" size={16} />
+                  <span className="text-xs">Termina em {getTimeRemaining()}</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Users className="text-green-300" size={16} />
+                  <span className="text-xs">{competition?.total_participants || ranking.length} jogadores</span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      {/* Prize Pool */}
-      <section className="px-4 -mt-4 relative z-10">
-        <div className="bg-white rounded-xl shadow-lg p-3 sm:p-4 mb-4">
-          <h3 className="text-center font-bold text-gray-800 mb-3 text-sm sm:text-base">
-            <Gift className="inline mr-2 text-purple-600" size={18} />
+        {/* Prize Pool */}
+        <div className="bg-card rounded-2xl shadow-lg p-4 border border-border">
+          <h3 className="text-center font-bold text-foreground mb-3 text-sm">
+            <Gift className="inline mr-2 text-primary" size={18} />
             Prêmios da Competição
           </h3>
           <div className="grid grid-cols-3 gap-2">
@@ -386,28 +386,26 @@ const RankingScreen = () => {
               
               return (
                 <div key={position} className="text-center">
-                  <div className={`bg-gradient-to-b ${config.bg} rounded-lg p-2 sm:p-3 ${position === 1 ? 'shadow-lg shadow-yellow-400/50' : ''}`}>
-                    <config.icon className="text-white text-lg sm:text-xl mb-1 mx-auto" />
+                  <div className={`bg-gradient-to-b ${config.bg} rounded-lg p-2 ${position === 1 ? 'shadow-lg shadow-yellow-400/50' : ''}`}>
+                    <config.icon className="text-white text-lg mb-1 mx-auto" />
                     <div className="text-white text-xs font-bold">{config.label}</div>
-                    <div className="text-white text-xs sm:text-sm font-bold">R$ {prizeAmount}</div>
+                    <div className="text-white text-xs font-bold">R$ {prizeAmount}</div>
                   </div>
                 </div>
               );
             })}
           </div>
         </div>
-      </section>
 
-      {/* Your Position */}
-      {currentUser && (
-        <section className="px-4 mb-4">
-          <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl p-3 sm:p-4 text-white">
+        {/* Your Position */}
+        {currentUser && (
+          <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl p-4 text-white shadow-lg">
             <div className="flex items-center justify-between">
               <div className="flex-1">
-                <h4 className="font-bold text-base sm:text-lg">Sua Posição</h4>
+                <h4 className="font-bold text-base">Sua Posição</h4>
                 <div className="flex items-center space-x-2 mt-1">
-                  <span className="text-2xl sm:text-3xl font-bold">#{currentUser.pos}</span>
-                  <div className="text-xs sm:text-sm opacity-90">
+                  <span className="text-2xl font-bold">#{currentUser.pos}</span>
+                  <div className="text-xs opacity-90">
                     <div>{currentUser.score.toLocaleString()} pontos</div>
                     {getPrizeAmount(currentUser.pos) > 0 && (
                       <div>Prêmio: R$ {getPrizeAmount(currentUser.pos)}</div>
@@ -420,125 +418,125 @@ const RankingScreen = () => {
               </div>
             </div>
           </div>
-        </section>
-      )}
+        )}
 
-      {/* Top Players */}
-      <section className="px-4 mb-20">
-        <h3 className="text-base sm:text-lg font-bold text-gray-800 mb-4">Top Jogadores</h3>
-        
-        {/* Top 3 */}
-        {topThree.map((player) => (
-          <div 
-            key={player.user_id} 
-            className={`bg-white rounded-xl shadow-md p-3 sm:p-4 mb-3 ${getRankBorderColor(player.pos)}`}
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3 flex-1 min-w-0">
-                <div className="relative flex-shrink-0">
-                  {getPlayerAvatar(player)}
-                  {player.pos <= 3 && (
-                    <div className={`absolute -top-1 -right-1 rounded-full w-6 h-6 flex items-center justify-center ${
-                      player.pos === 1 ? 'bg-yellow-500' : 
-                      player.pos === 2 ? 'bg-gray-500' : 'bg-orange-500'
-                    }`}>
-                      {getRankIcon(player.pos)}
+        {/* Top Players */}
+        <div className="space-y-2">
+          <h3 className="text-base font-bold text-foreground mb-3">Top Jogadores</h3>
+          
+          {/* Top 3 */}
+          {topThree.map((player) => (
+            <div 
+              key={player.user_id} 
+              className={`bg-card rounded-2xl shadow-md p-3 border border-border ${getRankBorderColor(player.pos)}`}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3 flex-1 min-w-0">
+                  <div className="relative flex-shrink-0">
+                    {getPlayerAvatar(player)}
+                    {player.pos <= 3 && (
+                      <div className={`absolute -top-1 -right-1 rounded-full w-6 h-6 flex items-center justify-center ${
+                        player.pos === 1 ? 'bg-yellow-500' : 
+                        player.pos === 2 ? 'bg-gray-500' : 'bg-orange-500'
+                      }`}>
+                        {getRankIcon(player.pos)}
+                      </div>
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h4 className="font-bold text-foreground text-sm truncate">{player.name}</h4>
+                    <p className="text-xs text-muted-foreground">{player.score.toLocaleString()} pontos</p>
+                  </div>
+                </div>
+                <div className="text-right flex-shrink-0 ml-2">
+                  <span className={`text-xl font-bold ${
+                    player.pos === 1 ? 'text-yellow-600' : 
+                    player.pos === 2 ? 'text-gray-600' : 'text-orange-600'
+                  }`}>
+                    #{player.pos}
+                  </span>
+                  {getPrizeAmount(player.pos) > 0 && (
+                    <div className="text-xs text-green-600 font-medium">
+                      R$ {getPrizeAmount(player.pos)}
                     </div>
                   )}
                 </div>
-                <div className="min-w-0 flex-1">
-                  <h4 className="font-bold text-gray-800 text-sm sm:text-base truncate">{player.name}</h4>
-                  <p className="text-xs sm:text-sm text-gray-600">{player.score.toLocaleString()} pontos</p>
-                </div>
-              </div>
-              <div className="text-right flex-shrink-0 ml-2">
-                <span className={`text-xl sm:text-2xl font-bold ${
-                  player.pos === 1 ? 'text-yellow-600' : 
-                  player.pos === 2 ? 'text-gray-600' : 'text-orange-600'
-                }`}>
-                  #{player.pos}
-                </span>
-                {getPrizeAmount(player.pos) > 0 && (
-                  <div className="text-xs text-green-600 font-medium">
-                    R$ {getPrizeAmount(player.pos)}
-                  </div>
-                )}
               </div>
             </div>
-          </div>
-        ))}
+          ))}
 
-        {/* Ranks 4+ */}
-        {remainingPlayers.map((player) => (
-          <div key={player.user_id} className="bg-white rounded-xl shadow-md p-3 mb-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3 flex-1 min-w-0">
-                {getPlayerAvatar(player, 'small')}
-                <div className="min-w-0 flex-1">
-                  <h4 className="font-semibold text-gray-800 text-sm truncate">{player.name}</h4>
-                  <p className="text-xs text-gray-600">{player.score.toLocaleString()} pontos</p>
+          {/* Ranks 4+ */}
+          {remainingPlayers.map((player) => (
+            <div key={player.user_id} className="bg-card rounded-2xl shadow-md p-3 border border-border">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3 flex-1 min-w-0">
+                  {getPlayerAvatar(player, 'small')}
+                  <div className="min-w-0 flex-1">
+                    <h4 className="font-semibold text-foreground text-sm truncate">{player.name}</h4>
+                    <p className="text-xs text-muted-foreground">{player.score.toLocaleString()} pontos</p>
+                  </div>
                 </div>
+                <span className="text-lg font-bold text-muted-foreground flex-shrink-0 ml-2">#{player.pos}</span>
               </div>
-              <span className="text-lg sm:text-xl font-bold text-gray-700 flex-shrink-0 ml-2">#{player.pos}</span>
             </div>
-          </div>
-        ))}
-        
-        {/* Paginação */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-center space-x-1 sm:space-x-2 mt-6">
-            <button
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-              className="px-2 sm:px-3 py-2 rounded-lg bg-white shadow-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-            >
-              <ArrowLeft className="w-4 h-4" />
-            </button>
-            
-            <div className="flex items-center space-x-1">
-              {Array.from({ length: Math.min(3, totalPages) }, (_, i) => {
-                let pageNum;
-                if (totalPages <= 3) {
-                  pageNum = i + 1;
-                } else if (currentPage <= 2) {
-                  pageNum = i + 1;
-                } else if (currentPage >= totalPages - 1) {
-                  pageNum = totalPages - 2 + i;
-                } else {
-                  pageNum = currentPage - 1 + i;
-                }
-                
-                return (
-                  <button
-                    key={pageNum}
-                    onClick={() => handlePageChange(pageNum)}
-                    className={`px-2 sm:px-3 py-2 rounded-lg shadow-md text-sm ${
-                      currentPage === pageNum
-                        ? 'bg-purple-600 text-white'
-                        : 'bg-white text-gray-700 hover:bg-gray-50'
-                    }`}
-                  >
-                    {pageNum}
-                  </button>
-                );
-              })}
+          ))}
+          
+          {/* Paginação */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center space-x-1 mt-4">
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="px-2 py-2 rounded-lg bg-card shadow-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-muted border border-border"
+              >
+                <ArrowLeft className="w-4 h-4" />
+              </button>
+              
+              <div className="flex items-center space-x-1">
+                {Array.from({ length: Math.min(3, totalPages) }, (_, i) => {
+                  let pageNum;
+                  if (totalPages <= 3) {
+                    pageNum = i + 1;
+                  } else if (currentPage <= 2) {
+                    pageNum = i + 1;
+                  } else if (currentPage >= totalPages - 1) {
+                    pageNum = totalPages - 2 + i;
+                  } else {
+                    pageNum = currentPage - 1 + i;
+                  }
+                  
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => handlePageChange(pageNum)}
+                      className={`px-2 py-2 rounded-lg shadow-md text-sm border ${
+                        currentPage === pageNum
+                          ? 'bg-primary text-primary-foreground border-primary'
+                          : 'bg-card text-foreground hover:bg-muted border-border'
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+              </div>
+              
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="px-2 py-2 rounded-lg bg-card shadow-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-muted border border-border"
+              >
+                <ArrowUp className="w-4 h-4 rotate-90" />
+              </button>
             </div>
-            
-            <button
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
-              className="px-2 sm:px-3 py-2 rounded-lg bg-white shadow-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-            >
-              <ArrowUp className="w-4 h-4 rotate-90" />
-            </button>
+          )}
+          
+          {/* Informações da página */}
+          <div className="text-center text-xs text-muted-foreground mt-2">
+            Página {currentPage} de {totalPages}
           </div>
-        )}
-        
-        {/* Informações da página */}
-        <div className="text-center text-xs sm:text-sm text-gray-500 mt-4">
-          Página {currentPage} de {totalPages}
         </div>
-      </section>
+      </div>
     </div>
   );
 };
