@@ -34,6 +34,10 @@ const RankingScreen = () => {
   const [competition, setCompetition] = useState<CompetitionData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [allPlayers, setAllPlayers] = useState<RankingPlayer[]>([]);
+  const itemsPerPage = 20;
 
   const loadPrizeConfigurations = async () => {
     try {
@@ -121,22 +125,36 @@ const RankingScreen = () => {
     }
   };
 
-  const loadRanking = async () => {
+  const loadRanking = async (page: number = 1) => {
     try {
       setIsLoading(true);
       setError(null);
 
+      // Primeiro, buscar o total de jogadores para calcular as páginas
+      const { count } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true })
+        .gt('total_score', 0);
+
+      const totalCount = count || 0;
+      const calculatedTotalPages = Math.ceil(totalCount / itemsPerPage);
+      setTotalPages(calculatedTotalPages);
+
+      // Calcular o offset para a página atual
+      const offset = (page - 1) * itemsPerPage;
+
+      // Buscar dados da página atual
       const { data, error } = await supabase
         .from('profiles')
         .select('id, username, total_score, avatar_url')
         .gt('total_score', 0)
         .order('total_score', { ascending: false })
-        .limit(50);
+        .range(offset, offset + itemsPerPage - 1);
 
       if (error) throw error;
 
       const players: RankingPlayer[] = (data || []).map((profile, index) => ({
-        pos: index + 1,
+        pos: offset + index + 1,
         user_id: profile.id,
         name: profile.username || 'Usuário',
         score: profile.total_score || 0,
@@ -145,10 +163,18 @@ const RankingScreen = () => {
 
       setRanking(players);
 
-      // Encontrar posição do usuário atual
+      // Para encontrar a posição do usuário, precisamos fazer uma busca separada
       if (user?.id) {
-        const userRank = players.find(p => p.user_id === user.id);
-        setUserPosition(userRank?.pos || null);
+        const { data: allUsersData } = await supabase
+          .from('profiles')
+          .select('id')
+          .gt('total_score', 0)
+          .order('total_score', { ascending: false });
+
+        if (allUsersData) {
+          const userIndex = allUsersData.findIndex(p => p.id === user.id);
+          setUserPosition(userIndex >= 0 ? userIndex + 1 : null);
+        }
       }
     } catch (err) {
       setError('Erro ao carregar ranking');
@@ -158,8 +184,8 @@ const RankingScreen = () => {
   };
 
   useEffect(() => {
-    Promise.all([loadPrizeConfigurations(), loadActiveCompetition(), loadRanking()]);
-  }, [user?.id]);
+    Promise.all([loadPrizeConfigurations(), loadActiveCompetition(), loadRanking(currentPage)]);
+  }, [user?.id, currentPage]);
 
   // Configurar atualizações em tempo real
   useEffect(() => {
@@ -169,18 +195,18 @@ const RankingScreen = () => {
         schema: 'public',
         table: 'profiles'
       }, () => {
-        loadRanking();
+        loadRanking(currentPage);
       }).subscribe();
 
     const interval = setInterval(() => {
-      loadRanking();
+      loadRanking(currentPage);
     }, 30000);
 
     return () => {
       supabase.removeChannel(profilesChannel);
       clearInterval(interval);
     };
-  }, [user?.id]);
+  }, [user?.id, currentPage]);
 
   const getPrizeAmount = (position: number) => {
     const prizeConfig = prizeConfigs.find(config => config.position === position);
@@ -299,8 +325,24 @@ const RankingScreen = () => {
   }
 
   const currentUser = ranking.find(p => p.user_id === user?.id);
-  const topThree = ranking.slice(0, 3);
-  const remainingPlayers = ranking.slice(3, 10);
+  
+  // Para a primeira página, separar top 3 e o resto
+  let topThree: RankingPlayer[] = [];
+  let remainingPlayers: RankingPlayer[] = [];
+  
+  if (currentPage === 1) {
+    topThree = ranking.slice(0, 3);
+    remainingPlayers = ranking.slice(3);
+  } else {
+    // Para outras páginas, mostrar todos os jogadores normalmente
+    remainingPlayers = ranking;
+  }
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -441,6 +483,61 @@ const RankingScreen = () => {
             </div>
           </div>
         ))}
+        
+        {/* Paginação */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center space-x-2 mt-6">
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="px-3 py-2 rounded-lg bg-white shadow-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </button>
+            
+            <div className="flex items-center space-x-1">
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                let pageNum;
+                if (totalPages <= 5) {
+                  pageNum = i + 1;
+                } else if (currentPage <= 3) {
+                  pageNum = i + 1;
+                } else if (currentPage >= totalPages - 2) {
+                  pageNum = totalPages - 4 + i;
+                } else {
+                  pageNum = currentPage - 2 + i;
+                }
+                
+                return (
+                  <button
+                    key={pageNum}
+                    onClick={() => handlePageChange(pageNum)}
+                    className={`px-3 py-2 rounded-lg shadow-md ${
+                      currentPage === pageNum
+                        ? 'bg-purple-600 text-white'
+                        : 'bg-white text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+            </div>
+            
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="px-3 py-2 rounded-lg bg-white shadow-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+            >
+              <ArrowUp className="w-4 h-4 rotate-90" />
+            </button>
+          </div>
+        )}
+        
+        {/* Informações da página */}
+        <div className="text-center text-sm text-gray-500 mt-4">
+          Página {currentPage} de {totalPages} • {itemsPerPage} jogadores por página
+        </div>
       </section>
     </div>
   );
