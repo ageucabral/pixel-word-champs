@@ -304,6 +304,30 @@ const RankingScreen = () => {
 
   return (
     <div className="bg-gray-50 min-h-screen">
+      {/* Header */}
+      <header className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white relative">
+        <div className="flex items-center justify-center p-4">
+          <h1 className="text-lg font-bold">Ranking</h1>
+        </div>
+        
+        {/* Competition Info */}
+        <div className="px-4 pb-6">
+          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 mb-4">
+            <h2 className="text-xl font-bold mb-2">{competition?.title || 'Caça Palavras Royale'}</h2>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Clock className="text-yellow-300" size={16} />
+                <span className="text-sm">Termina em {getTimeRemaining()}</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Users className="text-green-300" size={16} />
+                <span className="text-sm">{competition?.total_participants || ranking.length} jogadores</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
       {/* Prize Pool */}
       <section className="px-4 -mt-4 relative z-10">
         <div className="bg-white rounded-xl shadow-lg p-4 mb-4">
