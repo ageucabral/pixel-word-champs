@@ -2,6 +2,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from "@/hooks/use-toast";
+import { logger } from '@/utils/logger';
 
 export const useActiveWords = () => {
   const { toast } = useToast();
@@ -10,7 +11,7 @@ export const useActiveWords = () => {
   const { data: words, isLoading, error, refetch } = useQuery({
     queryKey: ['activeWords'],
     queryFn: async () => {
-      console.log('🔍 Buscando palavras ativas...');
+      logger.info('🔍 Buscando palavras ativas...', undefined, 'USE_ACTIVE_WORDS');
       
       const { data, error } = await supabase
         .from('level_words')
@@ -19,11 +20,11 @@ export const useActiveWords = () => {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('❌ Erro ao buscar palavras:', error);
+        logger.error('❌ Erro ao buscar palavras:', { error }, 'USE_ACTIVE_WORDS');
         throw error;
       }
 
-      console.log('📝 Palavras ativas encontradas:', data?.length, data);
+      logger.info('📝 Palavras ativas encontradas:', { count: data?.length }, 'USE_ACTIVE_WORDS');
       return data || [];
     },
     refetchInterval: 30000, // Atualizar a cada 30 segundos
@@ -34,7 +35,7 @@ export const useActiveWords = () => {
       // Aqui você pode adicionar validação da senha se necessário
       // Por exemplo, verificar se a senha está correta antes de prosseguir
       
-      console.log('🗑️ Excluindo todas as palavras ativas permanentemente...');
+      logger.info('🗑️ Excluindo todas as palavras ativas permanentemente...', undefined, 'USE_ACTIVE_WORDS');
       
       const { error } = await supabase
         .from('level_words')
@@ -42,11 +43,11 @@ export const useActiveWords = () => {
         .eq('is_active', true);
 
       if (error) {
-        console.error('❌ Erro ao excluir palavras:', error);
+        logger.error('❌ Erro ao excluir palavras:', { error }, 'USE_ACTIVE_WORDS');
         throw error;
       }
       
-      console.log('✅ Todas as palavras ativas foram excluídas permanentemente');
+      logger.info('✅ Todas as palavras ativas foram excluídas permanentemente', undefined, 'USE_ACTIVE_WORDS');
     },
     onSuccess: () => {
       toast({
@@ -61,7 +62,7 @@ export const useActiveWords = () => {
         description: "Erro ao excluir palavras",
         variant: "destructive",
       });
-      console.error('❌ Erro ao excluir palavras:', error);
+      logger.error('❌ Erro ao excluir palavras:', { error }, 'USE_ACTIVE_WORDS');
     },
   });
 

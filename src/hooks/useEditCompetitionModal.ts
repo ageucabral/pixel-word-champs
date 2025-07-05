@@ -4,6 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from '@/integrations/supabase/client';
 import { WeeklyConfig, WeeklyConfigRpcResponse, isWeeklyConfigRpcResponse } from '@/types/weeklyConfig';
 import { checkDateOverlap } from '@/utils/dateOverlapValidation';
+import { logger } from '@/utils/logger';
 
 interface UseEditCompetitionModalProps {
   competition: WeeklyConfig | null;
@@ -124,7 +125,7 @@ export const useEditCompetitionModal = ({
       }
 
     } catch (error: any) {
-      console.error('Erro ao atualizar competição:', error);
+      logger.error('Erro ao atualizar competição:', { error }, 'USE_EDIT_COMPETITION_MODAL');
       toast({
         title: "Erro",
         description: `Erro ao atualizar competição: ${error.message}`,

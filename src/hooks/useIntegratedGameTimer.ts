@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useGamePointsConfig } from './useGamePointsConfig';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/logger';
 
 interface TimerConfig {
   initialTime: number;
@@ -36,14 +37,14 @@ export const useIntegratedGameTimer = (isGameStarted: boolean) => {
         
         if (timerSetting) {
           initialTime = parseInt(timerSetting.setting_value) || 60;
-          console.log(`⏰ Tempo inicial configurado: ${initialTime} segundos (base_time_limit)`);
+          logger.info(`⏰ Tempo inicial configurado: ${initialTime} segundos (base_time_limit)`, undefined, 'USE_INTEGRATED_GAME_TIMER');
         } else {
-          console.log('⚠️ Configuração base_time_limit não encontrada, usando padrão de 60s');
+          logger.warn('⚠️ Configuração base_time_limit não encontrada, usando padrão de 60s', undefined, 'USE_INTEGRATED_GAME_TIMER');
         }
 
         // Garantir que o revive_time_bonus tenha um valor válido
         const reviveTimeBonus = config?.revive_time_bonus || 30;
-        console.log(`🔄 Revive time bonus configurado: ${reviveTimeBonus} segundos`);
+        logger.info(`🔄 Revive time bonus configurado: ${reviveTimeBonus} segundos`, undefined, 'USE_INTEGRATED_GAME_TIMER');
 
         setTimerConfig({
           initialTime,
@@ -51,7 +52,7 @@ export const useIntegratedGameTimer = (isGameStarted: boolean) => {
         });
         setTimeRemaining(initialTime);
       } catch (error) {
-        console.error('Erro ao buscar configuração de timer:', error);
+        logger.error('Erro ao buscar configuração de timer:', { error }, 'USE_INTEGRATED_GAME_TIMER');
         // Usar valores padrão em caso de erro
         const fallbackReviveBonus = config?.revive_time_bonus || 30;
         setTimerConfig({
@@ -86,7 +87,7 @@ export const useIntegratedGameTimer = (isGameStarted: boolean) => {
 
   const extendTime = useCallback(() => {
     const bonusTime = timerConfig.reviveTimeBonus;
-    console.log(`⏰ Adicionando ${bonusTime} segundos ao tempo restante`);
+    logger.info(`⏰ Adicionando ${bonusTime} segundos ao tempo restante`, undefined, 'USE_INTEGRATED_GAME_TIMER');
     setTimeRemaining(prev => prev + bonusTime);
     return true;
   }, [timerConfig.reviveTimeBonus]);

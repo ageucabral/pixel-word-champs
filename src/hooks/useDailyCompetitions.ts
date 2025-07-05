@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { dailyCompetitionService } from '@/services/dailyCompetitionService';
 import { getCurrentBrasiliaTime } from '@/utils/brasiliaTimeUnified';
+import { logger } from '@/utils/logger';
 
 export const useDailyCompetitions = () => {
   const [activeCompetitions, setActiveCompetitions] = useState<any[]>([]);
@@ -11,22 +12,21 @@ export const useDailyCompetitions = () => {
   const [error, setError] = useState<string | null>(null);
 
   const fetchActiveCompetitions = async () => {
-    console.log('🎯 Iniciando busca por competições diárias ativas...', {
+    logger.info('🎯 Iniciando busca por competições diárias ativas...', {
       timestamp: getCurrentBrasiliaTime()
-    });
+    }, 'USE_DAILY_COMPETITIONS');
     setIsLoading(true);
     setError(null);
 
     try {
       const response = await dailyCompetitionService.getActiveDailyCompetitions();
-      console.log('📊 Resposta do serviço:', response, {
-        timestamp: getCurrentBrasiliaTime()
-      });
+      logger.info('📊 Resposta do serviço:', { responseStatus: response.success }, 'USE_DAILY_COMPETITIONS');
       
       if (response.success) {
-        console.log('✅ Competições encontradas:', response.data, {
+        logger.info('✅ Competições encontradas:', { 
+          count: response.data.length,
           timestamp: getCurrentBrasiliaTime()
-        });
+        }, 'USE_DAILY_COMPETITIONS');
         setActiveCompetitions(response.data);
         
         // Carregar rankings para cada competição ativa
@@ -39,15 +39,17 @@ export const useDailyCompetitions = () => {
         }
         setCompetitionRankings(rankings);
       } else {
-        console.error('❌ Erro na resposta:', response.error, {
+        logger.error('❌ Erro na resposta:', { 
+          error: response.error,
           timestamp: getCurrentBrasiliaTime()
-        });
+        }, 'USE_DAILY_COMPETITIONS');
         setError(response.error || 'Erro ao carregar competições diárias');
       }
     } catch (err) {
-      console.error('❌ Erro ao carregar dados das competições diárias:', err, {
+      logger.error('❌ Erro ao carregar dados das competições diárias:', { 
+        error: err,
         timestamp: getCurrentBrasiliaTime()
-      });
+      }, 'USE_DAILY_COMPETITIONS');
       setError('Erro ao carregar dados das competições diárias');
     } finally {
       setIsLoading(false);
@@ -63,9 +65,10 @@ export const useDailyCompetitions = () => {
       }));
       return hasParticipated;
     } catch (error) {
-      console.error('❌ Erro ao verificar participação:', error, {
+      logger.error('❌ Erro ao verificar participação:', { 
+        error,
         timestamp: getCurrentBrasiliaTime()
-      });
+      }, 'USE_DAILY_COMPETITIONS');
       return false;
     }
   };
@@ -80,9 +83,10 @@ export const useDailyCompetitions = () => {
         }));
       }
     } catch (error) {
-      console.error('❌ Erro ao atualizar ranking:', error, {
+      logger.error('❌ Erro ao atualizar ranking:', { 
+        error,
         timestamp: getCurrentBrasiliaTime()
-      });
+      }, 'USE_DAILY_COMPETITIONS');
     }
   };
 
