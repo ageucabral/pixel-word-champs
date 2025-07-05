@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { UnifiedCompetitionFormWrapper } from './UnifiedCompetitionFormWrapper';
 import { getCurrentBrasiliaTime } from '@/utils/brasiliaTimeUnified';
+import { logger } from '@/utils/logger';
 
 interface UnifiedCompetitionModalProps {
   open: boolean;
@@ -25,24 +26,24 @@ export const UnifiedCompetitionModal: React.FC<UnifiedCompetitionModalProps> = (
   const [retryKey, setRetryKey] = useState(0);
 
   const handleRetry = () => {
-    console.log('🔄 Tentando novamente carregar o formulário...', {
+    logger.info('🔄 Tentando novamente carregar o formulário...', {
       timestamp: getCurrentBrasiliaTime(),
       retryCount: retryKey + 1
-    });
+    }, 'UNIFIED_COMPETITION_MODAL');
     setRetryKey(prev => prev + 1);
   };
 
   const handleClose = () => {
-    console.log('🔄 Fechando modal de competição', {
+    logger.info('🔄 Fechando modal de competição', {
       timestamp: getCurrentBrasiliaTime()
-    });
+    }, 'UNIFIED_COMPETITION_MODAL');
     onOpenChange(false);
   };
 
   const handleSuccess = () => {
-    console.log('✅ Competição criada com sucesso - fechando modal', {
+    logger.info('✅ Competição criada com sucesso - fechando modal', {
       timestamp: getCurrentBrasiliaTime()
-    });
+    }, 'UNIFIED_COMPETITION_MODAL');
     
     if (onCompetitionCreated) {
       onCompetitionCreated();
@@ -53,17 +54,15 @@ export const UnifiedCompetitionModal: React.FC<UnifiedCompetitionModalProps> = (
   };
 
   const handleError = (error: any) => {
-    console.error('❌ Erro no formulário de competição:', error, {
-      timestamp: getCurrentBrasiliaTime()
-    });
+    logger.error('❌ Erro no formulário de competição:', { error, timestamp: getCurrentBrasiliaTime() }, 'UNIFIED_COMPETITION_MODAL');
   };
 
   React.useEffect(() => {
     if (open) {
-      console.log('🎯 Modal de competição aberto', {
+      logger.info('🎯 Modal de competição aberto', {
         timestamp: getCurrentBrasiliaTime(),
         competitionTypeFilter
-      });
+      }, 'UNIFIED_COMPETITION_MODAL');
     }
   }, [open, competitionTypeFilter]);
 

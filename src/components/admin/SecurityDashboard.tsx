@@ -6,6 +6,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Shield, AlertTriangle, Activity, Clock, RefreshCw } from 'lucide-react';
 import { securityMonitoring, SecurityMetrics, SecurityEvent } from '@/services/securityMonitoring';
 import { useToast } from "@/hooks/use-toast";
+import { logger } from '@/utils/logger';
 
 export const SecurityDashboard = () => {
   const [metrics, setMetrics] = useState<SecurityMetrics | null>(null);
@@ -25,7 +26,7 @@ export const SecurityDashboard = () => {
       setMetrics(metricsData);
       setAlerts(alertsData);
     } catch (error) {
-      console.error('Erro ao carregar dados de segurança:', error);
+      logger.error('Erro ao carregar dados de segurança:', { error }, 'SECURITY_DASHBOARD');
       toast({
         title: "Erro",
         description: "Erro ao carregar dados de segurança",

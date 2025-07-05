@@ -8,6 +8,7 @@ import { useInviteVerification } from '@/hooks/useInviteVerification';
 import { InvitesTabHeader } from './layout/InvitesTabHeader';
 import { InviteMonthlyCompetition } from './invite/InviteMonthlyCompetition';
 import { InviteMonitoring } from './invite/InviteMonitoring';
+import { logger } from '@/utils/logger';
 import { 
   Users, 
   UserPlus, 
@@ -41,7 +42,7 @@ export const InviteDashboard = () => {
         });
       }
     } catch (error) {
-      console.error('Erro ao carregar estatísticas:', error);
+      logger.error('Erro ao carregar estatísticas:', { error }, 'INVITE_DASHBOARD');
     } finally {
       setIsLoadingStats(false);
     }

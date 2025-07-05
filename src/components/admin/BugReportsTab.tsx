@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useIsAdmin } from '@/hooks/useIsAdmin';
 import { createBrasiliaTimestamp, formatBrasiliaDate } from '@/utils/brasiliaTimeUnified';
+import { logger } from '@/utils/logger';
 
 interface BugReport {
   id: string;
@@ -77,7 +78,7 @@ export const BugReportsTab = () => {
 
       setReports(reportsWithUsernames);
     } catch (error) {
-      console.error('Erro ao carregar reports:', error);
+      logger.error('Erro ao carregar reports:', { error }, 'BUG_REPORTS_TAB');
       toast({
         title: "Erro",
         description: "Não foi possível carregar os reports de bugs",
@@ -106,7 +107,7 @@ export const BugReportsTab = () => {
         description: "Report marcado como resolvido",
       });
     } catch (error) {
-      console.error('Erro ao resolver report:', error);
+      logger.error('Erro ao resolver report:', { error }, 'BUG_REPORTS_TAB');
       toast({
         title: "Erro",
         description: "Não foi possível resolver o report",

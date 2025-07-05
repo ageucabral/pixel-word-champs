@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Label } from "@/components/ui/label";
 import { DollarSign } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/logger';
 
 interface PrizeSectionProps {
   totalPrizePool: number;
@@ -36,7 +37,7 @@ export const PrizeSection = ({ totalPrizePool: propsPrizePool }: PrizeSectionPro
 
         setCalculatedPrizePool(total);
       } catch (error) {
-        console.error('Erro ao calcular pool de prêmios:', error);
+        logger.error('Erro ao calcular pool de prêmios:', { error }, 'PRIZE_SECTION');
         setCalculatedPrizePool(propsPrizePool);
       }
     };

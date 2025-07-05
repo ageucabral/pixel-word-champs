@@ -6,6 +6,7 @@ import { Trophy, Calendar, Users, DollarSign, Settings, Eye, Download, ArrowRigh
 import { useToast } from "@/hooks/use-toast";
 import { rankingExportService } from '@/services/rankingExportService';
 import { useRankings } from '@/hooks/useRankings';
+import { logger } from '@/utils/logger';
 
 interface RankingInfoCardProps {
   type: 'daily' | 'weekly';
@@ -68,7 +69,7 @@ export const RankingInfoCard = ({
         description: `${data.length} registros exportados com sucesso.`,
       });
     } catch (error) {
-      console.error('Erro ao exportar ranking:', error);
+      logger.error('Erro ao exportar ranking:', { error }, 'RANKING_INFO_CARD');
       toast({
         title: "Erro na exportação",
         description: "Não foi possível exportar os dados do ranking.",

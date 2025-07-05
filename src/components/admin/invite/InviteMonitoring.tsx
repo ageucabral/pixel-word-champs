@@ -11,6 +11,7 @@ import { useUserMutations } from '@/hooks/useUserMutations';
 import { InviteMonitoringTable } from './monitoring/InviteMonitoringTable';
 import { InviteMonitoringFilters } from './monitoring/InviteMonitoringFilters';
 import { FraudDetectionPanel } from './monitoring/FraudDetectionPanel';
+import { logger } from '@/utils/logger';
 import { 
   Shield, 
   Search, 
@@ -47,7 +48,7 @@ export const InviteMonitoring = () => {
       await banUser({ userId, reason });
       refetch();
     } catch (error) {
-      console.error('Erro ao banir usuário:', error);
+      logger.error('Erro ao banir usuário:', { error, userId }, 'INVITE_MONITORING');
     }
   };
 

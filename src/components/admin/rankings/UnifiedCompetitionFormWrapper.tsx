@@ -3,6 +3,7 @@ import React from 'react';
 import { UnifiedCompetitionForm } from './UnifiedCompetitionForm';
 import { CompetitionFormErrorBoundary } from './CompetitionFormErrorBoundary';
 import { getCurrentBrasiliaTime } from '@/utils/brasiliaTimeUnified';
+import { logger } from '@/utils/logger';
 
 interface UnifiedCompetitionFormWrapperProps {
   onClose: () => void;
@@ -16,16 +17,14 @@ export const UnifiedCompetitionFormWrapper: React.FC<UnifiedCompetitionFormWrapp
   onError
 }) => {
   const handleRetry = () => {
-    console.log('🔄 Tentando recarregar formulário...', {
+    logger.info('🔄 Tentando recarregar formulário...', {
       timestamp: getCurrentBrasiliaTime()
-    });
+    }, 'UNIFIED_COMPETITION_FORM_WRAPPER');
     window.location.reload();
   };
 
   const handleFormError = (error: any) => {
-    console.error('❌ Erro no formulário:', error, {
-      timestamp: getCurrentBrasiliaTime()
-    });
+    logger.error('❌ Erro no formulário:', { error, timestamp: getCurrentBrasiliaTime() }, 'UNIFIED_COMPETITION_FORM_WRAPPER');
     onError(error instanceof Error ? error.message : 'Erro no formulário');
   };
 
