@@ -11,20 +11,26 @@ interface BoardData {
 }
 
 export const useBoardGeneration = () => {
-  const generateBoard = useCallback((height: number, words: string[]): BoardData => {
-    logger.debug('Gerando tabuleiro 8x12', { height, wordsCount: words.length }, 'BOARD_GENERATION');
+  const generateBoard = useCallback((height: number, words: string[], level: number = 1): BoardData => {
+    logger.debug('🎯 Gerando tabuleiro OTIMIZADO para nível', { 
+      height, 
+      level,
+      wordsCount: words.length 
+    }, 'BOARD_GENERATION');
     
     // Sempre gerar um tabuleiro, mesmo se não houver palavras
     if (words.length === 0) {
-      logger.warn('Gerando tabuleiro com palavras padrão', { height }, 'BOARD_GENERATION');
+      logger.warn('Gerando tabuleiro com palavras padrão para nível', { height, level }, 'BOARD_GENERATION');
       const defaultWords = getDefaultWordsForSize(12); // usar largura máxima de 12
-      return BoardGenerator.generateSmartBoard(height, defaultWords);
+      return BoardGenerator.generateSmartBoard(height, defaultWords, level);
     }
     
-    const boardData = BoardGenerator.generateSmartBoard(height, words);
-    logger.info('Tabuleiro 8x12 gerado com sucesso', { 
+    const boardData = BoardGenerator.generateSmartBoard(height, words, level);
+    logger.info('✅ Tabuleiro OTIMIZADO gerado com sucesso', { 
       height, 
-      wordsPlaced: boardData.placedWords.length 
+      level,
+      wordsPlaced: boardData.placedWords.length,
+      totalWords: words.length
     }, 'BOARD_GENERATION');
     
     return boardData;

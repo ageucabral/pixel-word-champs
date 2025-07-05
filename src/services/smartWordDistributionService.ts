@@ -44,18 +44,22 @@ export class SmartWordDistributionService {
   private placedWords: InternalPlacedWord[] = []; // 🎯 CORRIGIDO: Usar tipo interno
   private qualityAnalyzer: BoardQualityAnalyzer;
   private readonly MIN_WORD_DISTANCE = 2;
+  private levelConfig?: any; // ✨ NOVO: Configuração específica do nível
 
-  constructor(height: number, width: number = 12) {
+  constructor(height: number, width: number = 12, levelConfig?: any) {
     this.height = height;
     this.width = width;
     this.board = Array(height).fill(null).map(() => Array(width).fill(''));
     this.qualityAnalyzer = new BoardQualityAnalyzer(height, width);
+    this.levelConfig = levelConfig; // ✨ NOVO: Armazenar configuração do nível
   }
 
   public distributeWords(words: string[]): { board: string[][]; placedWords: PlacedWord[] } {
-    logger.info('🎯 Iniciando distribuição inteligente com 8 direções', {
+    logger.info('🎯 Iniciando distribuição inteligente NÍVEL-ESPECÍFICA', {
       wordsCount: words.length,
-      boardSize: `${this.height}x${this.width}`
+      boardSize: `${this.height}x${this.width}`,
+      levelStrategy: this.levelConfig?.strategy || 'default',
+      levelSeed: this.levelConfig?.seed?.toString(16).substring(0, 8) || 'none'
     }, 'SMART_DISTRIBUTION');
 
     let attempts = 0;
@@ -63,29 +67,40 @@ export class SmartWordDistributionService {
 
     while (attempts < maxAttempts) {
       this.resetBoard();
-      const shuffledWords = shuffleArray(words);
+      
+      // ✨ NOVO: Usar embaralhamento específico do nível se disponível
+      let shuffledWords;
+      if (this.levelConfig) {
+        const shuffler = new (await import('@/utils/advancedShuffling')).AdvancedShuffler(this.levelConfig.seed);
+        const shuffleResult = shuffler.shuffle(words, this.levelConfig.shuffleMethod);
+        shuffledWords = shuffleResult.shuffled;
+        
+        logger.debug(`🔀 Embaralhamento nível-específico: ${shuffleResult.method} (entropy: ${shuffleResult.entropy.toFixed(2)})`, undefined, 'SMART_DISTRIBUTION');
+      } else {
+        shuffledWords = shuffleArray(words);
+      }
       
       for (const word of shuffledWords) {
         this.placeWordOptimally(word);
       }
 
-      // 🎯 CORRIGIDO: Converter para PlacedWord[] antes de passar para shouldRegenerate
       const convertedWords = this.convertToLegacyFormat(this.placedWords);
       if (!this.qualityAnalyzer.shouldRegenerate(convertedWords) || attempts === maxAttempts - 1) {
         break;
       }
 
       attempts++;
-      logger.info(`🔄 Regenerando tabuleiro (tentativa ${attempts + 1}/${maxAttempts})`, {
+      logger.info(`🔄 Regenerando tabuleiro nível-específico (tentativa ${attempts + 1}/${maxAttempts})`, {
         placedWords: this.placedWords.length
       }, 'SMART_DISTRIBUTION');
     }
 
     this.fillEmptySpaces();
 
-    logger.info('✅ Distribuição inteligente concluída', {
+    logger.info('✅ Distribuição NÍVEL-ESPECÍFICA concluída', {
       placedWords: this.placedWords.length,
       attempts: attempts + 1,
+      levelStrategy: this.levelConfig?.strategy || 'default',
       distribution: this.getDistributionStats()
     }, 'SMART_DISTRIBUTION');
 

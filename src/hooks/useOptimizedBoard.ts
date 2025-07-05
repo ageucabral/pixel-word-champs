@@ -44,19 +44,21 @@ export const useOptimizedBoard = (level: number): OptimizedBoardResult => {
     }, 'OPTIMIZED_BOARD');
 
     try {
-      const newBoardData = generateBoard(size, levelWords);
+      // ✨ NOVO: Passar nível para geração baseada em estratégia
+      const newBoardData = generateBoard(size, levelWords, level);
       setBoardData(newBoardData);
       setError(null);
       
-      logger.info('✅ Tabuleiro otimizado gerado (ETAPA 4)', {
+      logger.info('✅ Tabuleiro NIVEL-ESPECÍFICO gerado (ETAPA 5)', {
         level,
         placedWords: newBoardData.placedWords.length,
         totalWords: levelWords.length,
-        gameTargetWords: 5 // Jogo sempre busca 5 palavras
+        gameTargetWords: 5, // Jogo sempre busca 5 palavras
+        levelStrategy: `Nível ${level} com estratégia específica`
       }, 'OPTIMIZED_BOARD');
       
     } catch (err) {
-      logger.error('❌ Erro ao gerar tabuleiro otimizado', { err }, 'OPTIMIZED_BOARD');
+      logger.error('❌ Erro ao gerar tabuleiro nivel-específico', { err, level }, 'OPTIMIZED_BOARD');
       setError(err instanceof Error ? err.message : 'Erro na geração do tabuleiro');
     }
   }, [levelWords, wordsLoading, level, size, isMobile, generateBoard]);
