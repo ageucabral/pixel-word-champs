@@ -1580,6 +1580,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      prevent_unsafe_score_reset: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       recalculate_competition_prize_pool: {
         Args: { comp_id: string }
         Returns: number
