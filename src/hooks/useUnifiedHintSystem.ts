@@ -1,8 +1,8 @@
 
 import { useCallback } from 'react';
 import { type Position } from '@/utils/boardUtils';
-import { useGamePointsConfig } from './useGamePointsConfig';
 import { logger } from '@/utils/logger';
+import { calculateWordPoints } from '@/utils/gameScoring';
 
 interface FoundWord {
   word: string;
@@ -27,7 +27,6 @@ export const useUnifiedHintSystem = ({
   setHintsUsed,
   setHintHighlightedCells
 }: UseUnifiedHintSystemProps) => {
-  const { getPointsForWord } = useGamePointsConfig();
 
   // Função principal para usar dica - TODAS as palavras podem receber dica
   const useHint = useCallback(() => {
@@ -58,8 +57,8 @@ export const useUnifiedHintSystem = ({
 
     // Escolher a palavra mais fácil (menor pontuação/tamanho)
     const sortedAvailableWords = availableWordsForHint.sort((a, b) => {
-      const pointsA = getPointsForWord(a);
-      const pointsB = getPointsForWord(b);
+      const pointsA = calculateWordPoints(a);
+      const pointsB = calculateWordPoints(b);
       
       // Priorizar por menor pontuação, depois por menor tamanho
       if (pointsA !== pointsB) return pointsA - pointsB;
@@ -102,8 +101,7 @@ export const useUnifiedHintSystem = ({
     levelWords,
     boardData.placedWords,
     setHintsUsed,
-    setHintHighlightedCells,
-    getPointsForWord
+    setHintHighlightedCells
   ]);
 
   return {

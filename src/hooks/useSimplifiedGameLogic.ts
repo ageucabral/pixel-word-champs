@@ -7,7 +7,7 @@ import { useAuth } from './useAuth';
 import { logger } from '@/utils/logger';
 import { getCurrentBrasiliaTime } from '@/utils/brasiliaTimeUnified';
 import { type Position } from '@/utils/boardUtils';
-import { useGamePointsConfig } from './useGamePointsConfig';
+import { calculateWordPoints } from '@/utils/gameScoring';
 
 interface FoundWord {
   word: string;
@@ -34,7 +34,6 @@ export const useSimplifiedGameLogic = ({
 }: UseSimplifiedGameLogicProps) => {
   const { user } = useAuth();
   const { boardData, size, levelWords, isLoading, error } = useOptimizedBoard(level);
-  const { getPointsForWord } = useGamePointsConfig();
 
   // Estados do jogo
   const [foundWords, setFoundWords] = useState<FoundWord[]>([]);
@@ -130,8 +129,7 @@ export const useSimplifiedGameLogic = ({
     boardData,
     levelWords,
     foundWords,
-    onWordFound: handleWordFound,
-    getPointsForWord
+    onWordFound: handleWordFound
   });
 
   // Verificar game over
@@ -257,7 +255,7 @@ export const useSimplifiedGameLogic = ({
       
       logger.debug('🎯 Palavra validada (pontos não salvos ainda)', { 
         word: selectedWord,
-        points: getPointsForWord(selectedWord)
+        points: calculateWordPoints(selectedWord)
       }, 'SIMPLIFIED_GAME');
     }
 
@@ -265,7 +263,7 @@ export const useSimplifiedGameLogic = ({
     setSelectedCells([]);
     setIsSelecting(false);
     setStartCell(null);
-  }, [selectedCells, validateAndConfirmWord, boardData.board, getPointsForWord]);
+  }, [selectedCells, validateAndConfirmWord, boardData.board]);
 
   // Handlers de célula
   const handleCellMouseDown = useCallback((row: number, col: number) => {

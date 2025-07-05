@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, Trophy, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useWeeklyRankingHistory } from '@/hooks/useWeeklyRankingHistory';
+import { useWeeklyRanking } from '@/hooks/useWeeklyRanking';
 
 export const WeeklyRankingHistory: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);

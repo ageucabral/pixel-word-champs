@@ -29,14 +29,11 @@ export const useSimpleSelectionWithValidation = ({
   const [isDragging, setIsDragging] = useState(false);
   const [isProcessingWord, setIsProcessingWord] = useState(false);
   
-  const { getPointsForWord } = useGamePointsConfig();
-  
   const { validateAndConfirmWord } = useWordValidation({
     boardData,
     levelWords,
     foundWords,
-    onWordFound,
-    getPointsForWord
+    onWordFound
   });
 
   // Verifica se uma posição forma linha reta com o ponto inicial

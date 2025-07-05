@@ -2,11 +2,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { type Position } from '@/utils/boardUtils';
 import { useGameScoring } from '@/hooks/useGameScoring';
-import { useGamePointsConfig } from '@/hooks/useGamePointsConfig';
 import { useGameSessionManager } from '@/hooks/useGameSessionManager';
 import { toast } from '@/hooks/use-toast';
 import { logger } from '@/utils/logger';
 import { GAME_CONSTANTS } from '@/constants/game';
+import { calculateWordPoints } from '@/utils/gameScoring';
 
 interface FoundWord {
   word: string;
@@ -40,7 +40,6 @@ export const useGameState = (
     isLevelCompleted: false
   });
 
-  const { getPointsForWord } = useGamePointsConfig();
   const { addWordFound: addWordToSession } = useGameSessionManager();
 
   // Usar hook especializado de pontuação
@@ -110,11 +109,11 @@ export const useGameState = (
     
     const wordsWithPoints = levelWords.map(word => ({
       word,
-      points: getPointsForWord(word)
+      points: calculateWordPoints(word)
     }));
     const sorted = [...wordsWithPoints].sort((a, b) => b.points - a.points);
     return sorted[0]?.word || null;
-  }, [levelWords, getPointsForWord]);
+  }, [levelWords]);
 
   // Sistema de dicas CORRIGIDO e unificado
   const useHint = useCallback(() => {

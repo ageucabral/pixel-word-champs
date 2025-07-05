@@ -5,7 +5,6 @@ import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { usePlayerLevel } from '@/hooks/usePlayerLevel';
 import { useOptimizedProfile } from '@/hooks/useOptimizedProfile';
-import { useWeeklyPositionManager } from '@/hooks/useWeeklyPositionManager';
 import { logger } from '@/utils/logger';
 import { formatBrasiliaDate } from '@/utils/brasiliaTimeUnified';
 import MyDataSection from './profile/MyDataSection';

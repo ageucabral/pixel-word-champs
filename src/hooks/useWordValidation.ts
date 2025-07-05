@@ -3,6 +3,7 @@ import { useCallback, useRef } from 'react';
 import { type Position } from '@/utils/boardUtils';
 import { isLinearPath } from '@/hooks/word-selection/validateLinearPath';
 import { logger } from '@/utils/logger';
+import { calculateWordPoints } from '@/utils/gameScoring';
 
 interface FoundWord {
   word: string;
@@ -15,15 +16,13 @@ interface UseWordValidationProps {
   levelWords: string[];
   foundWords: FoundWord[];
   onWordFound: (foundWord: FoundWord) => void;
-  getPointsForWord: (word: string) => number;
 }
 
 export const useWordValidation = ({
   boardData,
   levelWords,
   foundWords,
-  onWordFound,
-  getPointsForWord
+  onWordFound
 }: UseWordValidationProps) => {
 
   // ✅ PROTEÇÃO ROBUSTA: Lock com timeout
@@ -136,7 +135,7 @@ export const useWordValidation = ({
       }
 
       // ✅ PALAVRA VÁLIDA: Processar uma única vez
-      const points = getPointsForWord(validWord);
+      const points = calculateWordPoints(validWord);
       const foundWord: FoundWord = {
         word: validWord,
         positions: validPositions,
@@ -175,7 +174,7 @@ export const useWordValidation = ({
       }, 300); // Delay maior para proteção adicional
     }
 
-  }, [boardData, levelWords, foundWords, onWordFound, getPointsForWord]);
+  }, [boardData, levelWords, foundWords, onWordFound]);
 
   return {
     validateAndConfirmWord
