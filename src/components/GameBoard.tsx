@@ -7,6 +7,9 @@ import GameBoardErrorState from './game/GameBoardErrorState';
 import { useOptimizedBoard } from '@/hooks/useOptimizedBoard';
 import { logger } from '@/utils/logger';
 
+// ETAPA 4: Componente GameBoard 100% otimizado
+// ETAPA 5: Integrado com estratégias de nível específicas
+
 interface GameBoardProps {
   level: number;
   timeLeft: number;
