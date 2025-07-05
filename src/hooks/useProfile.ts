@@ -37,7 +37,7 @@ export const useProfile = () => {
     }
   };
 
-  const updateProfile = async (updates: Partial<{ username: string; avatar_url: string; phone: string }>) => {
+  const updateProfile = async (updates: Partial<{ username: string; avatar_url: string; phone: string; pix_key: string; pix_holder_name: string }>) => {
     try {
       const response = await profileService.updateProfile(updates);
       if (response.success && response.data) {

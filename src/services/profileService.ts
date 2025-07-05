@@ -188,7 +188,7 @@ class ProfileService {
     }
   }
 
-  async updateProfile(updates: Partial<{ username: string; avatar_url: string; phone: string }>): Promise<ApiResponse<User>> {
+  async updateProfile(updates: Partial<{ username: string; avatar_url: string; phone: string; pix_key: string; pix_holder_name: string }>): Promise<ApiResponse<User>> {
     try {
       logger.info('Atualizando perfil do usuário', { updates }, 'PROFILE_SERVICE');
       

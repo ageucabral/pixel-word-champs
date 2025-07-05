@@ -95,6 +95,8 @@ const MyDataSection = () => {
       const result = await updateProfile({
         username: editData.username,
         phone: editData.phone,
+        pix_key: editData.pixKey,
+        pix_holder_name: editData.pixHolderName,
       });
 
       if (result.success) {
