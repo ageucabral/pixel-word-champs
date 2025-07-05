@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
@@ -15,8 +15,11 @@ import XPProgressSection from './sections/XPProgressSection';
 
 const MyDataSection = () => {
   const { user } = useAuth();
-  const { updateProfile } = useProfile();
+  const { profile, updateProfile, refetch } = useProfile();
   const { toast } = useToast();
+  
+  // Usar dados do profile quando disponível, senão do user
+  const currentData = profile || user;
   
   const [isEditing, setIsEditing] = useState(false);
   const [showPixKey, setShowPixKey] = useState(false);
@@ -24,18 +27,25 @@ const MyDataSection = () => {
 
   // Memoizar dados iniciais para evitar re-inicializações
   const initialEditData = useMemo(() => ({
-    username: user?.username || '',
-    phone: user?.phone || '',
-    pixKey: user?.pix_key || '',
-    pixHolderName: user?.pix_holder_name || '',
+    username: currentData?.username || '',
+    phone: currentData?.phone || '',
+    pixKey: currentData?.pix_key || '',
+    pixHolderName: currentData?.pix_holder_name || '',
     pixType: 'cpf' as 'cpf' | 'email' | 'phone' | 'random'
-  }), [user?.username, user?.phone, user?.pix_key, user?.pix_holder_name]);
+  }), [currentData?.username, currentData?.phone, currentData?.pix_key, currentData?.pix_holder_name]);
 
   const [editData, setEditData] = useState(initialEditData);
 
+  // Sincronizar editData quando dados atuais mudam e não está editando
+  useEffect(() => {
+    if (!isEditing) {
+      setEditData(initialEditData);
+    }
+  }, [initialEditData, isEditing]);
+
   // Hooks de verificação - só executar quando em modo de edição
   const usernameCheck = useUsernameVerification(isEditing ? editData.username : '');
-  const phoneCheck = usePhoneVerification(isEditing ? editData.phone : '', user?.phone);
+  const phoneCheck = usePhoneVerification(isEditing ? editData.phone : '', currentData?.phone);
 
   const isValidUsername = (username: string) => {
     return username.trim().length >= 3 && username.trim().length <= 30;
@@ -43,17 +53,17 @@ const MyDataSection = () => {
 
   // Memoizar verificações de conflito
   const hasUsernameConflict = useMemo(() => {
-    if (!isEditing || editData.username === user?.username) return false;
+    if (!isEditing || editData.username === currentData?.username) return false;
     return editData.username.length >= 3 && usernameCheck.exists;
-  }, [isEditing, editData.username, user?.username, usernameCheck.exists]);
+  }, [isEditing, editData.username, currentData?.username, usernameCheck.exists]);
 
   const hasPhoneConflict = useMemo(() => {
     if (!isEditing) return false;
     const cleanPhone = editData.phone.replace(/\D/g, '');
-    const cleanCurrentPhone = (user?.phone || '').replace(/\D/g, '');
+    const cleanCurrentPhone = (currentData?.phone || '').replace(/\D/g, '');
     if (cleanPhone === cleanCurrentPhone) return false;
     return cleanPhone.length >= 10 && phoneCheck.exists;
-  }, [isEditing, editData.phone, user?.phone, phoneCheck.exists]);
+  }, [isEditing, editData.phone, currentData?.phone, phoneCheck.exists]);
 
   const canSave = useMemo(() => {
     if (!isValidUsername(editData.username)) return false;
@@ -85,6 +95,8 @@ const MyDataSection = () => {
 
     setIsLoading(true);
     try {
+      console.log('🔄 Salvando dados:', editData);
+      
       const result = await updateProfile({
         username: editData.username,
         phone: editData.phone,
@@ -92,13 +104,20 @@ const MyDataSection = () => {
         pix_holder_name: editData.pixHolderName,
       });
 
+      console.log('💾 Resultado do salvamento:', result);
+
       if (result.success) {
+        // Aguardar um pouco e atualizar dados
+        await new Promise(resolve => setTimeout(resolve, 500));
+        await refetch();
+        
         toast({
           title: "Dados atualizados",
           description: "Suas informações foram salvas com sucesso.",
         });
         setIsEditing(false);
       } else {
+        console.error('❌ Erro no salvamento:', result.error);
         toast({
           title: "Erro ao salvar",
           description: result.error || "Erro inesperado",
@@ -106,6 +125,7 @@ const MyDataSection = () => {
         });
       }
     } catch (error) {
+      console.error('❌ Erro inesperado:', error);
       toast({
         title: "Erro ao salvar",
         description: "Erro inesperado ao atualizar dados",
@@ -117,22 +137,22 @@ const MyDataSection = () => {
   }, [canSave, editData, updateProfile, toast]);
 
   const getAvatarFallback = useCallback(() => {
-    if (user?.username && user.username.length > 0) {
-      return user.username.charAt(0).toUpperCase();
+    if (currentData?.username && currentData.username.length > 0) {
+      return currentData.username.charAt(0).toUpperCase();
     }
-    if (user?.email && user.email.length > 0) {
-      return user.email.charAt(0).toUpperCase();
+    if (currentData?.email && currentData.email.length > 0) {
+      return currentData.email.charAt(0).toUpperCase();
     }
     return 'U';
-  }, [user?.username, user?.email]);
+  }, [currentData?.username, currentData?.email]);
 
   return (
     <div className="space-y-6">
       {/* XP Progress Section */}
       <XPProgressSection
-        permanentXP={user?.experience_points || 0}
-        temporaryScore={user?.total_score || 0}
-        gamesPlayed={user?.games_played || 0}
+        permanentXP={currentData?.experience_points || 0}
+        temporaryScore={currentData?.total_score || 0}
+        gamesPlayed={currentData?.games_played || 0}
       />
 
       {/* Personal Data Section */}
@@ -150,22 +170,22 @@ const MyDataSection = () => {
         
         <CardContent className="space-y-6">
           <AvatarSection
-            currentAvatar={user?.avatar_url}
+            currentAvatar={currentData?.avatar_url}
             fallback={getAvatarFallback()}
           />
 
           <UsernameSection
-            username={user?.username || ''}
+            username={currentData?.username || ''}
             editUsername={editData.username}
             isEditing={isEditing}
             isValidUsername={isValidUsername}
             onUsernameChange={(username) => setEditData(prev => ({ ...prev, username }))}
           />
 
-          <EmailExchangeSection email={user?.email || ''} />
+          <EmailExchangeSection email={currentData?.email || ''} />
 
           <PhoneSection
-            phone={user?.phone || ''}
+            phone={currentData?.phone || ''}
             editPhone={editData.phone}
             isEditing={isEditing}
             onPhoneChange={(phone) => setEditData(prev => ({ ...prev, phone }))}
@@ -173,8 +193,8 @@ const MyDataSection = () => {
 
           <PixConfigSection
             isEditing={isEditing}
-            pixHolderName={user?.pix_holder_name || ''}
-            pixKey={user?.pix_key || ''}
+            pixHolderName={currentData?.pix_holder_name || ''}
+            pixKey={currentData?.pix_key || ''}
             pixType={'cpf'}
             editPixHolderName={editData.pixHolderName}
             editPixKey={editData.pixKey}
