@@ -1,10 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+import { corsHeaders } from '../_shared/cors.ts'
+import { edgeLogger, validateInput, handleEdgeError } from '../_shared/edgeLogger.ts'
 
 interface RateLimitConfig {
   endpoint: string
@@ -42,14 +39,15 @@ serve(async (req) => {
     } = await req.json()
 
     // Validar entrada
-    if (!identifier || !identifierType || !endpoint) {
-      return new Response(
-        JSON.stringify({ 
-          error: 'Missing required fields: identifier, identifierType, endpoint' 
-        }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
+    validateInput.required(identifier, 'identifier');
+    validateInput.required(identifierType, 'identifierType');
+    validateInput.required(endpoint, 'endpoint');
+
+    edgeLogger.info('Verificação de rate limit iniciada', {
+      endpoint,
+      identifierType,
+      correlationId
+    }, 'GLOBAL_RATE_LIMITER');
 
     // Determinar configuração de rate limit
     const config = RATE_LIMITS[endpoint] || 
@@ -69,6 +67,11 @@ serve(async (req) => {
       .maybeSingle()
 
     if (blockedCheck) {
+      edgeLogger.security('Requisição bloqueada por rate limit', {
+        endpoint,
+        blockedUntil: blockedCheck.blocked_until
+      }, 'GLOBAL_RATE_LIMITER');
+
       // Registrar métricas da tentativa bloqueada
       await supabase
         .from('performance_metrics')
@@ -129,6 +132,13 @@ serve(async (req) => {
 
       // Criar alerta crítico se muitas tentativas
       if (currentAttempts > config.maxRequests * 2) {
+        edgeLogger.security('Rate limit abuse detectado', {
+          identifier,
+          endpoint,
+          attempts: currentAttempts + 1,
+          limit: config.maxRequests
+        }, 'GLOBAL_RATE_LIMITER');
+
         await supabase
           .from('system_alerts')
           .insert({
@@ -178,6 +188,11 @@ serve(async (req) => {
         window_start: new Date().toISOString()
       })
 
+    edgeLogger.operation('rate_limit_check', true, {
+      remaining: config.maxRequests - currentAttempts - 1,
+      limit: config.maxRequests
+    }, 'GLOBAL_RATE_LIMITER');
+
     // Retornar sucesso com informações de rate limit
     return new Response(
       JSON.stringify({
@@ -200,14 +215,6 @@ serve(async (req) => {
     )
 
   } catch (error) {
-    console.error('Error in global-rate-limiter:', error)
-    
-    return new Response(
-      JSON.stringify({ 
-        error: 'Internal server error',
-        message: error.message 
-      }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    )
+    return handleEdgeError(error, 'GLOBAL_RATE_LIMITER', 'rate_limit_check')
   }
 })

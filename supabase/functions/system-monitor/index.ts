@@ -1,10 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+import { corsHeaders } from '../_shared/cors.ts'
+import { edgeLogger, validateInput, handleEdgeError } from '../_shared/edgeLogger.ts'
 
 interface AlertThresholds {
   responseTime: { warning: number; critical: number }
@@ -33,6 +30,8 @@ serve(async (req) => {
 
     const { action } = await req.json()
 
+    edgeLogger.info('System monitor executando ação', { action }, 'SYSTEM_MONITOR');
+
     switch (action) {
       case 'health-check':
         return await performHealthCheck(supabase)
@@ -51,6 +50,7 @@ serve(async (req) => {
         return await getDashboardData(supabase)
       
       default:
+        edgeLogger.warn('Ação inválida solicitada', { action }, 'SYSTEM_MONITOR');
         return new Response(
           JSON.stringify({ error: 'Invalid action' }),
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -58,15 +58,7 @@ serve(async (req) => {
     }
 
   } catch (error) {
-    console.error('Error in system-monitor:', error)
-    
-    return new Response(
-      JSON.stringify({ 
-        error: 'Internal server error',
-        message: error.message 
-      }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    )
+    return handleEdgeError(error, 'SYSTEM_MONITOR', 'system_monitoring')
   }
 })
 
@@ -74,6 +66,8 @@ async function performHealthCheck(supabase: any) {
   const startTime = Date.now()
   
   try {
+    edgeLogger.info('Iniciando health check completo', {}, 'SYSTEM_MONITOR');
+
     // Verificar performance média (última hora)
     const { data: performanceData } = await supabase
       .from('performance_metrics')
@@ -128,6 +122,12 @@ async function performHealthCheck(supabase: any) {
 
     // Criar alertas se necessário
     if (overallStatus === 'critical' && issues.length > 0) {
+      edgeLogger.security('System health crítico detectado', {
+        issues,
+        avgResponseTime,
+        errorRate
+      }, 'SYSTEM_MONITOR');
+
       await createAlert(supabase, {
         alertType: 'system_health',
         severity: 'critical',
@@ -159,6 +159,12 @@ async function performHealthCheck(supabase: any) {
           checkedAt: new Date().toISOString()
         }
       })
+
+    edgeLogger.operation('health_check', true, {
+      status: overallStatus,
+      issues: issues.length,
+      duration: Date.now() - startTime
+    }, 'SYSTEM_MONITOR');
 
     return new Response(
       JSON.stringify({
@@ -204,6 +210,11 @@ async function logPerformanceMetric(supabase: any, metric: any) {
 
   // Verificar se precisa criar alerta por slow query
   if (metric.responseTime > ALERT_THRESHOLDS.responseTime.critical) {
+    edgeLogger.warn('Slow query detectada', {
+      endpoint: metric.endpoint,
+      responseTime: metric.responseTime
+    }, 'SYSTEM_MONITOR');
+
     await createAlert(supabase, {
       alertType: 'slow_query',
       severity: 'high',
@@ -230,6 +241,11 @@ async function createAlert(supabase: any, alert: any) {
     .maybeSingle()
 
   if (existingAlert) {
+    edgeLogger.info('Alerta duplicado evitado', {
+      alertType: alert.alertType,
+      existingId: existingAlert.id
+    }, 'SYSTEM_MONITOR');
+
     return new Response(
       JSON.stringify({ 
         success: true, 
@@ -252,6 +268,11 @@ async function createAlert(supabase: any, alert: any) {
     })
     .select()
     .single()
+
+  edgeLogger.operation('alert_created', true, {
+    alertType: alert.alertType,
+    severity: alert.severity
+  }, 'SYSTEM_MONITOR');
 
   return new Response(
     JSON.stringify({ 
@@ -318,6 +339,11 @@ async function getDashboardData(supabase: any) {
     rateLimits: rateLimitStats || [],
     timestamp: new Date().toISOString()
   }
+
+  edgeLogger.operation('dashboard_data_generated', true, {
+    metricsCount: performanceMetrics?.length || 0,
+    alertsCount: activeAlerts?.length || 0
+  }, 'SYSTEM_MONITOR');
 
   return new Response(
     JSON.stringify(dashboardData),

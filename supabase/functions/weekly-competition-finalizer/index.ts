@@ -1,33 +1,6 @@
-
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.10'
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
-
-// Sistema de logging estruturado para Edge Function
-const createLogger = () => {
-  const log = (level: string, message: string, data?: any, category?: string) => {
-    const logEntry = {
-      timestamp: new Date().toISOString(),
-      level,
-      message,
-      category: category || 'WEEKLY_FINALIZER',
-      data: data || undefined
-    };
-    console.log(`[${level}] ${category || 'WEEKLY_FINALIZER'}: ${message}`, data ? JSON.stringify(data) : '');
-  };
-
-  return {
-    debug: (message: string, data?: any, category?: string) => log('DEBUG', message, data, category),
-    info: (message: string, data?: any, category?: string) => log('INFO', message, data, category),
-    warn: (message: string, data?: any, category?: string) => log('WARN', message, data, category),
-    error: (message: string, data?: any, category?: string) => log('ERROR', message, data, category),
-  };
-};
-
-const logger = createLogger();
+import { corsHeaders } from '../_shared/cors.ts'
+import { edgeLogger, handleEdgeError } from '../_shared/edgeLogger.ts'
 
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
@@ -40,7 +13,7 @@ Deno.serve(async (req) => {
   const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
   if (!supabaseUrl || !supabaseServiceKey) {
-    logger.error('Variáveis de ambiente não configuradas');
+    edgeLogger.error('Variáveis de ambiente não configuradas', {}, 'WEEKLY_COMPETITION_FINALIZER');
     return new Response(JSON.stringify({ 
       error: 'Configuração do servidor incompleta' 
     }), {
@@ -52,7 +25,7 @@ Deno.serve(async (req) => {
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
   try {
-    logger.info('Iniciando verificação de finalização automática de competições');
+    edgeLogger.info('Iniciando verificação de finalização automática de competições', {}, 'WEEKLY_COMPETITION_FINALIZER');
 
     // Verificar se existe competição completed que precisa ser finalizada (snapshot)
     const { data: competitionsToCheck, error: checkError } = await supabase
@@ -62,7 +35,7 @@ Deno.serve(async (req) => {
       .order('end_date', { ascending: true });
 
     if (checkError) {
-      logger.error('Erro ao buscar competições', { error: checkError });
+      edgeLogger.error('Erro ao buscar competições', { error: checkError }, 'WEEKLY_COMPETITION_FINALIZER');
       return new Response(JSON.stringify({ 
         error: 'Erro ao verificar competições',
         details: checkError.message 
@@ -73,7 +46,7 @@ Deno.serve(async (req) => {
     }
 
     if (!competitionsToCheck || competitionsToCheck.length === 0) {
-      logger.info('Nenhuma competição ativa ou completed encontrada');
+      edgeLogger.info('Nenhuma competição ativa ou completed encontrada', {}, 'WEEKLY_COMPETITION_FINALIZER');
       return new Response(JSON.stringify({ 
         message: 'Nenhuma competição para finalizar',
         status: 'no_action_needed'
@@ -84,15 +57,15 @@ Deno.serve(async (req) => {
     }
 
     // Primeiro, executar atualização de status para marcar competições expiradas como 'completed'
-    logger.info('Executando atualização de status de competições semanais');
+    edgeLogger.info('Executando atualização de status de competições semanais', {}, 'WEEKLY_COMPETITION_FINALIZER');
     
     const { data: statusUpdateResult, error: statusUpdateError } = await supabase
       .rpc('update_weekly_competitions_status');
 
     if (statusUpdateError) {
-      logger.error('Erro na atualização de status', { error: statusUpdateError });
+      edgeLogger.error('Erro na atualização de status', { error: statusUpdateError }, 'WEEKLY_COMPETITION_FINALIZER');
     } else {
-      logger.info('Atualização de status executada', { result: statusUpdateResult });
+      edgeLogger.info('Atualização de status executada', { result: statusUpdateResult }, 'WEEKLY_COMPETITION_FINALIZER');
     }
 
     // Agora procurar competições 'completed' que precisam de snapshot
@@ -103,7 +76,7 @@ Deno.serve(async (req) => {
       .order('completed_at', { ascending: true });
 
     if (completedError) {
-      logger.error('Erro ao buscar competições completed', { error: completedError });
+      edgeLogger.error('Erro ao buscar competições completed', { error: completedError }, 'WEEKLY_COMPETITION_FINALIZER');
       return new Response(JSON.stringify({ 
         error: 'Erro ao buscar competições finalizadas',
         details: completedError.message 
@@ -114,7 +87,7 @@ Deno.serve(async (req) => {
     }
 
     if (!completedCompetitions || completedCompetitions.length === 0) {
-      logger.info('Nenhuma competição completed precisa de snapshot');
+      edgeLogger.info('Nenhuma competição completed precisa de snapshot', {}, 'WEEKLY_COMPETITION_FINALIZER');
       return new Response(JSON.stringify({ 
         message: 'Nenhuma competição completed precisa de finalização',
         status: 'no_action_needed'
@@ -137,16 +110,16 @@ Deno.serve(async (req) => {
       
       if (!existingSnapshot) {
         competitionToFinalize = comp;
-        logger.info('Encontrada competição completed sem snapshot', {
+        edgeLogger.info('Encontrada competição completed sem snapshot', {
           competition_id: comp.id,
           end_date: comp.end_date
-        });
+        }, 'WEEKLY_COMPETITION_FINALIZER');
         break;
       }
     }
 
     if (!competitionToFinalize) {
-      logger.info('Todas as competições completed já possuem snapshot');
+      edgeLogger.info('Todas as competições completed já possuem snapshot', {}, 'WEEKLY_COMPETITION_FINALIZER');
       return new Response(JSON.stringify({ 
         message: 'Todas as competições completed já foram finalizadas',
         status: 'no_action_needed'
@@ -157,19 +130,19 @@ Deno.serve(async (req) => {
     }
 
     // Executar a finalização completa usando a função SQL existente
-    logger.info('Executando finalização automática da competição', {
+    edgeLogger.info('Executando finalização automática da competição', {
       competition_id: competitionToFinalize.id,
       end_date: competitionToFinalize.end_date
-    });
+    }, 'WEEKLY_COMPETITION_FINALIZER');
 
     const { data: finalizationResult, error: finalizationError } = await supabase
       .rpc('finalize_weekly_competition');
 
     if (finalizationError) {
-      logger.error('Erro na finalização da competição', { 
+      edgeLogger.error('Erro na finalização da competição', { 
         error: finalizationError,
         competition: competitionToFinalize
-      });
+      }, 'WEEKLY_COMPETITION_FINALIZER');
       
       return new Response(JSON.stringify({ 
         error: 'Erro na finalização da competição',
@@ -182,10 +155,10 @@ Deno.serve(async (req) => {
     }
 
     if (!finalizationResult?.success) {
-      logger.error('Finalização retornou erro', { 
+      edgeLogger.error('Finalização retornou erro', { 
         result: finalizationResult,
         competition: competitionToFinalize
-      });
+      }, 'WEEKLY_COMPETITION_FINALIZER');
       
       return new Response(JSON.stringify({ 
         error: 'Falha na finalização',
@@ -197,13 +170,12 @@ Deno.serve(async (req) => {
       });
     }
 
-    logger.info('Finalização automática executada com sucesso', {
-      result: finalizationResult,
+    edgeLogger.operation('weekly_competition_finalization', true, {
       competition_finalized: competitionToFinalize.id,
       snapshot_created: finalizationResult.snapshot_id,
       profiles_reset: finalizationResult.profiles_reset,
       next_competition_activated: finalizationResult.activated_competition?.id
-    });
+    }, 'WEEKLY_COMPETITION_FINALIZER');
 
     return new Response(JSON.stringify({ 
       success: true,
@@ -216,17 +188,6 @@ Deno.serve(async (req) => {
     });
 
   } catch (error: any) {
-    logger.error('Erro geral na finalização automática', { 
-      error: error.message, 
-      stack: error.stack 
-    });
-    
-    return new Response(JSON.stringify({ 
-      error: error.message,
-      details: 'Erro interno do servidor de finalização'
-    }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-    });
+    return handleEdgeError(error, 'WEEKLY_COMPETITION_FINALIZER', 'weekly_competition_finalization')
   }
 });

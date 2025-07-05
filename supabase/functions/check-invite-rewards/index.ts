@@ -1,11 +1,7 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+import { corsHeaders } from '../_shared/cors.ts'
+import { edgeLogger, handleEdgeError } from '../_shared/edgeLogger.ts'
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -18,17 +14,17 @@ serve(async (req) => {
     
     const supabase = createClient(supabaseUrl, supabaseKey)
 
-    console.log('🚀 Starting invite rewards verification...')
+    edgeLogger.info('Iniciando verificação de recompensas de convite', {}, 'CHECK_INVITE_REWARDS')
     
     // Executar função de verificação e ativação de convites
     const { data, error } = await supabase.rpc('check_and_activate_invites')
     
     if (error) {
-      console.error('❌ Error in check_and_activate_invites:', error)
+      edgeLogger.error('Erro em check_and_activate_invites', { error }, 'CHECK_INVITE_REWARDS')
       throw error
     }
 
-    console.log('✅ Invite rewards verification completed:', data)
+    edgeLogger.operation('check_and_activate_invites', true, { data }, 'CHECK_INVITE_REWARDS')
 
     return new Response(
       JSON.stringify({
@@ -42,17 +38,6 @@ serve(async (req) => {
       },
     )
   } catch (error) {
-    console.error('❌ Error in check-invite-rewards function:', error)
-    
-    return new Response(
-      JSON.stringify({
-        success: false,
-        error: error.message
-      }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500,
-      },
-    )
+    return handleEdgeError(error, 'CHECK_INVITE_REWARDS', 'invite_rewards_verification')
   }
 })

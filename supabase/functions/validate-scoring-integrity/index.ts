@@ -1,11 +1,7 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+import { corsHeaders } from '../_shared/cors.ts'
+import { edgeLogger, handleEdgeError } from '../_shared/edgeLogger.ts'
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -18,17 +14,13 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
+    edgeLogger.info('Iniciando validação de integridade do sistema de pontuação', {}, 'VALIDATE_SCORING_INTEGRITY')
+
     // Calcular semana atual
     const now = new Date()
     const weekStart = new Date(now)
     weekStart.setDate(now.getDate() - now.getDay() + 1)
     weekStart.setHours(0, 0, 0, 0)
-
-    // Contar usuários com sessões completadas
-    const { count: usersWithSessions } = await supabaseClient
-      .from('game_sessions')
-      .select('user_id', { count: 'exact', head: true })
-      .eq('is_completed', true)
 
     // Contar usuários únicos com sessões completadas
     const { data: uniqueUsersWithSessions } = await supabaseClient
@@ -97,7 +89,18 @@ serve(async (req) => {
       system_health: validationPassed ? 'healthy' : (issues.length > 2 ? 'critical' : 'warning')
     }
 
-    console.log('✅ Validação de integridade concluída:', result)
+    if (!validationPassed) {
+      edgeLogger.warn('Problemas de integridade detectados', {
+        issues,
+        systemHealth: result.system_health
+      }, 'VALIDATE_SCORING_INTEGRITY');
+    }
+
+    edgeLogger.operation('scoring_integrity_validation', true, {
+      validationPassed,
+      issuesCount: issues.length,
+      systemHealth: result.system_health
+    }, 'VALIDATE_SCORING_INTEGRITY')
 
     return new Response(
       JSON.stringify(result),
@@ -110,17 +113,6 @@ serve(async (req) => {
     )
 
   } catch (error) {
-    console.error('❌ Erro na validação de integridade:', error)
-    
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      { 
-        status: 500, 
-        headers: { 
-          ...corsHeaders, 
-          'Content-Type': 'application/json' 
-        } 
-      }
-    )
+    return handleEdgeError(error, 'VALIDATE_SCORING_INTEGRITY', 'scoring_validation')
   }
 })

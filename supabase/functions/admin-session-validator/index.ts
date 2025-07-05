@@ -33,7 +33,7 @@ serve(async (req) => {
     // Verify user session
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser()
     if (userError || !user) {
-      secureLog.security('Invalid session attempt');
+      edgeLogger.security('Invalid session attempt', {}, 'ADMIN_SESSION_VALIDATOR');
       throw new Error('Invalid session')
     }
 
@@ -44,10 +44,10 @@ serve(async (req) => {
     const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000)
 
     if (lastSignIn < twentyFourHoursAgo) {
-      secureLog.security('Session expired - forcing re-authentication', {
+      edgeLogger.security('Session expired - forcing re-authentication', {
         lastSignIn: lastSignIn.toISOString(),
         threshold: twentyFourHoursAgo.toISOString()
-      });
+      }, 'ADMIN_SESSION_VALIDATOR');
       
       throw new Error('Session expired - please login again')
     }
@@ -57,14 +57,14 @@ serve(async (req) => {
       .rpc('has_role', { _user_id: user.id, _role: 'admin' })
 
     if (roleError) {
-      secureLog.error('Error checking admin role', { error: roleError.message });
+      edgeLogger.error('Error checking admin role', { error: roleError.message }, 'ADMIN_SESSION_VALIDATOR');
       throw new Error('Role verification failed')
     }
 
     if (!hasAdminRole) {
-      secureLog.security('Non-admin user attempting admin access', {
+      edgeLogger.security('Non-admin user attempting admin access', {
         timestamp: new Date().toISOString()
-      });
+      }, 'ADMIN_SESSION_VALIDATOR');
       throw new Error('Admin access required')
     }
 
@@ -76,19 +76,19 @@ serve(async (req) => {
       .single()
 
     if (profileError) {
-      secureLog.error('Error checking user profile', { error: profileError.message });
+      edgeLogger.error('Error checking user profile', { error: profileError.message }, 'ADMIN_SESSION_VALIDATOR');
       throw new Error('Profile verification failed')
     }
 
     if (userProfile?.is_banned) {
-      secureLog.security('Banned user attempting access', {
+      edgeLogger.security('Banned user attempting access', {
         bannedAt: userProfile.banned_at,
         reason: userProfile.ban_reason
-      });
+      }, 'ADMIN_SESSION_VALIDATOR');
       throw new Error('Account is banned')
     }
 
-    secureLog.info('Admin session validated successfully');
+    edgeLogger.info('Admin session validated successfully', {}, 'ADMIN_SESSION_VALIDATOR');
 
     return new Response(
       JSON.stringify({ 
@@ -105,17 +105,6 @@ serve(async (req) => {
     )
 
   } catch (error) {
-    secureLog.error('Session validation failed', { error: error.message });
-    return new Response(
-      JSON.stringify({ 
-        success: false, 
-        error: error.message,
-        session_valid: false
-      }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 401,
-      }
-    )
+    return handleEdgeError(error, 'ADMIN_SESSION_VALIDATOR', 'session_validation')
   }
 })

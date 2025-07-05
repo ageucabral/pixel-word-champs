@@ -1,59 +1,7 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
-
-// Secure logger for edge function
-const secureLog = {
-  info: (message: string, data?: any) => {
-    const maskedData = data ? maskSensitiveData(data) : undefined;
-    console.log(`[INFO] ${message}`, maskedData || '');
-  },
-  error: (message: string, data?: any) => {
-    const maskedData = data ? maskSensitiveData(data) : undefined;
-    console.error(`[ERROR] ${message}`, maskedData || '');
-  },
-  warn: (message: string, data?: any) => {
-    const maskedData = data ? maskSensitiveData(data) : undefined;
-    console.warn(`[WARN] ${message}`, maskedData || '');
-  }
-};
-
-const maskSensitiveData = (data: any): any => {
-  if (!data || typeof data !== 'object') {
-    return data;
-  }
-
-  const sensitiveFields = ['password', 'email', 'token', 'key', 'secret'];
-  const masked = { ...data };
-  
-  Object.keys(masked).forEach(key => {
-    const lowerKey = key.toLowerCase();
-    const isSensitive = sensitiveFields.some(field => lowerKey.includes(field));
-
-    if (isSensitive && typeof masked[key] === 'string') {
-      if (key.toLowerCase().includes('email')) {
-        const email = masked[key];
-        if (email.includes('@')) {
-          const [user, domain] = email.split('@');
-          masked[key] = `${user[0]}***${user[user.length - 1]}@***`;
-        } else {
-          masked[key] = '***';
-        }
-      } else {
-        masked[key] = '***';
-      }
-    } else if (typeof masked[key] === 'object') {
-      masked[key] = maskSensitiveData(masked[key]);
-    }
-  });
-
-  return masked;
-};
+import { corsHeaders } from '../_shared/cors.ts'
+import { edgeLogger, validateInput, handleEdgeError } from '../_shared/edgeLogger.ts'
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -65,6 +13,7 @@ serve(async (req) => {
     // Get the authorization header from the request
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) {
+      edgeLogger.security('Tentativa de acesso sem autorização', {}, 'ADMIN_UPDATE_PASSWORD')
       throw new Error('No authorization header')
     }
 
@@ -100,6 +49,7 @@ serve(async (req) => {
     // Verify the requesting user is authenticated and is an admin
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser()
     if (userError || !user) {
+      edgeLogger.security('Usuário não autenticado', { error: userError }, 'ADMIN_UPDATE_PASSWORD')
       throw new Error('Unauthorized')
     }
 
@@ -108,26 +58,25 @@ serve(async (req) => {
       .rpc('has_role', { _user_id: user.id, _role: 'admin' })
 
     if (roleError || !hasAdminRole) {
+      edgeLogger.security('Usuário sem permissões de admin', { userId: user.id }, 'ADMIN_UPDATE_PASSWORD')
       throw new Error('Insufficient permissions - admin role required')
     }
 
     // Get request body
     const { targetUserId, newPassword, username } = await req.json()
 
-    if (!targetUserId || !newPassword || !username) {
-      throw new Error('Missing required fields: targetUserId, newPassword, username')
-    }
+    // Validações de entrada
+    validateInput.required(targetUserId, 'targetUserId')
+    validateInput.required(newPassword, 'newPassword')
+    validateInput.required(username, 'username')
+    validateInput.uuid(targetUserId, 'targetUserId')
+    validateInput.minLength(newPassword, 6, 'newPassword')
 
-    // Validate password requirements
-    if (newPassword.length < 6) {
-      throw new Error('Password must be at least 6 characters long')
-    }
-
-    secureLog.info('Admin password update initiated', { 
+    edgeLogger.info('Iniciando atualização de senha pelo admin', { 
       adminId: user.id,
       targetUserId,
       username
-    });
+    }, 'ADMIN_UPDATE_PASSWORD');
 
     // Update user password using admin client
     const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
@@ -136,7 +85,7 @@ serve(async (req) => {
     )
 
     if (updateError) {
-      secureLog.error('Error updating password', { error: updateError.message });
+      edgeLogger.error('Erro ao atualizar senha', { error: updateError.message }, 'ADMIN_UPDATE_PASSWORD');
       throw updateError
     }
 
@@ -155,13 +104,13 @@ serve(async (req) => {
       })
 
     if (logError) {
-      secureLog.warn('Failed to log admin action', { error: logError.message });
+      edgeLogger.warn('Falha ao registrar ação administrativa', { error: logError.message }, 'ADMIN_UPDATE_PASSWORD');
     }
 
-    secureLog.info('Password update completed successfully', { 
+    edgeLogger.operation('password_change', true, { 
       targetUserId,
       username
-    });
+    }, 'ADMIN_UPDATE_PASSWORD');
 
     return new Response(
       JSON.stringify({ 
@@ -175,16 +124,6 @@ serve(async (req) => {
     )
 
   } catch (error) {
-    secureLog.error('Error in admin-update-password function', { error: error.message });
-    return new Response(
-      JSON.stringify({ 
-        success: false, 
-        error: error.message || 'Internal server error' 
-      }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 400,
-      },
-    )
+    return handleEdgeError(error, 'ADMIN_UPDATE_PASSWORD', 'password_update')
   }
 })

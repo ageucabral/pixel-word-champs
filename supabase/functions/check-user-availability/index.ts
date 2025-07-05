@@ -1,11 +1,7 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+import { corsHeaders } from '../_shared/cors.ts'
+import { edgeLogger, validateInput, handleEdgeError } from '../_shared/edgeLogger.ts'
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -22,6 +18,7 @@ serve(async (req) => {
     const { username, email, phone } = await req.json();
 
     if (!username && !email && !phone) {
+      edgeLogger.warn('Requisição sem parâmetros válidos', {}, 'CHECK_USER_AVAILABILITY')
       return new Response(
         JSON.stringify({ error: 'Username, email ou phone deve ser fornecido' }),
         { 
@@ -31,7 +28,11 @@ serve(async (req) => {
       );
     }
 
-    console.log('Verificando disponibilidade:', { username, email, phone });
+    edgeLogger.info('Verificando disponibilidade de usuário', { 
+      hasUsername: !!username, 
+      hasEmail: !!email, 
+      hasPhone: !!phone 
+    }, 'CHECK_USER_AVAILABILITY');
 
     const { data, error } = await supabaseClient.rpc('check_user_availability', {
       check_username: username || null,
@@ -40,7 +41,7 @@ serve(async (req) => {
     });
 
     if (error) {
-      console.error('Erro ao verificar disponibilidade:', error);
+      edgeLogger.error('Erro ao verificar disponibilidade', { error }, 'CHECK_USER_AVAILABILITY');
       return new Response(
         JSON.stringify({ error: 'Erro interno do servidor' }),
         { 
@@ -50,7 +51,10 @@ serve(async (req) => {
       );
     }
 
-    console.log('Resultado da verificação:', data);
+    edgeLogger.operation('check_user_availability', true, { 
+      result: data,
+      checked: { username: !!username, email: !!email, phone: !!phone }
+    }, 'CHECK_USER_AVAILABILITY');
 
     return new Response(
       JSON.stringify(data),
@@ -60,13 +64,6 @@ serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('Erro na edge function:', error);
-    return new Response(
-      JSON.stringify({ error: 'Erro interno do servidor' }),
-      { 
-        status: 500, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
-    );
+    return handleEdgeError(error, 'CHECK_USER_AVAILABILITY', 'user_availability_check')
   }
 });
