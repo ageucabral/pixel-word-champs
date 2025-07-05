@@ -2,10 +2,12 @@
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Calendar } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Plus, Calendar, Upload } from 'lucide-react';
 import { UnifiedCompetitionsList } from './UnifiedCompetitionsList';
 import { UnifiedCompetitionModal } from './UnifiedCompetitionModal';
 import { DailyCompetitionFilters } from './daily/DailyCompetitionFilters';
+import { CSVCompetitionUpload } from '../competitions/CSVCompetitionUpload';
 import { UnifiedCompetition } from '@/types/competition';
 import { useToast } from "@/hooks/use-toast";
 import { getCurrentBrasiliaTime } from '@/utils/brasiliaTimeUnified';
@@ -20,6 +22,7 @@ interface DailyCompetitionsViewProps {
 
 export const DailyCompetitionsView = ({ competitions, isLoading, onRefresh }: DailyCompetitionsViewProps) => {
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showUploadModal, setShowUploadModal] = useState(false);
   const [localCompetitions, setLocalCompetitions] = useState<UnifiedCompetition[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -134,6 +137,19 @@ export const DailyCompetitionsView = ({ competitions, isLoading, onRefresh }: Da
     setDateFilter(null);
   };
 
+  const handleCSVUploadSuccess = () => {
+    setShowUploadModal(false);
+    toast({
+      title: "Upload concluído",
+      description: "As competições do CSV foram criadas com sucesso.",
+    });
+    
+    // Refresh data after CSV upload
+    if (onRefresh) {
+      onRefresh();
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -149,10 +165,27 @@ export const DailyCompetitionsView = ({ competitions, isLoading, onRefresh }: Da
                 </p>
               </div>
             </div>
-            <Button onClick={handleOpenModal} className="flex items-center gap-2">
-              <Plus className="h-4 w-4" />
-              Nova Competição
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button onClick={handleOpenModal} className="flex items-center gap-2">
+                <Plus className="h-4 w-4" />
+                Nova Competição
+              </Button>
+              
+              <Dialog open={showUploadModal} onOpenChange={setShowUploadModal}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="flex items-center gap-2">
+                    <Upload className="h-4 w-4" />
+                    Upload CSV
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>Upload de Competições via CSV</DialogTitle>
+                  </DialogHeader>
+                  <CSVCompetitionUpload onCompetitionsCreated={handleCSVUploadSuccess} />
+                </DialogContent>
+              </Dialog>
+            </div>
           </div>
         </CardHeader>
       </Card>

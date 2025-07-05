@@ -8,7 +8,7 @@ export interface UnifiedCompetition {
   startDate: string;
   endDate: string;
   duration?: number; // Nova propriedade para duração em horas
-  maxParticipants: number;
+  maxParticipants?: number; // Opcional para competições diárias
   theme?: string;
   totalParticipants?: number;
   createdAt: string;
@@ -22,7 +22,7 @@ export interface CompetitionFormData {
   startDate: string;
   endDate: string;
   duration: number; // Nova propriedade obrigatória para duração em horas
-  maxParticipants: number;
+  maxParticipants?: number; // Opcional para competições diárias
 }
 
 export interface CompetitionValidationResult {

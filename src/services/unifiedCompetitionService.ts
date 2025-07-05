@@ -14,7 +14,7 @@ export interface CreateCompetitionData {
   startDate: string;
   endDate: string;
   duration: number;
-  maxParticipants: number;
+  maxParticipants?: number; // Opcional para competições diárias
 }
 
 class UnifiedCompetitionService {
@@ -128,7 +128,7 @@ class UnifiedCompetitionService {
         end_date: endDateUTC,
         status: 'scheduled', // Status inicial sempre scheduled
         prize_pool: 0, // Competições diárias não têm prêmio
-        max_participants: data.maxParticipants || 0,
+        max_participants: null, // Competições diárias não têm limite
         theme: 'daily',
         rules: {
           duration_hours: data.duration,
