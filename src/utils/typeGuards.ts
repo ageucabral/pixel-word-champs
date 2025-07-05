@@ -1,6 +1,7 @@
 
 
 import { Json } from '@/integrations/supabase/types';
+import { logger } from '@/utils/logger';
 
 // Interface para Winner conforme usado no código
 interface Winner {
@@ -58,7 +59,7 @@ export function parseWinnersData(data: Json | Json[]): Winner[] {
     }
     return [];
   } catch (error) {
-    console.error('Erro ao fazer parse dos dados de ganhadores:', error);
+    logger.error('Erro ao fazer parse dos dados de ganhadores:', error, 'TYPE_GUARDS');
     return [];
   }
 }
@@ -71,7 +72,7 @@ export function parseRankingsData(data: Json | Json[]): any[] {
     }
     return [];
   } catch (error) {
-    console.error('Erro ao fazer parse dos dados de ranking:', error);
+    logger.error('Erro ao fazer parse dos dados de ranking:', error, 'TYPE_GUARDS');
     return [];
   }
 }
@@ -90,7 +91,7 @@ export function parseFinalizeResult(data: Json): FinalizeResult {
       error: 'Dados de resposta inválidos'
     };
   } catch (error) {
-    console.error('Erro ao fazer parse do resultado de finalização:', error);
+    logger.error('Erro ao fazer parse do resultado de finalização:', error, 'TYPE_GUARDS');
     return {
       success: false,
       error: 'Erro ao processar resposta'

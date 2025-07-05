@@ -4,6 +4,8 @@
  * Enquanto mantém o formato ISO (YYYY-MM-DD) no banco de dados
  */
 
+import { logger } from '@/utils/logger';
+
 /**
  * Converte qualquer formato de data para o formato brasileiro DD/MM/YYYY
  * @param dateInput - String de data (ISO, UTC, etc.) ou objeto Date
@@ -17,7 +19,7 @@ export const formatToBrazilianDate = (dateInput: string | Date): string => {
     
     // Verificar se a data é válida
     if (isNaN(date.getTime())) {
-      console.warn('Data inválida fornecida:', dateInput);
+      logger.warn('Data inválida fornecida:', dateInput, 'BRAZILIAN_DATE_FORMATTER');
       return '';
     }
     
@@ -29,7 +31,7 @@ export const formatToBrazilianDate = (dateInput: string | Date): string => {
       timeZone: 'America/Sao_Paulo'
     });
   } catch (error) {
-    console.error('Erro ao formatar data:', error, dateInput);
+    logger.error('Erro ao formatar data:', error, 'BRAZILIAN_DATE_FORMATTER');
     return '';
   }
 };
@@ -46,7 +48,7 @@ export const formatToBrazilianDateTime = (dateInput: string | Date): string => {
     const date = typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
     
     if (isNaN(date.getTime())) {
-      console.warn('Data/hora inválida fornecida:', dateInput);
+      logger.warn('Data/hora inválida fornecida:', dateInput, 'BRAZILIAN_DATE_FORMATTER');
       return '';
     }
     
@@ -59,7 +61,7 @@ export const formatToBrazilianDateTime = (dateInput: string | Date): string => {
       timeZone: 'America/Sao_Paulo'
     });
   } catch (error) {
-    console.error('Erro ao formatar data/hora:', error, dateInput);
+    logger.error('Erro ao formatar data/hora:', error, 'BRAZILIAN_DATE_FORMATTER');
     return '';
   }
 };
@@ -102,7 +104,7 @@ export const formatISOToBrazilian = (isoDate: string): string => {
     const [year, month, day] = dateOnly.split('-');
     return `${day}/${month}/${year}`;
   } catch (error) {
-    console.error('Erro ao converter data ISO:', error, isoDate);
+    logger.error('Erro ao converter data ISO:', error, 'BRAZILIAN_DATE_FORMATTER');
     return formatToBrazilianDate(isoDate); // Fallback
   }
 };

@@ -4,6 +4,8 @@
  * Para evitar crashes quando as funções principais falham
  */
 
+import { logger } from '@/utils/logger';
+
 export const safeFormatWeeklyPeriodPreview = (startDate: string, endDate: string): string => {
   try {
     if (!startDate && !endDate) return 'Período não configurado';
@@ -18,7 +20,7 @@ export const safeFormatWeeklyPeriodPreview = (startDate: string, endDate: string
     
     return `${startStr} - ${endStr}`;
   } catch (error) {
-    console.error('Erro ao formatar período semanal:', error);
+    logger.error('Erro ao formatar período semanal:', error, 'TIMEZONE_FALLBACKS');
     return 'Erro ao formatar período';
   }
 };
@@ -42,7 +44,7 @@ export const safeValidateBrasiliaDateRange = (startDate: string, endDate: string
     
     return { isValid: true };
   } catch (error) {
-    console.error('Erro na validação de datas:', error);
+    logger.error('Erro na validação de datas:', error, 'TIMEZONE_FALLBACKS');
     return { isValid: false, error: 'Erro na validação das datas' };
   }
 };
@@ -59,7 +61,7 @@ export const safeGetCurrentBrasiliaTime = (): string => {
       minute: '2-digit'
     });
   } catch (error) {
-    console.error('Erro ao obter horário atual:', error);
+    logger.error('Erro ao obter horário atual:', error, 'TIMEZONE_FALLBACKS');
     return new Date().toLocaleString('pt-BR');
   }
 };

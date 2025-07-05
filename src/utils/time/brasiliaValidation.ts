@@ -4,6 +4,8 @@
  * Funções para validar períodos, durações e ranges
  */
 
+import { logger } from '@/utils/logger';
+
 /**
  * CORRIGIDO: Validação com formato datetime-local correto
  */
@@ -21,12 +23,12 @@ export const validateCompetitionDuration = (startDateTimeBrasilia: string, durat
   }
   
   try {
-    console.log('🔍 Validação CORRIGIDA:', {
+    logger.debug('🔍 Validação CORRIGIDA:', {
       input: startDateTimeBrasilia,
       inputType: typeof startDateTimeBrasilia,
       duration: durationHours,
       isDatetimeLocal: startDateTimeBrasilia.includes('T')
-    });
+    }, 'BRASILIA_VALIDATION');
     
     // CORREÇÃO: Verificar se é formato datetime-local (YYYY-MM-DDTHH:mm)
     let startDate: Date;
@@ -34,26 +36,26 @@ export const validateCompetitionDuration = (startDateTimeBrasilia: string, durat
     if (startDateTimeBrasilia.includes('T')) {
       // Formato datetime-local: YYYY-MM-DDTHH:mm
       startDate = new Date(startDateTimeBrasilia);
-      console.log('📅 Parsing formato datetime-local:', {
+      logger.debug('📅 Parsing formato datetime-local:', {
         original: startDateTimeBrasilia,
         parsed: startDate.toISOString(),
         isValid: !isNaN(startDate.getTime())
-      });
+      }, 'BRASILIA_VALIDATION');
     } else {
       // Fallback para outros formatos (não deveria acontecer com datetime-local)
       startDate = new Date(startDateTimeBrasilia);
-      console.log('📅 Parsing formato alternativo:', {
+      logger.debug('📅 Parsing formato alternativo:', {
         original: startDateTimeBrasilia,
         parsed: startDate.toISOString(),
         isValid: !isNaN(startDate.getTime())
-      });
+      }, 'BRASILIA_VALIDATION');
     }
     
     if (isNaN(startDate.getTime())) {
-      console.error('❌ Data inválida:', {
+      logger.error('❌ Data inválida:', {
         input: startDateTimeBrasilia,
         parsedTime: startDate.getTime()
-      });
+      }, 'BRASILIA_VALIDATION');
       return { isValid: false, error: 'Data de início inválida - formato não reconhecido' };
     }
     
@@ -63,14 +65,14 @@ export const validateCompetitionDuration = (startDateTimeBrasilia: string, durat
     const sameDayLimit = new Date(startDate);
     sameDayLimit.setHours(23, 59, 59, 999);
     
-    console.log('🔍 Validação de duração:', {
+    logger.debug('🔍 Validação de duração:', {
       startTime: startDate.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }),
       endTime: endDate.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }),
       limit: sameDayLimit.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }),
       willExceed: endDate > sameDayLimit,
       duration: durationHours,
       startDateInput: startDateTimeBrasilia
-    });
+    }, 'BRASILIA_VALIDATION');
     
     if (endDate > sameDayLimit) {
       const maxDurationMs = sameDayLimit.getTime() - startDate.getTime();
@@ -84,11 +86,11 @@ export const validateCompetitionDuration = (startDateTimeBrasilia: string, durat
     
     return { isValid: true };
   } catch (error) {
-    console.error('❌ Erro na validação de duração:', {
+    logger.error('❌ Erro na validação de duração:', {
       error: error.message,
       input: startDateTimeBrasilia,
       duration: durationHours
-    });
+    }, 'BRASILIA_VALIDATION');
     return { isValid: false, error: 'Erro na validação da duração: ' + error.message };
   }
 };
@@ -115,7 +117,7 @@ export const validateBrasiliaDateRange = (startDate: string, endDate: string): {
     
     return { isValid: true };
   } catch (error) {
-    console.error('❌ Erro na validação de range:', error);
+    logger.error('❌ Erro na validação de range:', error, 'BRASILIA_VALIDATION');
     return { isValid: false, error: 'Datas inválidas: ' + error.message };
   }
 };

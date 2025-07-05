@@ -4,6 +4,8 @@
  * Para datas em formato ISO (YYYY-MM-DD) que não precisam de conversão
  */
 
+import { logger } from '@/utils/logger';
+
 /**
  * Formata data simples ISO (YYYY-MM-DD) para DD/MM/YYYY
  * SEM aplicar conversões de timezone
@@ -30,7 +32,7 @@ export const formatSimpleDate = (dateString: string): string => {
     
     return `${day}/${month}/${year}`;
   } catch (error) {
-    console.error('Erro ao formatar data simples:', error);
+    logger.error('Erro ao formatar data simples:', error, 'SIMPLE_DATE_FORMATTER');
     return '';
   }
 };

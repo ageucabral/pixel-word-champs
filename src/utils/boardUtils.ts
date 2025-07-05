@@ -1,4 +1,5 @@
 import { GAME_CONSTANTS } from '@/constants/game';
+import { logger } from '@/utils/logger';
 
 export interface Position {
   row: number;
@@ -69,7 +70,7 @@ export const validateBoardContainsWords = (board: string[][], words: string[]): 
     }
     
     if (!found) {
-      console.error(`Palavra "${word}" não encontrada no tabuleiro!`);
+      logger.error(`Palavra "${word}" não encontrada no tabuleiro!`, undefined, 'BOARD_UTILS');
       return false;
     }
   }

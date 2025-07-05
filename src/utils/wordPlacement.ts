@@ -1,5 +1,6 @@
 
 import { type Position, type PlacedWord } from '@/utils/boardUtils';
+import { logger } from '@/utils/logger';
 
 export interface WordPlacementResult {
   board: string[][];
@@ -81,7 +82,7 @@ export class WordPlacer {
     for (const attempt of attempts) {
       if (this.canPlaceWord(word, attempt.row, attempt.col, attempt.dir)) {
         this.placeWord(word, attempt.row, attempt.col, attempt.dir);
-        console.log(`✅ "${word}" colocada ${attempt.dir} no centro em (${attempt.row}, ${attempt.col})`);
+        logger.debug(`✅ "${word}" colocada ${attempt.dir} no centro em (${attempt.row}, ${attempt.col})`, undefined, 'WORD_PLACEMENT');
         return true;
       }
     }

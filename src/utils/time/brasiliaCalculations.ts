@@ -4,6 +4,8 @@
  * Funções para calcular durações, períodos e tempo restante
  */
 
+import { logger } from '@/utils/logger';
+
 /**
  * CORRIGIDO: Calcula data de fim sem duplicação de timezone
  */
@@ -13,10 +15,10 @@ export const calculateEndDateWithDuration = (startDateTimeBrasilia: string, dura
   }
   
   try {
-    console.log('⏰ CÁLCULO DE FIM (SEM DUPLICAÇÃO):', {
+    logger.debug('⏰ CÁLCULO DE FIM (SEM DUPLICAÇÃO):', {
       startInput: startDateTimeBrasilia,
       duration: durationHours
-    });
+    }, 'BRASILIA_CALCULATIONS');
     
     // CORREÇÃO: Trabalhar diretamente com Date sem conversões manuais
     const startDate = new Date(startDateTimeBrasilia);
@@ -30,26 +32,26 @@ export const calculateEndDateWithDuration = (startDateTimeBrasilia: string, dura
     
     const finalEndDate = endDate > sameDayLimit ? sameDayLimit : endDate;
     
-    console.log('📊 Cálculo sem duplicação:', {
+    logger.debug('📊 Cálculo sem duplicação:', {
       startTime: startDate.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }),
       calculatedEnd: endDate.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }),
       finalEnd: finalEndDate.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }),
       wasLimited: endDate > sameDayLimit,
       durationUsed: durationHours
-    });
+    }, 'BRASILIA_CALCULATIONS');
     
     // Converter resultado final para UTC
     const utcResult = finalEndDate.toISOString();
     
-    console.log('✅ Resultado final (SEM DUPLICAÇÃO):', {
+    logger.debug('✅ Resultado final (SEM DUPLICAÇÃO):', {
       brasiliaEnd: finalEndDate.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }),
       utcEnd: utcResult,
       conversion: 'Conversão direta sem duplicação'
-    });
+    }, 'BRASILIA_CALCULATIONS');
     
     return utcResult;
   } catch (error) {
-    console.error('❌ Erro ao calcular data de fim:', error);
+    logger.error('❌ Erro ao calcular data de fim:', error, 'BRASILIA_CALCULATIONS');
     return '';
   }
 };
@@ -67,7 +69,7 @@ export const calculateTimeRemaining = (endDateUTC: string): number => {
     
     return Math.max(0, diff);
   } catch (error) {
-    console.error('Erro ao calcular tempo restante:', error);
+    logger.error('Erro ao calcular tempo restante:', error, 'BRASILIA_CALCULATIONS');
     return 0;
   }
 };
@@ -92,7 +94,7 @@ export const calculateTimeRemainingFormatted = (endDateUTC: string): string => {
     
     return `${minutes}m`;
   } catch (error) {
-    console.error('Erro ao calcular tempo restante:', error);
+    logger.error('Erro ao calcular tempo restante:', error, 'BRASILIA_CALCULATIONS');
     return '';
   }
 };

@@ -1,6 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { WeeklyConfig } from '@/types/weeklyConfig';
+import { logger } from '@/utils/logger';
 
 export interface DateOverlapValidationResult {
   hasOverlap: boolean;
@@ -33,7 +34,7 @@ export const checkDateOverlap = async (
     const { data: competitions, error } = await query;
 
     if (error) {
-      console.error('Erro ao buscar competições:', error);
+      logger.error('Erro ao buscar competições:', error, 'DATE_OVERLAP_VALIDATION');
       return {
         hasOverlap: false,
         errorMessage: 'Erro ao verificar sobreposições'
@@ -63,7 +64,7 @@ export const checkDateOverlap = async (
 
     return { hasOverlap: false };
   } catch (error) {
-    console.error('Erro na validação de sobreposição:', error);
+    logger.error('Erro na validação de sobreposição:', error, 'DATE_OVERLAP_VALIDATION');
     return {
       hasOverlap: false,
       errorMessage: 'Erro ao verificar sobreposições'

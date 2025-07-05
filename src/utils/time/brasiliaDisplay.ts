@@ -4,6 +4,8 @@
  * Funções para formatar datas e horários para exibição
  */
 
+import { logger } from '@/utils/logger';
+
 export const formatTimeForDisplay = (utcDateTime: string): string => {
   if (!utcDateTime) return '';
   
@@ -15,7 +17,7 @@ export const formatTimeForDisplay = (utcDateTime: string): string => {
       minute: '2-digit'
     });
   } catch (error) {
-    console.error('Erro ao formatar horário:', error);
+    logger.error('Erro ao formatar horário:', error, 'BRASILIA_DISPLAY');
     return '';
   }
 };
@@ -29,7 +31,7 @@ export const formatDateForDisplay = (utcDateTime: string): string => {
       timeZone: 'America/Sao_Paulo' 
     });
   } catch (error) {
-    console.error('Erro ao formatar data:', error);
+    logger.error('Erro ao formatar data:', error, 'BRASILIA_DISPLAY');
     return 'Data inválida';
   }
 };
@@ -64,7 +66,7 @@ export const formatBrasiliaDate = (date: Date | string | null | undefined, inclu
       timeZone: 'America/Sao_Paulo' 
     });
   } catch (error) {
-    console.error('Erro ao formatar data Brasília:', error);
+    logger.error('Erro ao formatar data Brasília:', error, 'BRASILIA_DISPLAY');
     return 'Data inválida';
   }
 };
@@ -81,7 +83,7 @@ export const formatDateInputToDisplay = (dateString: string): string => {
       timeZone: 'America/Sao_Paulo' 
     });
   } catch (error) {
-    console.error('Erro ao formatar data para input:', error);
+    logger.error('Erro ao formatar data para input:', error, 'BRASILIA_DISPLAY');
     return '';
   }
 };
@@ -97,7 +99,7 @@ export const formatWeeklyPeriodPreview = (startDate: string, endDate: string): s
     const end = formatDateInputToDisplay(endDate);
     return `${start} - ${end}`;
   } catch (error) {
-    console.error('Erro ao formatar período semanal:', error);
+    logger.error('Erro ao formatar período semanal:', error, 'BRASILIA_DISPLAY');
     return '';
   }
 };

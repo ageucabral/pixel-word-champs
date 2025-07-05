@@ -4,6 +4,8 @@
  * Funções core para conversão entre fusos horários
  */
 
+import { logger } from '@/utils/logger';
+
 /**
  * CORRIGIDO: Converte input datetime-local para UTC sem duplicação
  * Input: 15:30 Brasília → Output: 18:30 UTC (correto: +3h apenas uma vez)
@@ -12,10 +14,10 @@ export const convertBrasiliaInputToUTC = (brasiliaDateTime: string): string => {
   if (!brasiliaDateTime) return new Date().toISOString();
   
   try {
-    console.log('🔄 CONVERSÃO BRASÍLIA → UTC (SEM DUPLICAÇÃO):', {
+    logger.debug('🔄 CONVERSÃO BRASÍLIA → UTC (SEM DUPLICAÇÃO):', {
       input: brasiliaDateTime,
       step: 'Conversão direta sem adições extras'
-    });
+    }, 'BRASILIA_CORE');
     
     // CORREÇÃO DEFINITIVA: Usar Date diretamente sem parsing manual
     // O datetime-local já é interpretado no timezone local do sistema
@@ -23,23 +25,23 @@ export const convertBrasiliaInputToUTC = (brasiliaDateTime: string): string => {
     
     // Verificar se a data é válida
     if (isNaN(brasiliaDate.getTime())) {
-      console.error('❌ Data inválida:', brasiliaDateTime);
+      logger.error('❌ Data inválida:', brasiliaDateTime, 'BRASILIA_CORE');
       return new Date().toISOString();
     }
     
     // A conversão para UTC é automática pelo toISOString()
     const utcResult = brasiliaDate.toISOString();
     
-    console.log('✅ Conversão sem duplicação:', {
+    logger.debug('✅ Conversão sem duplicação:', {
       brasiliaInput: brasiliaDateTime,
       brasiliaTime: brasiliaDate.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }),
       utcResult: utcResult,
       operation: 'Conversão direta sem adições manuais'
-    });
+    }, 'BRASILIA_CORE');
     
     return utcResult;
   } catch (error) {
-    console.error('❌ Erro ao converter Brasília para UTC:', error);
+    logger.error('❌ Erro ao converter Brasília para UTC:', error, 'BRASILIA_CORE');
     return new Date().toISOString();
   }
 };
@@ -51,10 +53,10 @@ export const formatUTCForDateTimeLocal = (utcDateTime: string): string => {
   if (!utcDateTime) return '';
   
   try {
-    console.log('🔄 UTC → Brasília (SEM DUPLICAÇÃO):', {
+    logger.debug('🔄 UTC → Brasília (SEM DUPLICAÇÃO):', {
       input: utcDateTime,
       step: 'Conversão usando toLocaleString'
-    });
+    }, 'BRASILIA_CORE');
     
     const utcDate = new Date(utcDateTime);
     
@@ -63,15 +65,15 @@ export const formatUTCForDateTimeLocal = (utcDateTime: string): string => {
       timeZone: 'America/Sao_Paulo' 
     }).replace(' ', 'T').slice(0, 16);
     
-    console.log('✅ UTC → Brasília (sem duplicação):', {
+    logger.debug('✅ UTC → Brasília (sem duplicação):', {
       utcInput: utcDateTime,
       brasiliaResult: brasiliaString,
       operation: 'Conversão automática via toLocaleString'
-    });
+    }, 'BRASILIA_CORE');
     
     return brasiliaString;
   } catch (error) {
-    console.error('❌ Erro ao converter UTC para datetime-local:', error);
+    logger.error('❌ Erro ao converter UTC para datetime-local:', error, 'BRASILIA_CORE');
     return '';
   }
 };
@@ -120,15 +122,15 @@ export const getCurrentBrasiliaTime = (): string => {
     // Garantir formato padronizado DD/MM/YYYY HH:mm:ss
     const cleanedTime = brasiliaTime.replace(/,\s*/g, ' ').trim();
     
-    console.log('🕐 FORMATAÇÃO FINAL getCurrentBrasiliaTime:', {
+    logger.debug('🕐 FORMATAÇÃO FINAL getCurrentBrasiliaTime:', {
       original: brasiliaTime,
       cleaned: cleanedTime,
       regex: /^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}:\d{2}$/.test(cleanedTime)
-    });
+    }, 'BRASILIA_CORE');
     
     return cleanedTime;
   } catch (error) {
-    console.error('❌ Erro ao formatar horário atual:', error);
+    logger.error('❌ Erro ao formatar horário atual:', error, 'BRASILIA_CORE');
     // Fallback manual em caso de erro
     const fallback = now.toISOString().replace('T', ' ').slice(0, 19);
     return fallback;

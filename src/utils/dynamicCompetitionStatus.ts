@@ -4,6 +4,8 @@
  * Apenas funções de formatação, sem cálculos de status
  */
 
+import { logger } from '@/utils/logger';
+
 export type CompetitionStatus = 'scheduled' | 'active' | 'completed';
 
 /**
@@ -49,7 +51,7 @@ export const formatDateTimeBrasilia = (utcDateString: string): string => {
       minute: '2-digit'
     });
   } catch (error) {
-    console.error('❌ Erro ao formatar data:', error);
+    logger.error('❌ Erro ao formatar data:', error, 'DYNAMIC_COMPETITION_STATUS');
     return 'Data inválida';
   }
 };
