@@ -13,6 +13,7 @@ import {
   calculateEndDateWithDuration,
   validateCompetitionDuration 
 } from '@/utils/brasiliaTimeUnified';
+import { logger } from '@/utils/logger';
 
 interface ValidationResult {
   test: string;
@@ -34,7 +35,7 @@ export const TimeValidationPanel: React.FC = () => {
     const results: ValidationResult[] = [];
 
     // Teste 1: Conversão Brasília → UTC
-    console.log('🧪 TESTE 1: Conversão Brasília → UTC');
+    logger.info('🧪 TESTE 1: Conversão Brasília → UTC', {}, 'TIME_VALIDATION_PANEL');
     const brasiliaInput = '2025-06-26T15:30';
     const expectedUTC = '2025-06-26T18:30:00.000Z'; // +3h
     const actualUTC = convertBrasiliaInputToUTC(brasiliaInput);
@@ -49,7 +50,7 @@ export const TimeValidationPanel: React.FC = () => {
     });
 
     // Teste 2: Conversão UTC → Brasília para exibição
-    console.log('🧪 TESTE 2: Conversão UTC → Brasília para exibição');
+    logger.info('🧪 TESTE 2: Conversão UTC → Brasília para exibição', {}, 'TIME_VALIDATION_PANEL');
     const utcForDisplay = '2025-06-26T18:30:00.000Z';
     const expectedBrasilia = '26/06/2025 15:30:00'; // -3h SEM VÍRGULA
     const actualBrasilia = formatBrasiliaDate(utcForDisplay, true);
@@ -64,7 +65,7 @@ export const TimeValidationPanel: React.FC = () => {
     });
 
     // Teste 3: Roundtrip (Brasília → UTC → Brasília)
-    console.log('🧪 TESTE 3: Roundtrip (Brasília → UTC → Brasília)');
+    logger.info('🧪 TESTE 3: Roundtrip (Brasília → UTC → Brasília)', {}, 'TIME_VALIDATION_PANEL');
     const originalBrasilia = '2025-06-26T15:30';
     const convertedToUTC = convertBrasiliaInputToUTC(originalBrasilia);
     const backToBrasilia = formatUTCForDateTimeLocal(convertedToUTC);
@@ -79,7 +80,7 @@ export const TimeValidationPanel: React.FC = () => {
     });
 
     // Teste 4: Cálculo de duração em Brasília
-    console.log('🧪 TESTE 4: Cálculo de duração em Brasília');
+    logger.info('🧪 TESTE 4: Cálculo de duração em Brasília', {}, 'TIME_VALIDATION_PANEL');
     const startBrasilia = '2025-06-26T15:30';
     const duration = 3;
     const expectedEndBrasilia = '2025-06-26T18:30';
@@ -96,7 +97,7 @@ export const TimeValidationPanel: React.FC = () => {
     });
 
     // Teste 5: Validação de limite (23:59:59)
-    console.log('🧪 TESTE 5: Validação de limite (23:59:59)');
+    logger.info('🧪 TESTE 5: Validação de limite (23:59:59)', {}, 'TIME_VALIDATION_PANEL');
     const lateStart = '2025-06-26T22:00';
     const longDuration = 4;
     const validation = validateCompetitionDuration(lateStart, longDuration);
@@ -111,7 +112,7 @@ export const TimeValidationPanel: React.FC = () => {
     });
 
     // Teste 6: CORRIGIDO - Horário atual Brasília (formato padronizado)
-    console.log('🧪 TESTE 6: Horário atual Brasília (formato padronizado)');
+    logger.info('🧪 TESTE 6: Horário atual Brasília (formato padronizado)', {}, 'TIME_VALIDATION_PANEL');
     const currentBrasilia = getCurrentBrasiliaTime();
     const brazilianFormat = /^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}:\d{2}$/.test(currentBrasilia); // SEM VÍRGULA
     
@@ -126,7 +127,7 @@ export const TimeValidationPanel: React.FC = () => {
 
     // Teste 7: Teste personalizado com input do usuário
     if (testInput) {
-      console.log('🧪 TESTE 7: Teste personalizado');
+      logger.info('🧪 TESTE 7: Teste personalizado', {}, 'TIME_VALIDATION_PANEL');
       const customUTC = convertBrasiliaInputToUTC(testInput);
       const customBack = formatUTCForDateTimeLocal(customUTC);
       
@@ -147,14 +148,14 @@ export const TimeValidationPanel: React.FC = () => {
     const passedTests = results.filter(r => r.passed).length;
     const totalTests = results.length;
     
-    console.log(`\n✅ RESULTADO DOS TESTES: ${passedTests}/${totalTests} passaram`);
-    console.log('📊 RESUMO:', {
+    logger.info(`✅ RESULTADO DOS TESTES: ${passedTests}/${totalTests} passaram`, {}, 'TIME_VALIDATION_PANEL');
+    logger.info('📊 RESUMO:', {
       timestamp: getCurrentBrasiliaTime(),
       totalTests,
       passedTests,
       failedTests: totalTests - passedTests,
       allPassed: passedTests === totalTests
-    });
+    }, 'TIME_VALIDATION_PANEL');
   };
 
   const passedTests = validationResults.filter(r => r.passed).length;

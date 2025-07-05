@@ -7,6 +7,7 @@ import { UserListEmpty } from './UserListEmpty';
 import { UserModalsManager } from './UserModalsManager';
 import { useAllUsers, AllUsersData } from '@/hooks/useAllUsers';
 import { getCurrentBrasiliaTime } from '@/utils/brasiliaTimeUnified';
+import { logger } from '@/utils/logger';
 
 export const UserListContainer = () => {
   const { usersList: users = [], isLoading } = useAllUsers();
@@ -23,41 +24,37 @@ export const UserListContainer = () => {
   );
 
   const handleViewUser = (user: AllUsersData) => {
-    console.log('👁️ Visualizando usuário:', {
-      userId: user.id,
+    logger.info('👁️ Visualizando usuário:', {
       username: user.username,
       timestamp: getCurrentBrasiliaTime()
-    });
+    }, 'USER_LIST_CONTAINER');
     setSelectedUser(user);
     setShowDetailModal(true);
   };
 
   const handleEditUser = (user: AllUsersData) => {
-    console.log('✏️ Editando usuário:', {
-      userId: user.id,
+    logger.info('✏️ Editando usuário:', {
       username: user.username,
       timestamp: getCurrentBrasiliaTime()
-    });
+    }, 'USER_LIST_CONTAINER');
     setSelectedUser(user);
     setShowEditModal(true);
   };
 
   const handleBanUser = (user: AllUsersData) => {
-    console.log('🚫 Banindo usuário:', {
-      userId: user.id,
+    logger.info('🚫 Banindo usuário:', {
       username: user.username,
       timestamp: getCurrentBrasiliaTime()
-    });
+    }, 'USER_LIST_CONTAINER');
     setSelectedUser(user);
     setShowBanModal(true);
   };
 
   const handleDeleteUser = (user: AllUsersData) => {
-    console.log('🗑️ Deletando usuário:', {
-      userId: user.id,
+    logger.info('🗑️ Deletando usuário:', {
       username: user.username,
       timestamp: getCurrentBrasiliaTime()
-    });
+    }, 'USER_LIST_CONTAINER');
     setSelectedUser(user);
     setShowDeleteModal(true);
   };

@@ -7,6 +7,7 @@ import { Search, Users, Download, Loader2 } from 'lucide-react';
 import { AllUsersData } from '@/hooks/useUsersQuery';
 import { exportUsersToCSV } from '@/utils/csvExport';
 import { useToast } from "@/hooks/use-toast";
+import { logger } from '@/utils/logger';
 
 interface UserListHeaderProps {
   userCount: number;
@@ -36,7 +37,7 @@ export const UserListHeader = ({
         description: `${users.length} usuários exportados com sucesso.`,
       });
     } catch (error) {
-      console.error('Erro na exportação:', error);
+      logger.error('Erro na exportação:', { error }, 'USER_LIST_HEADER');
       toast({
         title: "Erro na exportação",
         description: "Não foi possível exportar os dados dos usuários.",

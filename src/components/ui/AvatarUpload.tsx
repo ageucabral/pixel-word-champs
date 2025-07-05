@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { avatarService } from '@/services/avatarService';
 import { profileService } from '@/services/profileService';
 import { useAuth } from '@/hooks/useAuth';
+import { logger } from '@/utils/logger';
 
 interface AvatarUploadProps {
   currentAvatar?: string;
@@ -56,7 +57,7 @@ const AvatarUpload = ({ currentAvatar, fallback, onAvatarUpdate, size = 'lg' }: 
 
       onAvatarUpdate?.(uploadResponse.data);
     } catch (error) {
-      console.error('Erro ao fazer upload:', error);
+      logger.error('Erro ao fazer upload:', { error }, 'AVATAR_UPLOAD');
       toast({
         title: "Erro no upload",
         description: error instanceof Error ? error.message : "Erro inesperado",

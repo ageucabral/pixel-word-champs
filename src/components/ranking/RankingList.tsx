@@ -2,6 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Trophy, Crown, Medal, Award } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 interface RankingPlayer {
   pos: number;
@@ -51,8 +52,8 @@ const RankingList = ({ weeklyRanking, user, totalWeeklyPlayers, getPrizeAmount }
     index === self.findIndex(p => p.user_id === player.user_id)
   );
 
-  console.log('🔍 Ranking original:', weeklyRanking.length, 'items');
-  console.log('🔍 Ranking após filtro:', uniqueRanking.length, 'items');
+  logger.info('🔍 Ranking original:', { count: weeklyRanking.length }, 'RANKING_LIST');
+  logger.info('🔍 Ranking após filtro:', { count: uniqueRanking.length }, 'RANKING_LIST');
 
   return (
     <Card className="shadow-sm border border-gray-200">

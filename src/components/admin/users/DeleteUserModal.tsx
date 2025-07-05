@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Trash2, AlertTriangle } from 'lucide-react';
 import { useUserMutations } from '@/hooks/useUserMutations';
+import { logger } from '@/utils/logger';
 
 interface DeleteUserModalProps {
   isOpen: boolean;
@@ -35,7 +36,7 @@ export const DeleteUserModal = ({ isOpen, onClose, user }: DeleteUserModalProps)
     }
 
     try {
-      console.log('🗑️ Iniciando exclusão COMPLETA do usuário:', user.username);
+      logger.info('🗑️ Iniciando exclusão COMPLETA do usuário:', { username: user.username }, 'DELETE_USER_MODAL');
       
       await deleteUser({
         userId: user.id,
@@ -48,7 +49,7 @@ export const DeleteUserModal = ({ isOpen, onClose, user }: DeleteUserModalProps)
       onClose();
       
     } catch (error) {
-      console.error('❌ Erro na exclusão completa:', error);
+      logger.error('❌ Erro na exclusão completa:', { error }, 'DELETE_USER_MODAL');
       // Não resetar o form se der erro, para o usuário tentar novamente
     }
   };

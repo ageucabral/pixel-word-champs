@@ -12,6 +12,7 @@ import EmailExchangeSection from './sections/EmailExchangeSection';
 import PhoneSection from './sections/PhoneSection';
 import PixConfigSection from './sections/PixConfigSection';
 import XPProgressSection from './sections/XPProgressSection';
+import { logger } from '@/utils/logger';
 
 const MyDataSection = () => {
   const { user } = useAuth();
@@ -95,7 +96,11 @@ const MyDataSection = () => {
 
     setIsLoading(true);
     try {
-      console.log('🔄 Salvando dados:', editData);
+      logger.info('🔄 Salvando dados:', { 
+        hasUsername: !!editData.username,
+        hasPhone: !!editData.phone,
+        hasPixKey: !!editData.pixKey
+      }, 'MY_DATA_SECTION');
       
       const result = await updateProfile({
         username: editData.username,
@@ -104,7 +109,9 @@ const MyDataSection = () => {
         pix_holder_name: editData.pixHolderName,
       });
 
-      console.log('💾 Resultado do salvamento:', result);
+      logger.info('💾 Resultado do salvamento:', {
+        success: result.success
+      }, 'MY_DATA_SECTION');
 
       if (result.success) {
         // Aguardar um pouco e atualizar dados
@@ -117,7 +124,7 @@ const MyDataSection = () => {
         });
         setIsEditing(false);
       } else {
-        console.error('❌ Erro no salvamento:', result.error);
+        logger.error('❌ Erro no salvamento:', { error: result.error }, 'MY_DATA_SECTION');
         toast({
           title: "Erro ao salvar",
           description: result.error || "Erro inesperado",
@@ -125,7 +132,7 @@ const MyDataSection = () => {
         });
       }
     } catch (error) {
-      console.error('❌ Erro inesperado:', error);
+      logger.error('❌ Erro inesperado:', { error }, 'MY_DATA_SECTION');
       toast({
         title: "Erro ao salvar",
         description: "Erro inesperado ao atualizar dados",

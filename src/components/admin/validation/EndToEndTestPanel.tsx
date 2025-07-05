@@ -10,6 +10,7 @@ import {
   formatUTCForDateTimeLocal,
   getCurrentBrasiliaTime 
 } from '@/utils/brasiliaTimeUnified';
+import { logger } from '@/utils/logger';
 
 interface EndToEndTest {
   step: string;
@@ -29,10 +30,10 @@ export const EndToEndTestPanel: React.FC = () => {
     setIsRunning(true);
     const results: EndToEndTest[] = [];
 
-    console.log('🎯 TESTE END-TO-END INICIADO:', { 
+    logger.info('🎯 TESTE END-TO-END INICIADO:', { 
       input: testInput, 
       timestamp: getCurrentBrasiliaTime() 
-    });
+    }, 'END_TO_END_TEST_PANEL');
 
     // Teste 1: Input do usuário
     results.push({
@@ -110,7 +111,7 @@ export const EndToEndTestPanel: React.FC = () => {
     const passedTests = results.filter(r => r.passed).length;
     const totalTests = results.length;
     
-    console.log('🎯 TESTE END-TO-END CONCLUÍDO:', {
+    logger.info('🎯 TESTE END-TO-END CONCLUÍDO:', {
       input: testInput,
       passedTests,
       totalTests,
@@ -120,7 +121,7 @@ export const EndToEndTestPanel: React.FC = () => {
         passed: r.passed,
         actual: r.actual
       }))
-    });
+    }, 'END_TO_END_TEST_PANEL');
   };
 
   const passedTests = testResults.filter(r => r.passed).length;

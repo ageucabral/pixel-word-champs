@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { StopCircle, Play, X, CloudRain, Frown, RotateCcw } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 interface GameOverModalProps {
   isOpen: boolean;
@@ -28,18 +29,18 @@ const GameOverModal = ({
   if (!isOpen) return null;
 
   const handleReviveClick = () => {
-    console.log('Iniciando anúncio para revive...');
+    logger.info('Iniciando anúncio para revive...', {}, 'GAME_OVER_MODAL');
     setIsWatchingAd(true);
   };
 
   const handleCloseAd = () => {
-    console.log('Anúncio fechado - ativando revive e adicionando tempo');
+    logger.info('Anúncio fechado - ativando revive e adicionando tempo', {}, 'GAME_OVER_MODAL');
     setIsWatchingAd(false);
     onRevive(); // Isso adiciona o tempo e fecha o modal do Game Over
   };
 
   const handleStopGame = () => {
-    console.log('Usuário escolheu parar o jogo - encerrando e marcando competição como concluída');
+    logger.info('Usuário escolheu parar o jogo - encerrando e marcando competição como concluída', {}, 'GAME_OVER_MODAL');
     onGoHome();
   };
 

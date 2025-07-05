@@ -7,6 +7,7 @@ import CompetitionCard from './CompetitionCard';
 import EmptyCompetitionsState from './EmptyCompetitionsState';
 import { Competition } from '@/types';
 import { cleanupInactiveCompetitionIcons } from '@/utils/competitionIcons';
+import { logger } from '@/utils/logger';
 
 interface CompetitionsListProps {
   competitions: Competition[];
@@ -46,7 +47,7 @@ const CompetitionsList = ({ competitions, onStartChallenge, onRefresh }: Competi
   };
 
   const handleViewRanking = (competitionId: string) => {
-    console.log('Ver ranking da competição:', competitionId);
+    logger.info('Ver ranking da competição:', { competitionId }, 'COMPETITIONS_LIST');
   };
 
   const totalCompetitions = activeCompetitions.length + scheduledCompetitions.length;
