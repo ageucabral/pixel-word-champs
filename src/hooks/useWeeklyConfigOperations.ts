@@ -2,6 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { WeeklyConfigRpcResponse, isWeeklyConfigRpcResponse } from '@/types/weeklyConfig';
 import { parseFinalizeResult } from '@/utils/typeGuards';
+import { logger } from '@/utils/logger';
 
 export const useWeeklyConfigOperations = () => {
   const updateCompetition = async (competitionId: string, startDate: string, endDate: string) => {
@@ -22,7 +23,7 @@ export const useWeeklyConfigOperations = () => {
         throw new Error(response?.error || 'Erro desconhecido');
       }
     } catch (err: any) {
-      console.error('Erro ao atualizar competição:', err);
+      logger.error('Erro ao atualizar competição:', { err }, 'USE_WEEKLY_CONFIG_OPERATIONS');
       return { success: false, error: err.message };
     }
   };
@@ -44,7 +45,7 @@ export const useWeeklyConfigOperations = () => {
         throw new Error(response?.error || 'Erro desconhecido');
       }
     } catch (err: any) {
-      console.error('Erro ao atualizar data de fim da competição ativa:', err);
+      logger.error('Erro ao atualizar data de fim da competição ativa:', { err }, 'USE_WEEKLY_CONFIG_OPERATIONS');
       return { success: false, error: err.message };
     }
   };
@@ -65,7 +66,7 @@ export const useWeeklyConfigOperations = () => {
         throw new Error(response?.error || 'Erro desconhecido');
       }
     } catch (err: any) {
-      console.error('Erro ao excluir competição:', err);
+      logger.error('Erro ao excluir competição:', { err }, 'USE_WEEKLY_CONFIG_OPERATIONS');
       return { success: false, error: err.message };
     }
   };
@@ -84,7 +85,7 @@ export const useWeeklyConfigOperations = () => {
         throw new Error(result.error || 'Erro desconhecido');
       }
     } catch (err: any) {
-      console.error('Erro ao finalizar competição:', err);
+      logger.error('Erro ao finalizar competição:', { err }, 'USE_WEEKLY_CONFIG_OPERATIONS');
       return { success: false, error: err.message };
     }
   };

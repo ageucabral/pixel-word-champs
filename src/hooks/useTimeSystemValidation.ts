@@ -7,6 +7,7 @@ import {
   formatUTCForDateTimeLocal,
   calculateEndDateWithDuration 
 } from '@/utils/brasiliaTimeUnified';
+import { logger } from '@/utils/logger';
 
 interface ValidationCheck {
   name: string;
@@ -25,7 +26,7 @@ export const useTimeSystemValidation = () => {
     const newChecks: ValidationCheck[] = [];
     const timestamp = getCurrentBrasiliaTime();
 
-    console.log('🔍 VALIDAÇÃO FINAL COM FORMATAÇÃO CORRIGIDA - Iniciando...', { timestamp });
+    logger.info('🔍 VALIDAÇÃO FINAL COM FORMATAÇÃO CORRIGIDA - Iniciando...', { timestamp }, 'USE_TIME_SYSTEM_VALIDATION');
 
     // Check 1: Conversão crítica DEFINITIVA 23:00 Brasília → 02:00 UTC (próximo dia)
     try {
@@ -151,13 +152,13 @@ export const useTimeSystemValidation = () => {
       const currentTime = getCurrentBrasiliaTime();
       const isValidFormat = /^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}:\d{2}$/.test(currentTime);
       
-      console.log('🔍 TESTE FINAL getCurrentBrasiliaTime:', {
+      logger.debug('🔍 TESTE FINAL getCurrentBrasiliaTime:', {
         currentTime,
         isValidFormat,
         regex: '/^\\d{2}/\\d{2}/\\d{4} \\d{2}:\\d{2}:\\d{2}$/',
         length: currentTime.length,
         charCodes: currentTime.split('').map(c => c.charCodeAt(0))
-      });
+      }, 'USE_TIME_SYSTEM_VALIDATION');
       
       newChecks.push({
         name: 'Horário Atual Brasília FINAL (Formato Garantido)',
@@ -208,7 +209,7 @@ export const useTimeSystemValidation = () => {
     setSystemHealthy(healthy);
     setIsValidating(false);
 
-    console.log('📊 VALIDAÇÃO FINAL COM FORMATAÇÃO CORRIGIDA CONCLUÍDA:', {
+    logger.info('📊 VALIDAÇÃO FINAL COM FORMATAÇÃO CORRIGIDA CONCLUÍDA:', {
       timestamp,
       totalChecks,
       passedChecks,
@@ -220,7 +221,7 @@ export const useTimeSystemValidation = () => {
         status: c.status,
         message: c.message
       }))
-    });
+    }, 'USE_TIME_SYSTEM_VALIDATION');
 
     return {
       healthy,

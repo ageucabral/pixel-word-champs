@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/logger';
 
 interface WeeklyRankingStats {
   current_week_start: string | null;
@@ -78,7 +79,7 @@ export const useWeeklyRanking = () => {
       }
 
     } catch (err: any) {
-      console.error('Erro ao carregar ranking semanal:', err);
+      logger.error('Erro ao carregar ranking semanal:', { err }, 'USE_WEEKLY_RANKING');
       setError(err.message || 'Erro ao carregar ranking semanal');
     } finally {
       setIsLoading(false);

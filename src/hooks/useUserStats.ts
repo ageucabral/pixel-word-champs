@@ -125,11 +125,11 @@ export const useUserStats = () => {
       const weekStart = new Date(today.getFullYear(), today.getMonth(), today.getDate() + diff);
       const weekStartStr = weekStart.toISOString().split('T')[0];
       
-      console.log('🔍 DEBUG RANKING:', {
+      logger.debug('🔍 DEBUG RANKING:', {
         userId: user.id,
         weekStartStr,
         today: today.toISOString().split('T')[0]
-      });
+      }, 'USE_USER_STATS');
 
       // Buscar ranking semanal
 
@@ -190,11 +190,11 @@ export const useUserStats = () => {
         bestWeeklyPosition: profile?.best_weekly_position || null
       };
       
-      console.log('📊 STATS FINAIS:', {
+      logger.debug('📊 STATS FINAIS:', {
         weeklyRanking,
         userStats,
         hasPosition: !!userStats.position
-      });
+      }, 'USE_USER_STATS');
 
       // Definir estatísticas finais
       setStats(userStats);

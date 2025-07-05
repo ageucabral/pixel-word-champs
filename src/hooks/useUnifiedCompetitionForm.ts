@@ -5,6 +5,7 @@ import { CompetitionFormData, CompetitionValidationResult } from '@/types/compet
 import { unifiedCompetitionService } from '@/services/unifiedCompetitionService';
 import { secureLogger } from '@/utils/secureLogger';
 import { validateCompetitionDuration, getCurrentBrasiliaTime } from '@/utils/brasiliaTimeUnified';
+import { logger } from '@/utils/logger';
 
 export const useUnifiedCompetitionForm = () => {
   const { toast } = useToast();
@@ -20,11 +21,11 @@ export const useUnifiedCompetitionForm = () => {
   });
 
   const updateField = useCallback((field: keyof CompetitionFormData, value: any) => {
-    console.log('📝 Campo alterado:', {
+    logger.debug('📝 Campo alterado:', {
       field,
       value,
       timestamp: getCurrentBrasiliaTime()
-    });
+    }, 'USE_UNIFIED_COMPETITION_FORM');
     
     setFormData(prev => {
       const newData = { ...prev, [field]: value };
@@ -33,11 +34,11 @@ export const useUnifiedCompetitionForm = () => {
       if (field === 'startDate' || field === 'duration') {
         if (newData.startDate && newData.duration) {
           try {
-            console.log('⏰ Recalculando endDate:', {
+            logger.debug('⏰ Recalculando endDate:', {
               startDate: newData.startDate,
               duration: newData.duration,
               timestamp: getCurrentBrasiliaTime()
-            });
+            }, 'USE_UNIFIED_COMPETITION_FORM');
             
             // Trabalhar com horário local (Brasília)
             const brasiliaStart = new Date(newData.startDate);
@@ -58,13 +59,13 @@ export const useUnifiedCompetitionForm = () => {
             
             newData.endDate = `${year}-${month}-${day}T${hours}:${minutes}`;
             
-            console.log('✅ EndDate calculado:', {
+            logger.debug('✅ EndDate calculado:', {
               brasiliaEnd: finalBrasiliaEnd.toLocaleString('pt-BR'),
               endDateFormat: newData.endDate,
               timestamp: getCurrentBrasiliaTime()
-            });
+            }, 'USE_UNIFIED_COMPETITION_FORM');
           } catch (error) {
-            console.error('❌ Erro ao calcular endDate:', error);
+            logger.error('❌ Erro ao calcular endDate:', { error }, 'USE_UNIFIED_COMPETITION_FORM');
           }
         }
       }

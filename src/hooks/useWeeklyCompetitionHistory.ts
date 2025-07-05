@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { WeeklyConfig } from '@/types/weeklyConfig';
+import { logger } from '@/utils/logger';
 
 interface CompetitionHistoryStats {
   totalParticipants: number;
@@ -88,7 +89,7 @@ export const useWeeklyCompetitionHistory = (page: number = 1, pageSize: number =
               }
             } as CompetitionHistoryItem;
           } catch (error) {
-            console.error('Erro ao buscar stats para competição:', config.id, error);
+            logger.error('Erro ao buscar stats para competição:', { competitionId: config.id, error }, 'USE_WEEKLY_COMPETITION_HISTORY');
             return {
               ...config,
               stats: {
@@ -106,7 +107,7 @@ export const useWeeklyCompetitionHistory = (page: number = 1, pageSize: number =
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Erro ao carregar histórico';
       setError(errorMessage);
-      console.error('Erro ao carregar histórico:', error);
+      logger.error('Erro ao carregar histórico:', { error }, 'USE_WEEKLY_COMPETITION_HISTORY');
     } finally {
       setIsLoading(false);
     }

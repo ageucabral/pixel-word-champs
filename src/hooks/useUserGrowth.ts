@@ -2,6 +2,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { getCurrentBrasiliaDate, createBrasiliaTimestamp } from '@/utils/brasiliaTimeUnified';
+import { logger } from '@/utils/logger';
 
 interface DailyUserData {
   date: string;
@@ -13,7 +14,7 @@ export const useUserGrowth = () => {
   return useQuery({
     queryKey: ['userGrowth'],
     queryFn: async (): Promise<DailyUserData[]> => {
-      console.log('📈 Buscando dados de crescimento de usuários...');
+      logger.info('📈 Buscando dados de crescimento de usuários...', {}, 'USE_USER_GROWTH');
 
       // Buscar dados dos últimos 7 dias usando horário de Brasília
       const sevenDaysAgo = getCurrentBrasiliaDate();
@@ -27,7 +28,7 @@ export const useUserGrowth = () => {
         .order('created_at', { ascending: true });
 
       if (error) {
-        console.error('❌ Erro ao buscar dados de crescimento:', error);
+        logger.error('❌ Erro ao buscar dados de crescimento:', { error }, 'USE_USER_GROWTH');
         throw error;
       }
 
@@ -62,7 +63,7 @@ export const useUserGrowth = () => {
         };
       });
 
-      console.log('📈 Dados de crescimento:', result);
+      logger.debug('📈 Dados de crescimento:', result, 'USE_USER_GROWTH');
       return result;
     },
     retry: 2,

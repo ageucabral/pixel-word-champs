@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/utils/logger';
 
 interface ParticipationData {
   id: string;
@@ -30,7 +31,7 @@ export const useWeeklyCompetitionParticipation = (competitionId: string) => {
     if (!competitionId || !user?.id) return;
 
     try {
-      console.log('🔍 Verificando participação na competição:', competitionId);
+      logger.debug('🔍 Verificando participação na competição:', { competitionId }, 'USE_WEEKLY_COMPETITION_PARTICIPATION');
 
       const { data, error } = await supabase
         .from('competition_participations')
@@ -40,21 +41,21 @@ export const useWeeklyCompetitionParticipation = (competitionId: string) => {
         .maybeSingle();
 
       if (error) {
-        console.error('❌ Erro ao verificar participação:', error);
+        logger.error('❌ Erro ao verificar participação:', { error }, 'USE_WEEKLY_COMPETITION_PARTICIPATION');
         throw error;
       }
 
       if (data) {
-        console.log('✅ Usuário já participando:', data);
+        logger.debug('✅ Usuário já participando:', data, 'USE_WEEKLY_COMPETITION_PARTICIPATION');
         setParticipation(data);
         setIsParticipating(true);
       } else {
-        console.log('ℹ️ Usuário não está participando ainda');
+        logger.debug('ℹ️ Usuário não está participando ainda', {}, 'USE_WEEKLY_COMPETITION_PARTICIPATION');
         setIsParticipating(false);
       }
 
     } catch (error) {
-      console.error('❌ Erro ao verificar participação:', error);
+      logger.error('❌ Erro ao verificar participação:', { error }, 'USE_WEEKLY_COMPETITION_PARTICIPATION');
     } finally {
       setIsLoading(false);
     }
@@ -64,7 +65,7 @@ export const useWeeklyCompetitionParticipation = (competitionId: string) => {
     if (!competitionId || !user?.id || isParticipating) return;
 
     try {
-      console.log('🎯 Inscrevendo usuário na competição (PARTICIPAÇÃO LIVRE):', competitionId);
+      logger.info('🎯 Inscrevendo usuário na competição (PARTICIPAÇÃO LIVRE):', { competitionId }, 'USE_WEEKLY_COMPETITION_PARTICIPATION');
 
       // Participação livre - sem verificação de limites
       const { data, error } = await supabase
@@ -78,11 +79,11 @@ export const useWeeklyCompetitionParticipation = (competitionId: string) => {
         .single();
 
       if (error) {
-        console.error('❌ Erro ao inscrever na competição:', error);
+        logger.error('❌ Erro ao inscrever na competição:', { error }, 'USE_WEEKLY_COMPETITION_PARTICIPATION');
         throw error;
       }
 
-      console.log('✅ Inscrição realizada com sucesso (PARTICIPAÇÃO LIVRE):', data);
+      logger.info('✅ Inscrição realizada com sucesso (PARTICIPAÇÃO LIVRE):', data, 'USE_WEEKLY_COMPETITION_PARTICIPATION');
       setParticipation(data);
       setIsParticipating(true);
 
@@ -94,7 +95,7 @@ export const useWeeklyCompetitionParticipation = (competitionId: string) => {
       return data;
 
     } catch (error) {
-      console.error('❌ Erro ao inscrever na competição:', error);
+      logger.error('❌ Erro ao inscrever na competição:', { error }, 'USE_WEEKLY_COMPETITION_PARTICIPATION');
       toast({
         title: "Erro na inscrição",
         description: "Não foi possível inscrever na competição. Tente novamente.",
@@ -108,7 +109,7 @@ export const useWeeklyCompetitionParticipation = (competitionId: string) => {
     if (!participation || !user?.id) return;
 
     try {
-      console.log('📊 Atualizando pontuação:', newScore);
+      logger.debug('📊 Atualizando pontuação:', { newScore }, 'USE_WEEKLY_COMPETITION_PARTICIPATION');
 
       const { data, error } = await supabase
         .from('competition_participations')
@@ -118,17 +119,17 @@ export const useWeeklyCompetitionParticipation = (competitionId: string) => {
         .single();
 
       if (error) {
-        console.error('❌ Erro ao atualizar pontuação:', error);
+        logger.error('❌ Erro ao atualizar pontuação:', { error }, 'USE_WEEKLY_COMPETITION_PARTICIPATION');
         throw error;
       }
 
-      console.log('✅ Pontuação atualizada:', data);
+      logger.debug('✅ Pontuação atualizada:', data, 'USE_WEEKLY_COMPETITION_PARTICIPATION');
       setParticipation(data);
 
       return data;
 
     } catch (error) {
-      console.error('❌ Erro ao atualizar pontuação:', error);
+      logger.error('❌ Erro ao atualizar pontuação:', { error }, 'USE_WEEKLY_COMPETITION_PARTICIPATION');
       throw error;
     }
   };
@@ -148,7 +149,7 @@ export const useWeeklyCompetitionParticipation = (competitionId: string) => {
           filter: `competition_id=eq.${competitionId} AND user_id=eq.${user.id}`
         },
         (payload) => {
-          console.log('📡 Mudança na participação detectada:', payload);
+          logger.debug('📡 Mudança na participação detectada:', payload, 'USE_WEEKLY_COMPETITION_PARTICIPATION');
           
           if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
             setParticipation(payload.new as ParticipationData);

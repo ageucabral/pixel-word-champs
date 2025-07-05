@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useWeeklyCompetitionActivation } from './useWeeklyCompetitionActivation';
 import { getCurrentBrasiliaTime } from '@/utils/brasiliaTimeUnified';
+import { logger } from '@/utils/logger';
 
 interface DiagnosticResult {
   hasActiveCompetition: boolean;
@@ -22,9 +23,9 @@ export const useWeeklyCompetitionDiagnostic = () => {
   const runDiagnostic = async () => {
     setIsChecking(true);
     try {
-      console.log('🔍 Executando diagnóstico de competições semanais', {
+      logger.info('🔍 Executando diagnóstico de competições semanais', {
         timestamp: getCurrentBrasiliaTime()
-      });
+      }, 'USE_WEEKLY_COMPETITION_DIAGNOSTIC');
 
       // Verificar competições ativas
       const { data: activeConfigs } = await supabase
@@ -87,10 +88,10 @@ export const useWeeklyCompetitionDiagnostic = () => {
       };
 
       setDiagnostic(result);
-      console.log('✅ Diagnóstico concluído:', result);
+      logger.info('✅ Diagnóstico concluído:', result, 'USE_WEEKLY_COMPETITION_DIAGNOSTIC');
       
     } catch (error) {
-      console.error('❌ Erro no diagnóstico:', error);
+      logger.error('❌ Erro no diagnóstico:', { error }, 'USE_WEEKLY_COMPETITION_DIAGNOSTIC');
       setDiagnostic({
         hasActiveCompetition: false,
         hasScheduledCompetitions: false,
@@ -106,14 +107,14 @@ export const useWeeklyCompetitionDiagnostic = () => {
   };
 
   const forceActivation = async () => {
-    console.log('🚀 Forçando ativação de competições semanais', {
+    logger.info('🚀 Forçando ativação de competições semanais', {
       timestamp: getCurrentBrasiliaTime()
-    });
+    }, 'USE_WEEKLY_COMPETITION_DIAGNOSTIC');
 
     const result = await activateWeeklyCompetitions();
     
     if (result.success) {
-      console.log('✅ Ativação forçada bem-sucedida');
+      logger.info('✅ Ativação forçada bem-sucedida', {}, 'USE_WEEKLY_COMPETITION_DIAGNOSTIC');
       // Re-executar diagnóstico após ativação
       await runDiagnostic();
     }

@@ -4,6 +4,7 @@ import { WeeklyConfig } from '@/types/weeklyConfig';
 import { WeeklyConfigService } from '@/services/weeklyConfigService';
 import { useWeeklyConfigOperations } from './useWeeklyConfigOperations';
 import { calculateNextDates } from '@/utils/weeklyConfigCalculations';
+import { logger } from '@/utils/logger';
 
 export const useWeeklyConfig = () => {
   const [activeConfig, setActiveConfig] = useState<WeeklyConfig | null>(null);
@@ -37,7 +38,7 @@ export const useWeeklyConfig = () => {
       }
 
     } catch (err: any) {
-      console.error('Erro ao carregar configurações:', err);
+      logger.error('Erro ao carregar configurações:', { err }, 'USE_WEEKLY_CONFIG');
       setError(err.message || 'Erro ao carregar configurações');
     } finally {
       setIsLoading(false);

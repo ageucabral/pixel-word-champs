@@ -1,6 +1,7 @@
 
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/logger';
 
 interface ActivationResult {
   success: boolean;
@@ -37,7 +38,7 @@ export const useWeeklyCompetitionActivation = () => {
         data: result
       };
     } catch (err: any) {
-      console.error('Erro ao ativar competições semanais:', err);
+      logger.error('Erro ao ativar competições semanais:', { err }, 'USE_WEEKLY_COMPETITION_ACTIVATION');
       return {
         success: false,
         error: err.message

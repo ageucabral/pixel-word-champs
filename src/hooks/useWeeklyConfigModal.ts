@@ -4,6 +4,7 @@ import { useWeeklyConfig } from './useWeeklyConfig';
 import { useWeeklyCompetitionActivation } from './useWeeklyCompetitionActivation';
 import { useWeeklyCompetitionHistory } from './useWeeklyCompetitionHistory';
 import { getCurrentBrasiliaTime } from '@/utils/brasiliaTimeUnified';
+import { logger } from '@/utils/logger';
 
 export const useWeeklyConfigModal = (onConfigUpdated: () => void) => {
   const [selectedCompetition, setSelectedCompetition] = useState<any>(null);
@@ -42,19 +43,19 @@ export const useWeeklyConfigModal = (onConfigUpdated: () => void) => {
   }, [scheduledConfigs, activeConfig, lastCompletedConfig]);
 
   const handleActivateCompetitions = async () => {
-    console.log('🎯 Ativando competições semanais manualmente', {
+    logger.info('🎯 Ativando competições semanais manualmente', {
       timestamp: getCurrentBrasiliaTime()
-    });
+    }, 'USE_WEEKLY_CONFIG_MODAL');
 
     const result = await activateWeeklyCompetitions();
     
     if (result.success) {
-      console.log('✅ Competições ativadas com sucesso:', result.data);
+      logger.info('✅ Competições ativadas com sucesso:', result.data, 'USE_WEEKLY_CONFIG_MODAL');
       await loadConfigurations();
       await refetchHistory();
       onConfigUpdated();
     } else {
-      console.error('❌ Erro ao ativar competições:', result.error);
+      logger.error('❌ Erro ao ativar competições:', { error: result.error }, 'USE_WEEKLY_CONFIG_MODAL');
     }
   };
 
@@ -68,15 +69,15 @@ export const useWeeklyConfigModal = (onConfigUpdated: () => void) => {
       const result = await scheduleCompetition(newStartDate, newEndDate);
       
       if (result.success) {
-        console.log('✅ Nova competição agendada com sucesso');
+        logger.info('✅ Nova competição agendada com sucesso', {}, 'USE_WEEKLY_CONFIG_MODAL');
         await loadConfigurations();
         await refetchHistory();
         onConfigUpdated();
       } else {
-        console.error('❌ Erro ao agendar competição:', result.error);
+        logger.error('❌ Erro ao agendar competição:', { error: result.error }, 'USE_WEEKLY_CONFIG_MODAL');
       }
     } catch (error) {
-      console.error('❌ Erro ao agendar competição:', error);
+      logger.error('❌ Erro ao agendar competição:', { error }, 'USE_WEEKLY_CONFIG_MODAL');
     } finally {
       setIsLoading(false);
     }
@@ -85,22 +86,22 @@ export const useWeeklyConfigModal = (onConfigUpdated: () => void) => {
   const handleFinalize = async () => {
     setIsLoading(true);
     try {
-      console.log('🏁 Finalizando competição semanal manualmente', {
+      logger.info('🏁 Finalizando competição semanal manualmente', {
         timestamp: getCurrentBrasiliaTime()
-      });
+      }, 'USE_WEEKLY_CONFIG_MODAL');
 
       const result = await finalizeCompetition();
       
       if (result.success) {
-        console.log('✅ Competição finalizada com sucesso:', result.data);
+        logger.info('✅ Competição finalizada com sucesso:', result.data, 'USE_WEEKLY_CONFIG_MODAL');
         await loadConfigurations();
         await refetchHistory();
         onConfigUpdated();
       } else {
-        console.error('❌ Erro ao finalizar competição:', result.error);
+        logger.error('❌ Erro ao finalizar competição:', { error: result.error }, 'USE_WEEKLY_CONFIG_MODAL');
       }
     } catch (error) {
-      console.error('❌ Erro ao finalizar competição:', error);
+      logger.error('❌ Erro ao finalizar competição:', { error }, 'USE_WEEKLY_CONFIG_MODAL');
     } finally {
       setIsLoading(false);
     }

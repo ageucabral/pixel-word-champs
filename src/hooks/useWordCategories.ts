@@ -2,6 +2,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from "@/hooks/use-toast";
+import { logger } from '@/utils/logger';
 
 interface WordCategory {
   id: string;
@@ -19,7 +20,7 @@ export const useWordCategories = () => {
   const { data: categories = [], isLoading } = useQuery({
     queryKey: ['wordCategories'],
     queryFn: async (): Promise<WordCategory[]> => {
-      console.log('🔍 Buscando categorias de palavras...');
+      logger.info('🔍 Buscando categorias de palavras...', {}, 'USE_WORD_CATEGORIES');
       
       const { data, error } = await supabase
         .from('word_categories')
@@ -28,11 +29,11 @@ export const useWordCategories = () => {
         .order('name');
 
       if (error) {
-        console.error('❌ Erro ao buscar categorias:', error);
+        logger.error('❌ Erro ao buscar categorias:', { error }, 'USE_WORD_CATEGORIES');
         throw error;
       }
 
-      console.log('📋 Categorias encontradas:', data?.length);
+      logger.debug('📋 Categorias encontradas:', { count: data?.length }, 'USE_WORD_CATEGORIES');
       return data || [];
     },
   });
@@ -73,7 +74,7 @@ export const useWordCategories = () => {
       queryClient.invalidateQueries({ queryKey: ['wordCategories'] });
     },
     onError: (error: any) => {
-      console.error('❌ Erro ao criar categoria:', error);
+      logger.error('❌ Erro ao criar categoria:', { error }, 'USE_WORD_CATEGORIES');
       
       let errorMessage = "Erro ao criar categoria";
       
@@ -115,7 +116,7 @@ export const useWordCategories = () => {
       queryClient.invalidateQueries({ queryKey: ['wordCategories'] });
     },
     onError: (error: any) => {
-      console.error('❌ Erro ao atualizar categoria:', error);
+      logger.error('❌ Erro ao atualizar categoria:', { error }, 'USE_WORD_CATEGORIES');
       toast({
         title: "Erro",
         description: "Erro ao atualizar categoria",
@@ -151,7 +152,7 @@ export const useWordCategories = () => {
       queryClient.invalidateQueries({ queryKey: ['wordCategories'] });
     },
     onError: (error: any) => {
-      console.error('❌ Erro ao remover categoria:', error);
+      logger.error('❌ Erro ao remover categoria:', { error }, 'USE_WORD_CATEGORIES');
       
       let errorMessage = "Erro ao remover categoria";
       if (error.message && error.message.includes('Senha incorreta')) {
