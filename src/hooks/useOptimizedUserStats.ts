@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from './useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { getCurrentBrasiliaDate, createBrasiliaTimestamp } from '@/utils/brasiliaTimeUnified';
+import { logger } from '@/utils/logger';
 
 interface UserStats {
   position: number | null;
@@ -182,7 +183,7 @@ export const useOptimizedUserStats = () => {
 
     } catch (error: any) {
       if (error.name !== 'AbortError') {
-        console.warn('Erro ao carregar estatísticas do usuário:', error);
+        logger.warn('Erro ao carregar estatísticas do usuário:', { error }, 'USE_OPTIMIZED_USER_STATS');
       }
     } finally {
       setIsLoading(false);

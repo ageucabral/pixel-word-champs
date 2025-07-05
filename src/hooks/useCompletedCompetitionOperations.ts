@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { WeeklyConfigRpcResponse, isWeeklyConfigRpcResponse } from '@/types/weeklyConfig';
+import { logger } from '@/utils/logger';
 
 interface DeleteCompletedCompetitionResult {
   success: boolean;
@@ -36,7 +37,7 @@ export const useCompletedCompetitionOperations = () => {
         throw new Error(response.error || 'Erro desconhecido');
       }
     } catch (err: any) {
-      console.error('Erro ao excluir competição finalizada:', err);
+      logger.error('Erro ao excluir competição finalizada:', { err }, 'USE_COMPLETED_COMPETITION_OPERATIONS');
       return { success: false, error: err.message };
     } finally {
       setIsDeleting(false);

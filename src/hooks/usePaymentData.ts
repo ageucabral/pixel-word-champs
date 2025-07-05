@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { IndividualPrize, GroupPrize } from '@/types/payment';
 import { secureLogger } from '@/utils/secureLogger';
 import { createBrasiliaTimestamp } from '@/utils/brasiliaTimeUnified';
+import { logger } from '@/utils/logger';
 
 export const usePaymentData = () => {
   const { toast } = useToast();
@@ -159,7 +160,7 @@ export const usePaymentData = () => {
           description: `Prêmio do ${position}º lugar atualizado com sucesso.`,
         });
       } catch (error) {
-        console.error('❌ Erro ao atualizar prêmio individual:', error);
+        logger.error('❌ Erro ao atualizar prêmio individual:', { error }, 'USE_PAYMENT_DATA');
         toast({
           title: "Erro",
           description: "Não foi possível atualizar o prêmio.",
@@ -201,7 +202,7 @@ export const usePaymentData = () => {
           description: "Configurações do grupo atualizadas com sucesso.",
         });
       } catch (error) {
-        console.error('❌ Erro ao atualizar grupo:', error);
+        logger.error('❌ Erro ao atualizar grupo:', { error }, 'USE_PAYMENT_DATA');
         toast({
           title: "Erro",
           description: "Não foi possível atualizar o grupo.",
@@ -235,7 +236,7 @@ export const usePaymentData = () => {
           description: `Grupo ${group.name} ${group.active ? 'desativado' : 'ativado'} com sucesso.`,
         });
       } catch (error) {
-        console.error('❌ Erro ao alternar estado do grupo:', error);
+        logger.error('❌ Erro ao alternar estado do grupo:', { error }, 'USE_PAYMENT_DATA');
         toast({
           title: "Erro",
           description: "Não foi possível alterar o estado do grupo.",

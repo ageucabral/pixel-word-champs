@@ -2,6 +2,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { getCurrentBrasiliaDate, createBrasiliaTimestamp } from '@/utils/brasiliaTimeUnified';
+import { logger } from '@/utils/logger';
 
 export interface UserStats {
   totalUsers: number;
@@ -21,7 +22,7 @@ export const useRealUserStats = () => {
   return useQuery({
     queryKey: ['realUserStats'],
     queryFn: async (): Promise<UserStats> => {
-      console.log('🔍 Buscando estatísticas reais do sistema...');
+      logger.info('🔍 Buscando estatísticas reais do sistema...', {}, 'USE_REAL_USER_STATS');
 
       // Buscar total de usuários
       const { count: totalUsers } = await supabase
@@ -148,11 +149,15 @@ async function calculateRetention(days: number): Promise<number> {
     // Calcular percentual de retenção
     const retentionRate = (returnedUsers / registeredUsers.length) * 100;
     
-    console.log(`📊 Retenção D${days}: ${returnedUsers}/${registeredUsers.length} = ${retentionRate.toFixed(1)}%`);
+    logger.info(`📊 Retenção D${days}:`, { 
+      returnedUsers, 
+      total: registeredUsers.length, 
+      retentionRate: `${retentionRate.toFixed(1)}%` 
+    }, 'USE_REAL_USER_STATS');
     
     return Math.round(retentionRate);
   } catch (error) {
-    console.error(`❌ Erro ao calcular retenção D${days}:`, error);
+    logger.error(`❌ Erro ao calcular retenção D${days}:`, { error }, 'USE_REAL_USER_STATS');
     return 0;
   }
 }

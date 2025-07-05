@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from '@/integrations/supabase/client';
 import { getCurrentBrasiliaDate } from '@/utils/brasiliaTimeUnified';
+import { logger } from '@/utils/logger';
 
 interface RankingPlayer {
   pos: number;
@@ -21,7 +22,7 @@ export const useRankings = () => {
 
   const fetchWeeklyRankings = async () => {
     try {
-      console.log('📊 Buscando ranking semanal...');
+      logger.info('📊 Buscando ranking semanal...', {}, 'USE_RANKINGS');
       
       // Calcular início da semana atual (segunda-feira) usando Brasília
       const today = getCurrentBrasiliaDate();
@@ -41,7 +42,7 @@ export const useRankings = () => {
       if (rankingError) throw rankingError;
 
       if (!rankingData || rankingData.length === 0) {
-        console.log('📊 Nenhum ranking semanal encontrado');
+        logger.info('📊 Nenhum ranking semanal encontrado', {}, 'USE_RANKINGS');
         setWeeklyRanking([]);
         return;
       }
@@ -54,7 +55,7 @@ export const useRankings = () => {
         .in('id', userIds);
 
       if (profilesError) {
-        console.warn('⚠️ Erro ao buscar perfis:', profilesError);
+        logger.warn('⚠️ Erro ao buscar perfis:', { profilesError }, 'USE_RANKINGS');
       }
 
       // Combinar dados do ranking com perfis
@@ -70,10 +71,10 @@ export const useRankings = () => {
         };
       });
 
-      console.log('📊 Ranking semanal carregado:', rankings.length, 'jogadores');
+      logger.info('📊 Ranking semanal carregado:', { count: rankings.length }, 'USE_RANKINGS');
       setWeeklyRanking(rankings);
     } catch (error) {
-      console.error('❌ Erro ao carregar ranking semanal:', error);
+      logger.error('❌ Erro ao carregar ranking semanal:', { error }, 'USE_RANKINGS');
       toast({
         title: "Erro ao carregar ranking semanal",
         description: "Não foi possível carregar os dados do ranking.",
@@ -91,10 +92,10 @@ export const useRankings = () => {
 
       if (error) throw error;
       
-      console.log('📊 Total de jogadores ativos:', count);
+      logger.info('📊 Total de jogadores ativos:', { count }, 'USE_RANKINGS');
       setTotalPlayers(count || 0);
     } catch (error) {
-      console.error('❌ Erro ao buscar total de jogadores:', error);
+      logger.error('❌ Erro ao buscar total de jogadores:', { error }, 'USE_RANKINGS');
     }
   };
 

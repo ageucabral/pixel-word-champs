@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/logger';
 
 interface UsernameCheckState {
   checking: boolean;
@@ -38,7 +39,7 @@ export const useUsernameVerification = (username: string) => {
           exists: data.username_exists || false
         });
       } catch (error) {
-        console.error('Erro ao verificar username:', error);
+        logger.error('Erro ao verificar username:', { error }, 'USE_USERNAME_VERIFICATION');
         setUsernameCheck({ checking: false, available: true, exists: false });
       }
     };

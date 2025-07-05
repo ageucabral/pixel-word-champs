@@ -2,6 +2,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/logger';
 
 export const useResetScores = () => {
   const { toast } = useToast();
@@ -47,7 +48,7 @@ export const useResetScores = () => {
         });
 
       if (logError) {
-        console.warn('⚠️ Erro ao registrar log:', logError);
+        logger.warn('⚠️ Erro ao registrar log:', { logError }, 'USE_RESET_SCORES');
       }
     },
     onSuccess: () => {

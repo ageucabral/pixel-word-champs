@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/logger';
 
 interface AutomationLog {
   id: string;
@@ -53,7 +54,7 @@ export const useAutomationLogs = (page: number = 1, pageSize: number = 10) => {
 
     } catch (err) {
       setError('Erro ao carregar logs de automação');
-      console.error('Erro ao buscar logs:', err);
+      logger.error('Erro ao buscar logs:', { err }, 'USE_AUTOMATION_LOGS');
     } finally {
       setIsLoading(false);
     }

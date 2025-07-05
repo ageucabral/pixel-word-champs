@@ -4,6 +4,7 @@ import { paymentService } from '@/services/paymentService';
 import { useToast } from "@/hooks/use-toast";
 import { PaymentRecord } from '@/services/paymentService';
 import { getCurrentBrasiliaDate, createBrasiliaTimestamp } from '@/utils/brasiliaTimeUnified';
+import { logger } from '@/utils/logger';
 
 export const usePixExportModal = (open: boolean, prizeLevel: string) => {
   const { toast } = useToast();
@@ -27,7 +28,7 @@ export const usePixExportModal = (open: boolean, prizeLevel: string) => {
       setAllWinners(winners);
       setDisplayWinners(winners);
     } catch (error) {
-      console.error('Erro ao carregar ganhadores:', error);
+      logger.error('Erro ao carregar ganhadores:', { error }, 'USE_PIX_EXPORT_MODAL');
       toast({
         title: "Erro",
         description: "Não foi possível carregar os ganhadores",
@@ -69,7 +70,7 @@ export const usePixExportModal = (open: boolean, prizeLevel: string) => {
         description: `${filtered.length} ganhadores encontrados no período`,
       });
     } catch (error) {
-      console.error('Erro ao filtrar:', error);
+      logger.error('Erro ao filtrar:', { error }, 'USE_PIX_EXPORT_MODAL');
       toast({
         title: "Erro",
         description: "Erro ao aplicar filtro",
@@ -113,7 +114,7 @@ export const usePixExportModal = (open: boolean, prizeLevel: string) => {
         });
       }
     } catch (error) {
-      console.error('Erro ao marcar como pago:', error);
+      logger.error('Erro ao marcar como pago:', { error }, 'USE_PIX_EXPORT_MODAL');
       toast({
         title: "Erro",
         description: "Erro ao marcar pagamento como pago",
@@ -151,7 +152,7 @@ export const usePixExportModal = (open: boolean, prizeLevel: string) => {
         description: `${pendingWinners.length} pagamentos marcados como pagos`,
       });
     } catch (error) {
-      console.error('Erro ao marcar todos como pagos:', error);
+      logger.error('Erro ao marcar todos como pagos:', { error }, 'USE_PIX_EXPORT_MODAL');
       toast({
         title: "Erro",
         description: "Erro ao marcar pagamentos como pagos",
