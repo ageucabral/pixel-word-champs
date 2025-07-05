@@ -17,6 +17,7 @@ export const useUsernameVerification = (username: string) => {
 
   useEffect(() => {
     const checkUsernameAvailability = async () => {
+      // Verificação antecipada - não executar se não necessário  
       if (!username || username.length < 3) {
         setUsernameCheck({ checking: false, available: true, exists: false });
         return;
@@ -42,7 +43,8 @@ export const useUsernameVerification = (username: string) => {
       }
     };
 
-    const debounceTimer = setTimeout(checkUsernameAvailability, 500);
+    // Debounce maior para evitar chamadas excessivas
+    const debounceTimer = setTimeout(checkUsernameAvailability, 1000);
     return () => clearTimeout(debounceTimer);
   }, [username]);
 

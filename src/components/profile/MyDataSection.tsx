@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
@@ -19,15 +19,19 @@ const MyDataSection = () => {
   const { toast } = useToast();
   
   const [isEditing, setIsEditing] = useState(false);
-  const [editData, setEditData] = useState({
+  const [showPixKey, setShowPixKey] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Memoizar dados iniciais para evitar re-inicializações
+  const initialEditData = useMemo(() => ({
     username: user?.username || '',
     phone: user?.phone || '',
     pixKey: user?.pix_key || '',
     pixHolderName: user?.pix_holder_name || '',
     pixType: 'cpf' as 'cpf' | 'email' | 'phone' | 'random'
-  });
-  const [showPixKey, setShowPixKey] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  }), [user?.username, user?.phone, user?.pix_key, user?.pix_holder_name]);
+
+  const [editData, setEditData] = useState(initialEditData);
 
   // Hooks de verificação - só executar quando em modo de edição
   const usernameCheck = useUsernameVerification(isEditing ? editData.username : '');
@@ -37,51 +41,40 @@ const MyDataSection = () => {
     return username.trim().length >= 3 && username.trim().length <= 30;
   };
 
-  // Verificar se há conflitos de duplicidade
-  const hasUsernameConflict = () => {
+  // Memoizar verificações de conflito
+  const hasUsernameConflict = useMemo(() => {
     if (!isEditing || editData.username === user?.username) return false;
     return editData.username.length >= 3 && usernameCheck.exists;
-  };
+  }, [isEditing, editData.username, user?.username, usernameCheck.exists]);
 
-  const hasPhoneConflict = () => {
+  const hasPhoneConflict = useMemo(() => {
     if (!isEditing) return false;
     const cleanPhone = editData.phone.replace(/\D/g, '');
     const cleanCurrentPhone = (user?.phone || '').replace(/\D/g, '');
     if (cleanPhone === cleanCurrentPhone) return false;
     return cleanPhone.length >= 10 && phoneCheck.exists;
-  };
+  }, [isEditing, editData.phone, user?.phone, phoneCheck.exists]);
 
-  const canSave = () => {
+  const canSave = useMemo(() => {
     if (!isValidUsername(editData.username)) return false;
-    if (hasUsernameConflict() || hasPhoneConflict()) return false;
+    if (hasUsernameConflict || hasPhoneConflict) return false;
     if (usernameCheck.checking || phoneCheck.checking) return false;
     return true;
-  };
+  }, [editData.username, hasUsernameConflict, hasPhoneConflict, usernameCheck.checking, phoneCheck.checking]);
 
-  const handleStartEdit = () => {
-    setEditData({
-      username: user?.username || '',
-      phone: user?.phone || '',
-      pixKey: user?.pix_key || '',
-      pixHolderName: user?.pix_holder_name || '',
-      pixType: 'cpf'
-    });
+  // Handlers memoizados
+  const handleStartEdit = useCallback(() => {
+    setEditData(initialEditData);
     setIsEditing(true);
-  };
+  }, [initialEditData]);
 
-  const handleCancelEdit = () => {
+  const handleCancelEdit = useCallback(() => {
     setIsEditing(false);
-    setEditData({
-      username: user?.username || '',
-      phone: user?.phone || '',
-      pixKey: user?.pix_key || '',
-      pixHolderName: user?.pix_holder_name || '',
-      pixType: 'cpf'
-    });
-  };
+    setEditData(initialEditData);
+  }, [initialEditData]);
 
-  const handleSave = async () => {
-    if (!canSave()) {
+  const handleSave = useCallback(async () => {
+    if (!canSave) {
       toast({
         title: "Não é possível salvar",
         description: "Verifique os dados informados e tente novamente.",
@@ -121,9 +114,9 @@ const MyDataSection = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [canSave, editData, updateProfile, toast]);
 
-  const getAvatarFallback = () => {
+  const getAvatarFallback = useCallback(() => {
     if (user?.username && user.username.length > 0) {
       return user.username.charAt(0).toUpperCase();
     }
@@ -131,7 +124,7 @@ const MyDataSection = () => {
       return user.email.charAt(0).toUpperCase();
     }
     return 'U';
-  };
+  }, [user?.username, user?.email]);
 
   return (
     <div className="space-y-6">
@@ -149,7 +142,7 @@ const MyDataSection = () => {
           isLoading={isLoading}
           isValidUsername={isValidUsername}
           editUsername={editData.username}
-          canSave={canSave()}
+          canSave={canSave}
           onStartEdit={handleStartEdit}
           onCancelEdit={handleCancelEdit}
           onSave={handleSave}
@@ -193,7 +186,7 @@ const MyDataSection = () => {
             onToggleShowPixKey={() => setShowPixKey(!showPixKey)}
           />
 
-          {isEditing && (hasUsernameConflict() || hasPhoneConflict()) && (
+          {isEditing && (hasUsernameConflict || hasPhoneConflict) && (
             <div className="bg-red-50 p-3 rounded-lg border border-red-200">
               <p className="text-sm text-red-800">
                 <strong>Atenção:</strong> Alguns dados já estão em uso por outro usuário. 
