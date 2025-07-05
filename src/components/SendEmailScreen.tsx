@@ -6,6 +6,7 @@ import { ArrowLeft, Mail, Send } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { logger } from '@/utils/logger';
 
 interface SendEmailScreenProps {
   onBack: () => void;
@@ -52,7 +53,7 @@ const SendEmailScreen = ({ onBack }: SendEmailScreenProps) => {
       
       onBack();
     } catch (error) {
-      console.error('Erro ao enviar email:', error);
+      logger.error('Erro ao enviar email:', { error }, 'SEND_EMAIL');
       toast({
         title: "Erro ao enviar email",
         description: "Tente novamente mais tarde",

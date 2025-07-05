@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Database, RefreshCw, Trash2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { DeleteInactiveWordsModal } from './content/DeleteInactiveWordsModal';
+import { logger } from '@/utils/logger';
 
 export const WordsCount = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -13,7 +14,7 @@ export const WordsCount = () => {
   const { data: counts, isLoading, error, refetch } = useQuery({
     queryKey: ['wordsCount'],
     queryFn: async () => {
-      console.log('🔍 Consultando contagem de palavras no banco...');
+      logger.info('🔍 Consultando contagem de palavras no banco...', undefined, 'WORDS_COUNT');
       
       // Contar palavras ativas
       const { count: activeCount, error: activeError } = await supabase
@@ -22,7 +23,7 @@ export const WordsCount = () => {
         .eq('is_active', true);
 
       if (activeError) {
-        console.error('❌ Erro ao contar palavras ativas:', activeError);
+        logger.error('❌ Erro ao contar palavras ativas:', { error: activeError }, 'WORDS_COUNT');
         throw activeError;
       }
 
@@ -33,7 +34,7 @@ export const WordsCount = () => {
         .eq('is_active', false);
 
       if (inactiveError) {
-        console.error('❌ Erro ao contar palavras inativas:', inactiveError);
+        logger.error('❌ Erro ao contar palavras inativas:', { error: inactiveError }, 'WORDS_COUNT');
         throw inactiveError;
       }
 
@@ -43,7 +44,7 @@ export const WordsCount = () => {
         .select('*', { count: 'exact', head: true });
 
       if (totalError) {
-        console.error('❌ Erro ao contar total de palavras:', totalError);
+        logger.error('❌ Erro ao contar total de palavras:', { error: totalError }, 'WORDS_COUNT');
         throw totalError;
       }
 
@@ -53,7 +54,7 @@ export const WordsCount = () => {
         total: totalCount || 0
       };
 
-      console.log('📊 Contagem de palavras:', result);
+      logger.info('📊 Contagem de palavras:', result, 'WORDS_COUNT');
       return result;
     },
     refetchInterval: 10000, // Atualizar a cada 10 segundos

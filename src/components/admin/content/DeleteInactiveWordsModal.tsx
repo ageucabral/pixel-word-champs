@@ -8,6 +8,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Trash2, AlertTriangle, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from "@/hooks/use-toast";
+import { logger } from '@/utils/logger';
 
 interface DeleteInactiveWordsModalProps {
   isOpen: boolean;
@@ -34,7 +35,7 @@ export const DeleteInactiveWordsModal = ({ isOpen, onClose, onSuccess, inactiveW
     setIsDeleting(true);
     
     try {
-      console.log('🗑️ Iniciando exclusão de palavras inativas...');
+      logger.info('🗑️ Iniciando exclusão de palavras inativas...', undefined, 'DELETE_INACTIVE_WORDS');
       
       const { error, count } = await supabase
         .from('level_words')
@@ -42,11 +43,11 @@ export const DeleteInactiveWordsModal = ({ isOpen, onClose, onSuccess, inactiveW
         .eq('is_active', false);
 
       if (error) {
-        console.error('❌ Erro ao deletar palavras inativas:', error);
+        logger.error('❌ Erro ao deletar palavras inativas:', { error }, 'DELETE_INACTIVE_WORDS');
         throw error;
       }
 
-      console.log(`✅ ${count} palavras inativas deletadas com sucesso`);
+      logger.info(`✅ ${count} palavras inativas deletadas com sucesso`, { count }, 'DELETE_INACTIVE_WORDS');
       
       toast({
         title: "Sucesso!",
@@ -58,7 +59,7 @@ export const DeleteInactiveWordsModal = ({ isOpen, onClose, onSuccess, inactiveW
       onClose();
       setPassword('');
     } catch (error: any) {
-      console.error('❌ Erro durante exclusão:', error);
+      logger.error('❌ Erro durante exclusão:', { error }, 'DELETE_INACTIVE_WORDS');
       toast({
         title: "Erro ao deletar",
         description: error.message || "Falha ao deletar palavras inativas",

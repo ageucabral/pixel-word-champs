@@ -114,7 +114,7 @@ const RankingScreen = () => {
         });
       }
     } catch (err) {
-      console.error('Erro ao carregar competição:', err);
+      logger.error('Erro ao carregar competição:', { err }, 'RANKING_SCREEN');
     }
   };
   const loadRanking = async (page: number = 1) => {

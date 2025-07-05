@@ -9,6 +9,7 @@ import { Upload, FileText, AlertCircle, CheckCircle, Info, Layers } from 'lucide
 import { useToast } from "@/hooks/use-toast";
 import { useWordCategories } from '@/hooks/useWordCategories';
 import { saveWordsToDatabase } from '@/services/wordStorageService';
+import { logger } from '@/utils/logger';
 
 export const CSVUpload = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -85,7 +86,7 @@ export const CSVUpload = () => {
         description: `${skippedWords.length} palavras foram ignoradas por pertencerem a categorias inexistentes`,
         variant: "destructive",
       });
-      console.log('Palavras ignoradas:', skippedWords);
+      logger.info('Palavras ignoradas:', { skippedWords }, 'CSV_UPLOAD');
     }
     
     return categorizedWords;
@@ -134,7 +135,7 @@ export const CSVUpload = () => {
       if (fileInput) fileInput.value = '';
 
     } catch (error) {
-      console.error('Erro no upload:', error);
+      logger.error('Erro no upload:', { error }, 'CSV_UPLOAD');
       toast({
         title: "Erro",
         description: "Erro ao processar o arquivo CSV",
@@ -181,7 +182,7 @@ export const CSVUpload = () => {
                               (categoryName === 'geral' ? { id: '', name: 'geral' } : null);
           
           if (!categoryInDb) {
-            console.log(`Categoria "${categoryName}" não encontrada - pulando`);
+            logger.warn(`Categoria "${categoryName}" não encontrada - pulando`, { categoryName }, 'CSV_UPLOAD');
             continue;
           }
 
@@ -192,9 +193,9 @@ export const CSVUpload = () => {
           totalImported += result.count;
           categoriesProcessed++;
 
-          console.log(`Categoria "${categoryName}": ${result.count} palavras importadas`);
+          logger.info(`Categoria "${categoryName}": ${result.count} palavras importadas`, { categoryName, count: result.count }, 'CSV_UPLOAD');
         } catch (error) {
-          console.error(`Erro ao processar categoria "${categoryName}":`, error);
+          logger.error(`Erro ao processar categoria "${categoryName}":`, { error, categoryName }, 'CSV_UPLOAD');
         }
       }
 
@@ -209,7 +210,7 @@ export const CSVUpload = () => {
       if (fileInput) fileInput.value = '';
 
     } catch (error) {
-      console.error('Erro no upload:', error);
+      logger.error('Erro no upload:', { error }, 'CSV_UPLOAD');
       toast({
         title: "Erro",
         description: "Erro ao processar o arquivo CSV",
