@@ -8,6 +8,7 @@ import { ArrowLeft, Trophy, Users, Calendar, Medal, Crown } from 'lucide-react';
 import PlayerAvatar from '@/components/ui/PlayerAvatar';
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/logger';
 import {
   Table,
   TableBody,
@@ -73,7 +74,7 @@ export default function WeeklyCompetitionRanking() {
 
     setIsLoading(true);
     try {
-      console.log('🔄 Carregando dados da competição:', competitionId);
+      logger.info('🔄 Carregando dados da competição:', { competitionId }, 'WEEKLY_COMPETITION_RANKING');
 
       // Carregar informações da competição
       const { data: competitionData, error: competitionError } = await supabase
@@ -83,11 +84,11 @@ export default function WeeklyCompetitionRanking() {
         .single();
 
       if (competitionError) {
-        console.error('❌ Erro ao carregar competição:', competitionError);
+        logger.error('❌ Erro ao carregar competição:', { competitionError }, 'WEEKLY_COMPETITION_RANKING');
         throw competitionError;
       }
 
-      console.log('✅ Competição carregada:', competitionData);
+      logger.info('✅ Competição carregada:', { competitionData }, 'WEEKLY_COMPETITION_RANKING');
 
       // Contar total de participantes
       const { count: totalParticipants } = await supabase
@@ -118,7 +119,7 @@ export default function WeeklyCompetitionRanking() {
         .order('user_score', { ascending: false });
 
       if (participationsError) {
-        console.error('❌ Erro ao carregar participações:', participationsError);
+        logger.error('❌ Erro ao carregar participações:', { participationsError }, 'WEEKLY_COMPETITION_RANKING');
         throw participationsError;
       }
 
@@ -130,7 +131,7 @@ export default function WeeklyCompetitionRanking() {
         .in('id', userIds);
       
       if (profilesError) {
-        console.error('❌ Erro ao carregar perfis:', profilesError);
+        logger.error('❌ Erro ao carregar perfis:', { profilesError }, 'WEEKLY_COMPETITION_RANKING');
         throw profilesError;
       }
 
@@ -150,14 +151,14 @@ export default function WeeklyCompetitionRanking() {
         };
       });
 
-      console.log('📊 Ranking carregado:', rankingParticipants.length, 'participantes');
+      logger.info('📊 Ranking carregado:', { participantsCount: rankingParticipants.length }, 'WEEKLY_COMPETITION_RANKING');
       setRanking(rankingParticipants);
 
       // Atualizar as posições no banco de dados
       await updateParticipantPositions(competitionId, rankingParticipants);
 
     } catch (error) {
-      console.error('❌ Erro ao carregar dados:', error);
+      logger.error('❌ Erro ao carregar dados:', { error }, 'WEEKLY_COMPETITION_RANKING');
       toast({
         title: "Erro",
         description: "Não foi possível carregar os dados da competição.",
@@ -171,7 +172,7 @@ export default function WeeklyCompetitionRanking() {
   // Função para atualizar as posições dos participantes no banco de dados
   const updateParticipantPositions = async (competitionId: string, participants: RankingParticipant[]) => {
     try {
-      console.log('🔄 Atualizando posições dos participantes...');
+      logger.info('🔄 Atualizando posições dos participantes...', {}, 'WEEKLY_COMPETITION_RANKING');
       
       for (const participant of participants) {
         await supabase
@@ -181,9 +182,9 @@ export default function WeeklyCompetitionRanking() {
           .eq('user_id', participant.user_id);
       }
       
-      console.log('✅ Posições atualizadas com sucesso');
+      logger.info('✅ Posições atualizadas com sucesso', {}, 'WEEKLY_COMPETITION_RANKING');
     } catch (error) {
-      console.error('❌ Erro ao atualizar posições:', error);
+      logger.error('❌ Erro ao atualizar posições:', { error }, 'WEEKLY_COMPETITION_RANKING');
     }
   };
 
@@ -191,7 +192,7 @@ export default function WeeklyCompetitionRanking() {
   useEffect(() => {
     if (!competitionId) return;
 
-    console.log('🔄 Configurando monitoramento em tempo real para competição:', competitionId);
+    logger.info('🔄 Configurando monitoramento em tempo real para competição:', { competitionId }, 'WEEKLY_COMPETITION_RANKING');
 
     const channel = supabase
       .channel(`competition-${competitionId}`)
@@ -204,14 +205,14 @@ export default function WeeklyCompetitionRanking() {
           filter: `competition_id=eq.${competitionId}`
         },
         (payload) => {
-          console.log('📡 Mudança detectada nas participações:', payload);
+          logger.info('📡 Mudança detectada nas participações:', { payload }, 'WEEKLY_COMPETITION_RANKING');
           loadCompetitionData(); // Recarregar dados quando houver mudanças
         }
       )
       .subscribe();
 
     return () => {
-      console.log('🔌 Desconectando canal de tempo real');
+      logger.info('🔌 Desconectando canal de tempo real', {}, 'WEEKLY_COMPETITION_RANKING');
       supabase.removeChannel(channel);
     };
   }, [competitionId]);

@@ -1,6 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { WeeklyConfig } from '@/types/weeklyConfig';
+import { logger } from '@/utils/logger';
 
 export class WeeklyConfigService {
   static async loadActiveConfig(): Promise<WeeklyConfig | null> {
@@ -62,7 +63,7 @@ export class WeeklyConfigService {
 
       return { success: true, data };
     } catch (err: any) {
-      console.error('Erro ao agendar competição:', err);
+      logger.error('Erro ao agendar competição:', { err }, 'WEEKLY_CONFIG_SERVICE');
       return { success: false, error: err.message };
     }
   }
@@ -75,7 +76,7 @@ export class WeeklyConfigService {
 
       return { success: true, data };
     } catch (err: any) {
-      console.error('Erro ao finalizar competição:', err);
+      logger.error('Erro ao finalizar competição:', { err }, 'WEEKLY_CONFIG_SERVICE');
       return { success: false, error: err.message };
     }
   }

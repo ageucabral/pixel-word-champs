@@ -2,11 +2,12 @@
 import { supabase } from '@/integrations/supabase/client';
 import { createSuccessResponse, createErrorResponse, handleServiceError } from '@/utils/apiHelpers';
 import { ApiResponse } from '@/types';
+import { logger } from '@/utils/logger';
 
 export class CompetitionStatusService {
   async updateSingleCompetitionStatus(competitionId: string, newStatus: string): Promise<ApiResponse<void>> {
     try {
-      console.log(`🔄 Atualizando status da competição ${competitionId} para: ${newStatus}`);
+      logger.info(`🔄 Atualizando status da competição ${competitionId} para: ${newStatus}`, { competitionId, newStatus }, 'COMPETITION_STATUS_SERVICE');
 
       const { error } = await supabase
         .from('custom_competitions')
@@ -17,17 +18,17 @@ export class CompetitionStatusService {
 
       if (error) throw error;
 
-      console.log(`✅ Status da competição ${competitionId} atualizado para: ${newStatus}`);
+      logger.info(`✅ Status da competição ${competitionId} atualizado para: ${newStatus}`, { competitionId, newStatus }, 'COMPETITION_STATUS_SERVICE');
       return createSuccessResponse(undefined);
     } catch (error) {
-      console.error(`❌ Erro ao atualizar status da competição ${competitionId}:`, error);
+      logger.error(`❌ Erro ao atualizar status da competição ${competitionId}:`, { competitionId, error }, 'COMPETITION_STATUS_SERVICE');
       return createErrorResponse(handleServiceError(error, 'COMPETITION_STATUS_UPDATE'));
     }
   }
 
   async getCompetitionsByStatus(status: string): Promise<ApiResponse<any[]>> {
     try {
-      console.log(`🔍 Buscando competições com status: ${status}`);
+      logger.info(`🔍 Buscando competições com status: ${status}`, { status }, 'COMPETITION_STATUS_SERVICE');
 
       const { data, error } = await supabase
         .from('custom_competitions')
@@ -37,17 +38,17 @@ export class CompetitionStatusService {
 
       if (error) throw error;
 
-      console.log(`📊 Encontradas ${data?.length || 0} competições com status: ${status}`);
+      logger.info(`📊 Encontradas ${data?.length || 0} competições com status: ${status}`, { status, count: data?.length || 0 }, 'COMPETITION_STATUS_SERVICE');
       return createSuccessResponse(data || []);
     } catch (error) {
-      console.error(`❌ Erro ao buscar competições por status ${status}:`, error);
+      logger.error(`❌ Erro ao buscar competições por status ${status}:`, { status, error }, 'COMPETITION_STATUS_SERVICE');
       return createErrorResponse(handleServiceError(error, 'COMPETITION_STATUS_QUERY'));
     }
   }
 
   async finalizeCompetition(competitionId: string): Promise<ApiResponse<void>> {
     try {
-      console.log(`🏁 Finalizando competição: ${competitionId}`);
+      logger.info(`🏁 Finalizando competição: ${competitionId}`, { competitionId }, 'COMPETITION_STATUS_SERVICE');
 
       const { data: competition, error: fetchError } = await supabase
         .from('custom_competitions')
@@ -62,7 +63,7 @@ export class CompetitionStatusService {
       }
 
       if (competition.status === 'completed') {
-        console.log(`⚠️ Competição ${competitionId} já está finalizada`);
+        logger.warn(`⚠️ Competição ${competitionId} já está finalizada`, { competitionId }, 'COMPETITION_STATUS_SERVICE');
         return createSuccessResponse(undefined);
       }
 
@@ -75,10 +76,10 @@ export class CompetitionStatusService {
 
       if (updateError) throw updateError;
 
-      console.log(`✅ Competição "${competition.title}" finalizada com sucesso`);
+      logger.info(`✅ Competição "${competition.title}" finalizada com sucesso`, { competitionId, title: competition.title }, 'COMPETITION_STATUS_SERVICE');
       return createSuccessResponse(undefined);
     } catch (error) {
-      console.error(`❌ Erro ao finalizar competição ${competitionId}:`, error);
+      logger.error(`❌ Erro ao finalizar competição ${competitionId}:`, { competitionId, error }, 'COMPETITION_STATUS_SERVICE');
       return createErrorResponse(handleServiceError(error, 'COMPETITION_FINALIZATION'));
     }
   }
