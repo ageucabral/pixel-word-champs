@@ -1,6 +1,7 @@
 import { type Position, type PlacedWord } from '@/utils/boardUtils';
 import { logger } from '@/utils/logger';
 import { BoardQualityAnalyzer, shuffleArray } from '@/utils/boardQuality';
+import { AdvancedShuffler } from '@/utils/advancedShuffling';
 
 // Todas as 8 direções possíveis
 type ExtendedDirection = 
@@ -71,7 +72,7 @@ export class SmartWordDistributionService {
       // ✨ NOVO: Usar embaralhamento específico do nível se disponível
       let shuffledWords;
       if (this.levelConfig) {
-        const shuffler = new (await import('@/utils/advancedShuffling')).AdvancedShuffler(this.levelConfig.seed);
+        const shuffler = new AdvancedShuffler(this.levelConfig.seed);
         const shuffleResult = shuffler.shuffle(words, this.levelConfig.shuffleMethod);
         shuffledWords = shuffleResult.shuffled;
         
