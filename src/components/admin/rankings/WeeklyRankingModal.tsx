@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from '@/integrations/supabase/client';
 import { rankingQueryService } from '@/services/rankingQueryService';
 import { formatISOToBrazilian } from '@/utils/brazilianDateFormatter';
+import { logger } from '@/utils/logger';
 import {
   Table,
   TableBody,
@@ -95,7 +96,7 @@ export const WeeklyRankingModal: React.FC<WeeklyRankingModalProps> = ({
 
     setIsLoading(true);
     try {
-      console.log('🔄 Carregando dados da competição:', competitionId);
+      logger.info('🔄 Carregando dados da competição:', { competitionId }, 'WEEKLY_RANKING_MODAL');
 
       // Carregar informações da competição
       const { data: competitionData, error: competitionError } = await supabase
@@ -105,11 +106,11 @@ export const WeeklyRankingModal: React.FC<WeeklyRankingModalProps> = ({
         .single();
 
       if (competitionError) {
-        console.error('❌ Erro ao carregar competição:', competitionError);
+        logger.error('❌ Erro ao carregar competição:', { error: competitionError }, 'WEEKLY_RANKING_MODAL');
         throw competitionError;
       }
 
-      console.log('✅ Competição carregada:', competitionData);
+      logger.info('✅ Competição carregada:', { competitionData }, 'WEEKLY_RANKING_MODAL');
 
       // Buscar configurações de prêmio do banco de dados
       const { data: prizeData, error: prizeError } = await supabase
@@ -119,17 +120,17 @@ export const WeeklyRankingModal: React.FC<WeeklyRankingModalProps> = ({
         .order('position', { ascending: true });
 
       if (prizeError) {
-        console.error('❌ Erro ao carregar configurações de prêmio:', prizeError);
+        logger.error('❌ Erro ao carregar configurações de prêmio:', { error: prizeError }, 'WEEKLY_RANKING_MODAL');
         throw prizeError;
       }
 
-      console.log('💰 Configurações de prêmio carregadas:', prizeData);
+      logger.info('💰 Configurações de prêmio carregadas:', { prizeData }, 'WEEKLY_RANKING_MODAL');
       setPrizeConfigs(prizeData || []);
 
       // Usar o ranking simplificado baseado na pontuação total dos perfis
       const rankingData = await rankingQueryService.getWeeklyRanking();
       
-      console.log('📊 Ranking simplificado carregado:', rankingData.length, 'participantes');
+      logger.info('📊 Ranking simplificado carregado:', { count: rankingData.length }, 'WEEKLY_RANKING_MODAL');
 
       const competitionInfo: CompetitionInfo = {
         id: competitionData.id,
@@ -158,7 +159,7 @@ export const WeeklyRankingModal: React.FC<WeeklyRankingModalProps> = ({
       setRanking(rankingParticipants);
 
     } catch (error) {
-      console.error('❌ Erro ao carregar dados:', error);
+      logger.error('❌ Erro ao carregar dados:', { error }, 'WEEKLY_RANKING_MODAL');
       toast({
         title: "Erro",
         description: "Não foi possível carregar os dados da competição.",

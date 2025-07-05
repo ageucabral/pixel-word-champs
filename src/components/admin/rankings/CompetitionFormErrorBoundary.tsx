@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 import { getCurrentBrasiliaTime } from '@/utils/brasiliaTimeUnified';
+import { logger } from '@/utils/logger';
 
 interface Props {
   children: React.ReactNode;
@@ -23,19 +24,17 @@ export class CompetitionFormErrorBoundary extends React.Component<Props, State> 
   }
 
   static getDerivedStateFromError(error: Error): State {
-    console.error('🚨 ErrorBoundary capturou erro:', error, {
-      timestamp: getCurrentBrasiliaTime()
-    });
+    logger.error('🚨 ErrorBoundary capturou erro:', { error, timestamp: getCurrentBrasiliaTime() }, 'COMPETITION_FORM_ERROR_BOUNDARY');
     return { hasError: true, error };
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('🚨 Detalhes do erro capturado:', {
+    logger.error('🚨 Detalhes do erro capturado:', {
       error: error.message,
       stack: error.stack,
       componentStack: errorInfo.componentStack,
       timestamp: getCurrentBrasiliaTime()
-    });
+    }, 'COMPETITION_FORM_ERROR_BOUNDARY');
     
     this.setState({
       error,
@@ -44,9 +43,9 @@ export class CompetitionFormErrorBoundary extends React.Component<Props, State> 
   }
 
   handleRetry = () => {
-    console.log('🔄 Tentando novamente após erro...', {
+    logger.info('🔄 Tentando novamente após erro...', {
       timestamp: getCurrentBrasiliaTime()
-    });
+    }, 'COMPETITION_FORM_ERROR_BOUNDARY');
     
     this.setState({ hasError: false, error: undefined, errorInfo: undefined });
     

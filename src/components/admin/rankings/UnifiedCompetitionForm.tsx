@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Save, X, Clock } from 'lucide-react';
 import { useUnifiedCompetitionForm } from '@/hooks/useUnifiedCompetitionForm';
 import { validateCompetitionDuration, getCurrentBrasiliaTime } from '@/utils/brasiliaTimeUnified';
+import { logger } from '@/utils/logger';
 
 interface UnifiedCompetitionFormProps {
   onClose: () => void;
@@ -30,28 +31,28 @@ export const UnifiedCompetitionForm = ({
 
   // Debug: Log quando o componente é montado
   useEffect(() => {
-    console.log('🎯 UnifiedCompetitionForm montado', {
+    logger.info('🎯 UnifiedCompetitionForm montado', {
       timestamp: getCurrentBrasiliaTime(),
       formData: {
         title: formData.title,
         duration: formData.duration
       }
-    });
+    }, 'UNIFIED_COMPETITION_FORM');
 
     return () => {
-      console.log('🔄 UnifiedCompetitionForm desmontado', {
+      logger.info('🔄 UnifiedCompetitionForm desmontado', {
         timestamp: getCurrentBrasiliaTime()
-      });
+      }, 'UNIFIED_COMPETITION_FORM');
     };
   }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('📝 Formulário submetido', {
+    logger.info('📝 Formulário submetido', {
       timestamp: getCurrentBrasiliaTime(),
       hasTitle,
       isSubmitting
-    });
+    }, 'UNIFIED_COMPETITION_FORM');
     
     submitForm(onSuccess);
   };
@@ -61,10 +62,10 @@ export const UnifiedCompetitionForm = ({
     if (!formData.startDate || !formData.duration) return null;
     
     try {
-      console.log('🎯 Gerando preview (Brasília):', {
+      logger.debug('🎯 Gerando preview (Brasília):', {
         startDate: formData.startDate,
         duration: formData.duration
-      });
+      }, 'UNIFIED_COMPETITION_FORM');
       
       // Trabalhar direto com o input (já em Brasília)
       const startInput = new Date(formData.startDate);
@@ -79,16 +80,16 @@ export const UnifiedCompetitionForm = ({
       const startTime = startInput.toTimeString().slice(0, 5);
       const endTime = finalEnd.toTimeString().slice(0, 5);
       
-      console.log('✅ Preview gerado (Brasília):', {
+      logger.debug('✅ Preview gerado (Brasília):', {
         startTime,
         endTime,
         startFull: startInput.toLocaleString('pt-BR'),
         endFull: finalEnd.toLocaleString('pt-BR')
-      });
+      }, 'UNIFIED_COMPETITION_FORM');
       
       return { startTime, endTime };
     } catch (error) {
-      console.error('❌ Erro no preview:', error);
+      logger.error('❌ Erro no preview:', { error }, 'UNIFIED_COMPETITION_FORM');
       return null;
     }
   };

@@ -10,6 +10,7 @@ import { UnifiedCompetition } from '@/types/competition';
 import { useToast } from "@/hooks/use-toast";
 import { getCurrentBrasiliaTime } from '@/utils/brasiliaTimeUnified';
 import { parseISO, isSameDay } from 'date-fns';
+import { logger } from '@/utils/logger';
 
 interface DailyCompetitionsViewProps {
   competitions: UnifiedCompetition[];
@@ -61,7 +62,7 @@ export const DailyCompetitionsView = ({ competitions, isLoading, onRefresh }: Da
   }, [competitions]);
 
   const handleDelete = (competition: UnifiedCompetition) => {
-    console.log('✅ Competição excluída:', competition.id);
+    logger.info('✅ Competição excluída:', { competitionId: competition.id }, 'DAILY_COMPETITIONS');
     
     // Optimistic update: remove immediately from local state
     setLocalCompetitions(prev => prev.filter(comp => comp.id !== competition.id));
@@ -81,9 +82,9 @@ export const DailyCompetitionsView = ({ competitions, isLoading, onRefresh }: Da
   };
 
   const handleCompetitionCreated = () => {
-    console.log('✅ Competição criada com sucesso', {
+    logger.info('✅ Competição criada com sucesso', {
       timestamp: getCurrentBrasiliaTime()
-    });
+    }, 'DAILY_COMPETITIONS');
     
     setShowCreateModal(false);
     toast({
@@ -98,20 +99,18 @@ export const DailyCompetitionsView = ({ competitions, isLoading, onRefresh }: Da
   };
 
   const handleOpenModal = () => {
-    console.log('🎯 Tentando abrir modal de nova competição', {
+    logger.info('🎯 Tentando abrir modal de nova competição', {
       timestamp: getCurrentBrasiliaTime(),
       currentModalState: showCreateModal
-    });
+    }, 'DAILY_COMPETITIONS');
     
     try {
       setShowCreateModal(true);
-      console.log('✅ Modal definido como aberto', {
+      logger.info('✅ Modal definido como aberto', {
         timestamp: getCurrentBrasiliaTime()
-      });
+      }, 'DAILY_COMPETITIONS');
     } catch (error) {
-      console.error('❌ Erro ao abrir modal:', error, {
-        timestamp: getCurrentBrasiliaTime()
-      });
+      logger.error('❌ Erro ao abrir modal:', { error, timestamp: getCurrentBrasiliaTime() }, 'DAILY_COMPETITIONS');
       
       toast({
         title: "Erro",
@@ -122,10 +121,10 @@ export const DailyCompetitionsView = ({ competitions, isLoading, onRefresh }: Da
   };
 
   const handleCloseModal = (open: boolean) => {
-    console.log('🔄 Alterando estado do modal', {
+    logger.info('🔄 Alterando estado do modal', {
       open,
       timestamp: getCurrentBrasiliaTime()
-    });
+    }, 'DAILY_COMPETITIONS');
     setShowCreateModal(open);
   };
 
