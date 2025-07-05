@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { formatDateForDisplay } from '@/utils/dateFormatters';
 import { parseWinnersData, parseRankingsData, type Winner } from '@/utils/typeGuards';
 import { Trophy, Calendar, DollarSign, Users, Download, Eye } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 interface CompetitionSnapshot {
   id: string;
@@ -50,7 +51,7 @@ export const WinnersManagementTab = () => {
 
       setSnapshots(parsedSnapshots);
     } catch (error: any) {
-      console.error('Erro ao carregar snapshots:', error);
+      logger.error('Erro ao carregar snapshots:', { error }, 'WINNERS_MANAGEMENT_TAB');
       toast({
         title: "Erro",
         description: "Erro ao carregar histórico de competições",

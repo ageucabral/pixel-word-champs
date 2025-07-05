@@ -9,6 +9,7 @@ import { CompetitionTableRow } from './CompetitionTableRow';
 import { handleExportWinners } from './CompetitionExportService';
 import { CompetitionHistoryItem, CompetitionTableProps } from './types';
 import { getCurrentBrasiliaTime } from '@/utils/brasiliaTimeUnified';
+import { logger } from '@/utils/logger';
 
 export const CompetitionTable: React.FC<CompetitionTableProps> = ({ competitions, onReload }) => {
   const { toast } = useToast();
@@ -16,12 +17,12 @@ export const CompetitionTable: React.FC<CompetitionTableProps> = ({ competitions
 
   const handleViewCompetition = (competition: CompetitionHistoryItem) => {
     // Since CompetitionDetailsModal was removed, we can show a toast or handle differently
-    console.log('👁️ Visualizando competição:', {
+    logger.info('👁️ Visualizando competição:', {
       id: competition.id,
       title: competition.title,
       status: competition.status,
       timestamp: getCurrentBrasiliaTime()
-    });
+    }, 'COMPETITION_TABLE');
     
     toast({
       title: "Competição selecionada",
@@ -30,11 +31,11 @@ export const CompetitionTable: React.FC<CompetitionTableProps> = ({ competitions
   };
 
   const onExportWinners = (competition: CompetitionHistoryItem) => {
-    console.log('📤 Exportando vencedores:', {
+    logger.info('📤 Exportando vencedores:', {
       id: competition.id,
       title: competition.title,
       timestamp: getCurrentBrasiliaTime()
-    });
+    }, 'COMPETITION_TABLE');
     
     handleExportWinners(competition, toast, setExportingId);
   };

@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { UnifiedCompetition } from '@/types/competition';
 import { unifiedCompetitionService } from '@/services/unifiedCompetitionService';
 import { useToast } from "@/hooks/use-toast";
+import { logger } from '@/utils/logger';
 
 export const useCompetitionActions = (onDelete: (competition: UnifiedCompetition) => void) => {
   const { toast } = useToast();
@@ -36,7 +37,7 @@ export const useCompetitionActions = (onDelete: (competition: UnifiedCompetition
         throw new Error(result.error || 'Erro ao excluir competição');
       }
     } catch (error) {
-      console.error('Erro ao excluir competição:', error);
+      logger.error('Erro ao excluir competição:', { error }, 'USE_COMPETITION_ACTIONS');
       toast({
         title: "Erro ao excluir",
         description: error instanceof Error ? error.message : "Não foi possível excluir a competição. Tente novamente.",

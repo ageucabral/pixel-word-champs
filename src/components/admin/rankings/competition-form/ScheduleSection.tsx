@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Clock } from 'lucide-react';
 import { formatBrasiliaDate, getCurrentBrasiliaDate } from '@/utils/brasiliaTimeUnified';
+import { logger } from '@/utils/logger';
 
 interface ScheduleSectionProps {
   formData: any;
@@ -16,16 +17,16 @@ export const ScheduleSection = ({
   onInputChange,
   competitionType
 }: ScheduleSectionProps) => {
-  console.log('📅 BRASÍLIA: ScheduleSection renderizando com tipo:', competitionType);
+  logger.info('📅 BRASÍLIA: ScheduleSection renderizando com tipo:', { competitionType }, 'SCHEDULE_SECTION');
   
   const handleDateChange = (field: string, value: string) => {
-    console.log(`📅 BRASÍLIA: Data alterada - ${field}:`, value);
-    console.log('📅 BRASÍLIA: Valor será processado em horário de Brasília');
+    logger.info(`📅 BRASÍLIA: Data alterada - ${field}:`, { value }, 'SCHEDULE_SECTION');
+    logger.info('📅 BRASÍLIA: Valor será processado em horário de Brasília', undefined, 'SCHEDULE_SECTION');
     onInputChange(field, value);
   };
 
   const handleTimeChange = (value: string) => {
-    console.log('🕐 BRASÍLIA: Horário alterado:', value);
+    logger.info('🕐 BRASÍLIA: Horário alterado:', { value }, 'SCHEDULE_SECTION');
     onInputChange('startTime', value);
   };
 

@@ -9,6 +9,7 @@ import {
   getStatusColor, 
   formatDateTimeBrasilia 
 } from '@/utils/dynamicCompetitionStatus';
+import { logger } from '@/utils/logger';
 
 interface DailyCompetition {
   id: string;
@@ -38,7 +39,7 @@ export const DailyCompetitionCard: React.FC<DailyCompetitionCardProps> = ({
   const status = competition.status as 'scheduled' | 'active' | 'completed';
 
   const handleDelete = () => {
-    console.log('🃏 Card: handleDelete executado para competição:', competition.id);
+    logger.info('🃏 Card: handleDelete executado para competição:', { competitionId: competition.id }, 'DAILY_COMPETITION_CARD');
     onDelete(competition);
   };
 

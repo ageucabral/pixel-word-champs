@@ -10,6 +10,7 @@ import { PrizeConfigModal } from '../PrizeConfigModal';
 import { useWeeklyRanking } from '@/hooks/useWeeklyRanking';
 import { Loader2 } from 'lucide-react';
 import { getCurrentBrasiliaTime } from '@/utils/brasiliaTimeUnified';
+import { logger } from '@/utils/logger';
 
 export const WeeklyRankingView = () => {
   const [configModalOpen, setConfigModalOpen] = useState(false);
@@ -23,34 +24,34 @@ export const WeeklyRankingView = () => {
   } = useWeeklyRanking();
 
   const handleConfigUpdated = () => {
-    console.log('✅ Configuração semanal atualizada', {
+    logger.info('✅ Configuração semanal atualizada', {
       timestamp: getCurrentBrasiliaTime()
-    });
+    }, 'WEEKLY_RANKING_VIEW');
     refetch();
   };
 
   const handleConfigModalOpen = () => {
-    console.log('🎯 WeeklyRankingView - Abrindo modal de configuração semanal', {
+    logger.info('🎯 WeeklyRankingView - Abrindo modal de configuração semanal', {
       timestamp: getCurrentBrasiliaTime(),
       currentState: {
         configModalOpen,
         prizeConfigModalOpen
       }
-    });
+    }, 'WEEKLY_RANKING_VIEW');
     
     try {
       setConfigModalOpen(true);
-      console.log('✅ WeeklyRankingView - Modal state atualizado para true');
+      logger.info('✅ WeeklyRankingView - Modal state atualizado para true', undefined, 'WEEKLY_RANKING_VIEW');
     } catch (error) {
-      console.error('❌ WeeklyRankingView - Erro ao abrir modal:', error);
+      logger.error('❌ WeeklyRankingView - Erro ao abrir modal:', { error }, 'WEEKLY_RANKING_VIEW');
     }
   };
 
   const handleConfigModalClose = (open: boolean) => {
-    console.log('🔄 WeeklyRankingView - Modal de configuração semanal:', { 
+    logger.info('🔄 WeeklyRankingView - Modal de configuração semanal:', { 
       open,
       timestamp: getCurrentBrasiliaTime()
-    });
+    }, 'WEEKLY_RANKING_VIEW');
     setConfigModalOpen(open);
   };
 
@@ -74,10 +75,10 @@ export const WeeklyRankingView = () => {
   }
 
   // Log de renderização fora do JSX
-  console.log('🎯 WeeklyRankingView - Renderizando componente', {
+  logger.info('🎯 WeeklyRankingView - Renderizando componente', {
     configModalOpen,
     timestamp: getCurrentBrasiliaTime()
-  });
+  }, 'WEEKLY_RANKING_VIEW');
 
   return (
     <div className="space-y-6">

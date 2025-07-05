@@ -15,6 +15,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { formatDateForDisplay } from '@/utils/dateFormatters';
 import { Trash2, AlertTriangle } from 'lucide-react';
 import { WeeklyConfig, WeeklyConfigRpcResponse, isWeeklyConfigRpcResponse } from '@/types/weeklyConfig';
+import { logger } from '@/utils/logger';
 
 interface DeleteCompetitionModalProps {
   open: boolean;
@@ -59,7 +60,7 @@ export const DeleteCompetitionModal: React.FC<DeleteCompetitionModalProps> = ({
       }
 
     } catch (error: any) {
-      console.error('Erro ao excluir competição:', error);
+      logger.error('Erro ao excluir competição:', { error }, 'DELETE_COMPETITION_MODAL');
       toast({
         title: "Erro",
         description: `Erro ao excluir competição: ${error.message}`,

@@ -10,6 +10,7 @@ import {
   getStatusColor, 
   formatDateTimeBrasilia 
 } from '@/utils/dynamicCompetitionStatus';
+import { logger } from '@/utils/logger';
 
 interface CompetitionCardProps {
   competition: UnifiedCompetition;
@@ -41,7 +42,7 @@ export const CompetitionCard: React.FC<CompetitionCardProps> = ({
         
         return `${hours}h`;
       } catch (error) {
-        console.error('Erro ao calcular duração:', error);
+        logger.error('Erro ao calcular duração:', { error }, 'COMPETITION_CARD');
         return 'N/A';
       }
     }

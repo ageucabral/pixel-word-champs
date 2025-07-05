@@ -3,6 +3,7 @@ import React from 'react';
 import { WeeklyConfigModal } from './WeeklyConfigModal';
 import { WeeklyConfigErrorBoundary } from './WeeklyConfigErrorBoundary';
 import { getCurrentBrasiliaTime } from '@/utils/brasiliaTimeUnified';
+import { logger } from '@/utils/logger';
 
 interface WeeklyConfigModalWrapperProps {
   open: boolean;
@@ -16,9 +17,9 @@ export const WeeklyConfigModalWrapper: React.FC<WeeklyConfigModalWrapperProps> =
   onConfigUpdated
 }) => {
   const handleRetry = () => {
-    console.log('🔄 WeeklyConfigModalWrapper - tentando recarregar modal...', {
+    logger.info('🔄 WeeklyConfigModalWrapper - tentando recarregar modal...', {
       timestamp: getCurrentBrasiliaTime()
-    });
+    }, 'WEEKLY_CONFIG_MODAL_WRAPPER');
     
     // Fechar e reabrir o modal para forçar re-render
     onOpenChange(false);
@@ -28,27 +29,25 @@ export const WeeklyConfigModalWrapper: React.FC<WeeklyConfigModalWrapperProps> =
   };
 
   const handleModalError = (error: any) => {
-    console.error('❌ Erro no WeeklyConfigModal:', error, {
-      timestamp: getCurrentBrasiliaTime()
-    });
+    logger.error('❌ Erro no WeeklyConfigModal:', { error, timestamp: getCurrentBrasiliaTime() }, 'WEEKLY_CONFIG_MODAL_WRAPPER');
   };
 
   React.useEffect(() => {
     if (open) {
-      console.log('🎯 WeeklyConfigModalWrapper - Modal aberto', {
+      logger.info('🎯 WeeklyConfigModalWrapper - Modal aberto', {
         timestamp: getCurrentBrasiliaTime()
-      });
+      }, 'WEEKLY_CONFIG_MODAL_WRAPPER');
     } else {
-      console.log('📴 WeeklyConfigModalWrapper - Modal fechado', {
+      logger.info('📴 WeeklyConfigModalWrapper - Modal fechado', {
         timestamp: getCurrentBrasiliaTime()
-      });
+      }, 'WEEKLY_CONFIG_MODAL_WRAPPER');
     }
   }, [open]);
 
-  console.log('🔍 WeeklyConfigModalWrapper - Renderizando', {
+  logger.info('🔍 WeeklyConfigModalWrapper - Renderizando', {
     open,
     timestamp: getCurrentBrasiliaTime()
-  });
+  }, 'WEEKLY_CONFIG_MODAL_WRAPPER');
 
   return (
     <WeeklyConfigErrorBoundary onRetry={handleRetry}>
