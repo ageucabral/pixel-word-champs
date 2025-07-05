@@ -29,9 +29,9 @@ const MyDataSection = () => {
   const [showPixKey, setShowPixKey] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Hooks de verificação
-  const usernameCheck = useUsernameVerification(editData.username);
-  const phoneCheck = usePhoneVerification(editData.phone, user?.phone);
+  // Hooks de verificação - só executar quando em modo de edição
+  const usernameCheck = useUsernameVerification(isEditing ? editData.username : '');
+  const phoneCheck = usePhoneVerification(isEditing ? editData.phone : '', user?.phone);
 
   const isValidUsername = (username: string) => {
     return username.trim().length >= 3 && username.trim().length <= 30;
