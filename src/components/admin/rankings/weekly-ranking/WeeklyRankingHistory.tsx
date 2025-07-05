@@ -10,12 +10,10 @@ import { useWeeklyRanking } from '@/hooks/useWeeklyRanking';
 export const WeeklyRankingHistory: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const { 
-    historyData, 
-    isLoading, 
-    error, 
-    totalPages,
-    currentWeek 
-  } = useWeeklyRankingHistory(currentPage);
+    stats,
+    isLoading,
+    error
+  } = useWeeklyRanking();
 
   const formatWeekRange = (weekStart: string, weekEnd: string) => {
     const start = new Date(weekStart);
@@ -53,100 +51,62 @@ export const WeeklyRankingHistory: React.FC = () => {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {historyData.length === 0 ? (
+        {!stats?.top_3_players || stats.top_3_players.length === 0 ? (
           <div className="text-center py-8">
             <Calendar className="h-12 w-12 mx-auto mb-4 text-gray-300" />
             <p className="text-gray-500">Nenhum histórico disponível ainda</p>
           </div>
         ) : (
-          <>
-            <div className="space-y-4">
-              {historyData.map((week) => (
-                <Card key={`${week.week_start}-${week.week_end}`} className="border-l-4 border-l-blue-500">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Trophy className="h-4 w-4 text-yellow-600" />
-                        <span className="font-semibold">
-                          Semana: {formatWeekRange(week.week_start, week.week_end)}
-                        </span>
-                      </div>
-                      {week.week_start === currentWeek?.week_start && (
-                        <Badge className="bg-green-50 text-green-700 border-green-200">
-                          Semana Atual
-                        </Badge>
-                      )}
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="overflow-x-auto">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead className="w-16">Pos.</TableHead>
-                            <TableHead>Jogador</TableHead>
-                            <TableHead className="text-center">Pontos</TableHead>
-                            <TableHead className="text-center">Prêmio</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {week.rankings.slice(0, 10).map((ranking) => (
-                            <TableRow key={ranking.id} className="hover:bg-slate-50">
-                              <TableCell className="font-medium">
-                                <Badge variant={ranking.position <= 3 ? "default" : "outline"}>
-                                  #{ranking.position}
-                                </Badge>
-                              </TableCell>
-                              <TableCell className="font-medium">
-                                {ranking.username}
-                              </TableCell>
-                              <TableCell className="text-center">
-                                {ranking.total_score.toLocaleString()}
-                              </TableCell>
-                              <TableCell className="text-center">
-                                {ranking.prize_amount > 0 ? (
-                                  <span className="font-semibold text-green-600">
-                                    R$ {ranking.prize_amount.toFixed(2)}
-                                  </span>
-                                ) : (
-                                  <span className="text-gray-400">-</span>
-                                )}
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            {/* Paginação */}
-            {totalPages > 1 && (
-              <div className="flex items-center justify-center gap-2 pt-4">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                  disabled={currentPage === 1}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <span className="text-sm text-gray-600">
-                  Página {currentPage} de {totalPages}
-                </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                  disabled={currentPage === totalPages}
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            )}
-          </>
+          <div className="space-y-4">
+            <Card className="border-l-4 border-l-blue-500">
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-2">
+                  <Trophy className="h-4 w-4 text-yellow-600" />
+                  <span className="font-semibold">Top 3 Atual</span>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-16">Pos.</TableHead>
+                        <TableHead>Jogador</TableHead>
+                        <TableHead className="text-center">Pontos</TableHead>
+                        <TableHead className="text-center">Prêmio</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {stats.top_3_players.map((player, index) => (
+                        <TableRow key={index} className="hover:bg-slate-50">
+                          <TableCell className="font-medium">
+                            <Badge variant={player.position <= 3 ? "default" : "outline"}>
+                              #{player.position}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="font-medium">
+                            {player.username}
+                          </TableCell>
+                          <TableCell className="text-center">
+                            {player.score.toLocaleString()}
+                          </TableCell>
+                          <TableCell className="text-center">
+                            {player.prize > 0 ? (
+                              <span className="font-semibold text-green-600">
+                                R$ {player.prize.toFixed(2)}
+                              </span>
+                            ) : (
+                              <span className="text-gray-400">-</span>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         )}
       </CardContent>
     </Card>

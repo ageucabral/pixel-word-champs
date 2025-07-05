@@ -13,8 +13,6 @@ export const useWeeklyConfig = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const operations = useWeeklyConfigOperations();
-
   const loadConfigurations = async () => {
     try {
       setIsLoading(true);
@@ -53,31 +51,7 @@ export const useWeeklyConfig = () => {
   };
 
   const finalizeCompetition = async () => {
-    const result = await operations.finalizeCompetition();
-    if (result.success) {
-      await loadConfigurations();
-    }
-    return result;
-  };
-
-  const updateCompetition = async (competitionId: string, startDate: string, endDate: string) => {
-    const result = await operations.updateCompetition(competitionId, startDate, endDate);
-    if (result.success) {
-      await loadConfigurations();
-    }
-    return result;
-  };
-
-  const updateActiveCompetitionEndDate = async (competitionId: string, endDate: string) => {
-    const result = await operations.updateActiveCompetitionEndDate(competitionId, endDate);
-    if (result.success) {
-      await loadConfigurations();
-    }
-    return result;
-  };
-
-  const deleteCompetition = async (competitionId: string) => {
-    const result = await operations.deleteCompetition(competitionId);
+    const result = await WeeklyConfigService.finalizeCompetition();
     if (result.success) {
       await loadConfigurations();
     }
@@ -101,9 +75,6 @@ export const useWeeklyConfig = () => {
     error,
     loadConfigurations,
     scheduleCompetition,
-    updateCompetition,
-    updateActiveCompetitionEndDate,
-    deleteCompetition,
     finalizeCompetition,
     calculateNextDates: getCalculatedNextDates
   };

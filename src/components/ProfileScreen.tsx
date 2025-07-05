@@ -41,10 +41,6 @@ const ProfileScreen = ({
     progress
   } = usePlayerLevel(profileData?.experience_points || user?.experience_points || 0);
 
-  // Integrar gerenciamento automático das melhores posições
-  const {
-    forceUpdatePositions
-  } = useWeeklyPositionManager();
   logger.debug('Renderizando ProfileScreen', {
     userId: user?.id,
     timestamp: formatBrasiliaDate(new Date())
