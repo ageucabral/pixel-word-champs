@@ -1,6 +1,8 @@
 
 import { MonthlyInviteUnifiedService } from './monthlyInviteUnified';
 import { MonthlyInvitePrizesService } from './monthlyInvitePrizes';
+import { MonthlyInviteCoreService } from './monthlyInviteCore';
+import { MonthlyInviteCompetitionService } from './monthlyInviteCompetition';
 
 /**
  * SERVIÇO OTIMIZADO DE CONVITES MENSAIS
@@ -10,6 +12,8 @@ import { MonthlyInvitePrizesService } from './monthlyInvitePrizes';
 class MonthlyInviteService {
   private unifiedService = new MonthlyInviteUnifiedService();
   private prizesService = new MonthlyInvitePrizesService();
+  private coreService = new MonthlyInviteCoreService();
+  private competitionService = new MonthlyInviteCompetitionService();
 
   // Métodos principais otimizados
   async getMonthlyStats(monthYear?: string) {
@@ -18,6 +22,20 @@ class MonthlyInviteService {
 
   async refreshMonthlyRanking(monthYear?: string) {
     return this.unifiedService.refreshMonthlyRanking(monthYear);
+  }
+
+  // Métodos do core service
+  async getUserMonthlyPoints(userId?: string, monthYear?: string) {
+    return this.coreService.getUserMonthlyPoints(userId, monthYear);
+  }
+
+  async getUserMonthlyPosition(userId?: string, monthYear?: string) {
+    return this.coreService.getUserMonthlyPosition(userId, monthYear);
+  }
+
+  // Métodos da competição
+  async getMonthlyRanking(monthYear?: string, limit = 100) {
+    return this.competitionService.getMonthlyRanking(monthYear, limit);
   }
 
   // Métodos de prêmios
