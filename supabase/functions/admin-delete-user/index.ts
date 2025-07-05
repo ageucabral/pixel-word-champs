@@ -1,6 +1,7 @@
 
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.10'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.2'
 import { corsHeaders } from '../_shared/cors.ts'
+import { edgeLogger, validateInput, handleEdgeError } from '../_shared/edgeLogger.ts'
 
 // Inicializar cliente Supabase com configurações específicas para operações administrativas
 const supabase = createClient(
@@ -28,14 +29,16 @@ Deno.serve(async (req) => {
   try {
     const { userId, adminPassword, adminId } = await req.json()
 
-    console.log('🗑️ Iniciando exclusão SIMPLIFICADA do usuário:', { userId, adminId })
+    edgeLogger.info('Iniciando exclusão de usuário', { operation: 'delete_user' }, 'ADMIN_DELETE_USER')
 
-    if (!userId || !adminId) {
-      throw new Error('Parâmetros obrigatórios: userId, adminId')
-    }
+    // Validações de entrada melhoradas
+    validateInput.required(userId, 'userId')
+    validateInput.required(adminId, 'adminId')
+    validateInput.uuid(userId, 'userId')
+    validateInput.uuid(adminId, 'adminId')
 
     // Validar se o admin existe e tem permissões
-    console.log('🔍 Verificando se admin existe...')
+    edgeLogger.info('Verificando admin', { adminId }, 'ADMIN_DELETE_USER')
     const { data: adminProfile, error: adminProfileError } = await supabase
       .from('profiles')
       .select('id, username')
@@ -43,46 +46,45 @@ Deno.serve(async (req) => {
       .single()
 
     if (adminProfileError || !adminProfile) {
-      console.error('❌ Admin não encontrado:', adminProfileError?.message)
+      edgeLogger.error('Admin não encontrado', { error: adminProfileError }, 'ADMIN_DELETE_USER')
       throw new Error('Admin não encontrado')
     }
 
-    console.log('✅ Admin encontrado:', adminProfile.username)
+    edgeLogger.info('Admin encontrado', { username: adminProfile.username }, 'ADMIN_DELETE_USER')
 
-    // Verificar se o admin tem role de admin
-    console.log('🔍 Verificando permissões de admin...')
-    const { data: adminRoles, error: rolesError } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', adminId)
-      .eq('role', 'admin')
-      .single()
+    // Verificar se o admin tem role de admin usando RPC segura
+    edgeLogger.info('Verificando permissões de admin', { adminId }, 'ADMIN_DELETE_USER')
+    const { data: hasAdminRole, error: rolesError } = await supabase
+      .rpc('has_role', {
+        _user_id: adminId,
+        _role: 'admin'
+      })
 
-    if (rolesError || !adminRoles) {
-      console.error('❌ Usuário não tem permissões de administrador:', rolesError?.message)
+    if (rolesError || !hasAdminRole) {
+      edgeLogger.security('Tentativa de acesso sem permissões', { adminId, error: rolesError }, 'ADMIN_DELETE_USER')
       throw new Error('Usuário não tem permissões de administrador')
     }
 
-    console.log('✅ Permissões de admin validadas')
+    edgeLogger.info('Permissões de admin validadas', { adminId }, 'ADMIN_DELETE_USER')
 
     // Verificar se não é o próprio admin tentando se deletar
     if (adminId === userId) {
+      edgeLogger.security('Tentativa de auto-exclusão bloqueada', { adminId, userId }, 'ADMIN_DELETE_USER')
       throw new Error('Você não pode excluir sua própria conta')
     }
 
     // Buscar dados do usuário para logs
-    console.log('🔍 Buscando dados do usuário a ser excluído...')
+    edgeLogger.info('Buscando dados do usuário', { userId }, 'ADMIN_DELETE_USER')
     const { data: userProfile } = await supabase
       .from('profiles')
       .select('username')
       .eq('id', userId)
       .single()
 
-    console.log('🧹 Iniciando exclusão OTIMIZADA com CASCADE')
+    edgeLogger.info('Iniciando exclusão com CASCADE', { userId }, 'ADMIN_DELETE_USER')
 
-    // IMPORTANTE: Registrar ação administrativa ANTES da exclusão
-    // Isso permite rastrear quem fez a exclusão
-    console.log('📝 Registrando ação administrativa...')
+    // Registrar ação administrativa ANTES da exclusão
+    edgeLogger.info('Registrando ação administrativa', { adminId, userId }, 'ADMIN_DELETE_USER')
     const { error: logError } = await supabase
       .from('admin_actions')
       .insert({
@@ -97,45 +99,42 @@ Deno.serve(async (req) => {
       })
 
     if (logError) {
-      console.warn('⚠️ Erro ao registrar log:', logError.message)
+      edgeLogger.warn('Erro ao registrar log', { error: logError }, 'ADMIN_DELETE_USER')
     } else {
-      console.log('✅ Log registrado com sucesso')
+      edgeLogger.info('Log registrado com sucesso', {}, 'ADMIN_DELETE_USER')
     }
 
-    // Agora deletar o usuário do auth system
-    // As foreign keys CASCADE farão toda a limpeza automaticamente
-    console.log('🗑️ Deletando usuário do sistema de autenticação...')
-    console.log('🔧 Configuração do cliente:', {
-      url: Deno.env.get('SUPABASE_URL') ? 'SET' : 'NOT_SET',
-      serviceKey: Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ? 'SET' : 'NOT_SET',
-      serviceKeyLength: Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')?.length || 0
-    })
+    // Deletar o usuário do auth system com CASCADE automático
+    edgeLogger.info('Deletando usuário do sistema de autenticação', { userId }, 'ADMIN_DELETE_USER')
 
     try {
       const { data: deleteAuthData, error: deleteAuthError } = await supabase.auth.admin.deleteUser(userId)
       
       if (deleteAuthError) {
-        console.error('❌ Erro detalhado ao deletar usuário do auth:', {
-          message: deleteAuthError.message,
-          code: deleteAuthError.code || 'NO_CODE',
-          status: deleteAuthError.status || 'NO_STATUS',
-          details: deleteAuthError
-        })
+        edgeLogger.error('Erro ao deletar usuário do auth', {
+          error: deleteAuthError,
+          userId
+        }, 'ADMIN_DELETE_USER')
         throw new Error(`Erro ao deletar usuário do sistema de autenticação: ${deleteAuthError.message}`)
       }
 
-      console.log('✅ Resposta da API de auth:', deleteAuthData)
-      console.log('✅ Usuário completamente removido do sistema')
-      console.log('🧹 Todas as tabelas relacionadas foram limpas automaticamente via CASCADE')
+      edgeLogger.operation('delete_user_auth', true, {
+        userId,
+        deletedData: deleteAuthData
+      }, 'ADMIN_DELETE_USER')
 
     } catch (authDeleteError) {
-      console.error('❌ Exceção capturada ao deletar do auth:', {
-        message: authDeleteError.message,
-        name: authDeleteError.name,
-        stack: authDeleteError.stack
-      })
+      edgeLogger.error('Exceção capturada ao deletar do auth', {
+        error: authDeleteError,
+        userId
+      }, 'ADMIN_DELETE_USER')
       throw new Error(`Erro crítico ao deletar usuário do sistema de autenticação: ${authDeleteError.message}`)
     }
+
+    edgeLogger.operation('complete_user_deletion', true, {
+      userId,
+      username: userProfile?.username
+    }, 'ADMIN_DELETE_USER')
 
     return new Response(
       JSON.stringify({ 
@@ -143,7 +142,8 @@ Deno.serve(async (req) => {
         message: 'Usuário excluído completamente do sistema',
         deletedUserId: userId,
         deletedUsername: userProfile?.username,
-        method: 'CASCADE_DELETE'
+        method: 'CASCADE_DELETE',
+        timestamp: new Date().toISOString()
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -152,17 +152,6 @@ Deno.serve(async (req) => {
     )
 
   } catch (error) {
-    console.error('❌ Erro na exclusão:', error.message)
-    
-    return new Response(
-      JSON.stringify({ 
-        error: error.message,
-        success: false 
-      }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 400,
-      },
-    )
+    return handleEdgeError(error, 'ADMIN_DELETE_USER', 'delete_user')
   }
 })

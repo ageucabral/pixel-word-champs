@@ -1,10 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.2'
+import { corsHeaders } from '../_shared/cors.ts'
+import { edgeLogger, validateInput, handleEdgeError } from '../_shared/edgeLogger.ts'
 
 // Rate limiting configuration
 const RATE_LIMITS = {
@@ -14,33 +11,6 @@ const RATE_LIMITS = {
   email_update: { maxAttempts: 10, windowMinutes: 60 }
 }
 
-const secureLog = {
-  security: (message: string, data?: any) => {
-    const maskedData = data ? maskSensitiveData(data) : undefined;
-    console.warn(`🔒 [SECURITY] ${message}`, maskedData || '');
-  },
-  error: (message: string, data?: any) => {
-    const maskedData = data ? maskSensitiveData(data) : undefined;
-    console.error(`[ERROR] ${message}`, maskedData || '');
-  }
-};
-
-const maskSensitiveData = (data: any): any => {
-  if (!data || typeof data !== 'object') return data;
-  
-  const sensitiveFields = ['password', 'email', 'token', 'user_id', 'admin_id'];
-  const masked = { ...data };
-  
-  Object.keys(masked).forEach(key => {
-    const lowerKey = key.toLowerCase();
-    if (sensitiveFields.some(field => lowerKey.includes(field))) {
-      masked[key] = '***';
-    }
-  });
-  
-  return masked;
-};
-
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -49,6 +19,7 @@ serve(async (req) => {
   try {
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) {
+      edgeLogger.security('Tentativa de acesso sem autorização', {}, 'ADMIN_RATE_LIMITER')
       throw new Error('No authorization header')
     }
 
@@ -68,8 +39,10 @@ serve(async (req) => {
     )
 
     // Verify admin user
+    edgeLogger.info('Verificando usuário admin', {}, 'ADMIN_RATE_LIMITER')
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser()
     if (userError || !user) {
+      edgeLogger.security('Usuário não autorizado', { error: userError }, 'ADMIN_RATE_LIMITER')
       throw new Error('Unauthorized')
     }
 
@@ -77,17 +50,24 @@ serve(async (req) => {
       .rpc('has_role', { _user_id: user.id, _role: 'admin' })
 
     if (!hasAdminRole) {
+      edgeLogger.security('Permissões insuficientes', { userId: user.id }, 'ADMIN_RATE_LIMITER')
       throw new Error('Insufficient permissions')
     }
 
     const { action, targetUserId } = await req.json()
 
-    if (!action || !RATE_LIMITS[action as keyof typeof RATE_LIMITS]) {
+    // Validações de entrada
+    validateInput.required(action, 'action')
+    
+    if (!RATE_LIMITS[action as keyof typeof RATE_LIMITS]) {
+      edgeLogger.warn('Ação inválida solicitada', { action }, 'ADMIN_RATE_LIMITER')
       throw new Error('Invalid action')
     }
 
     const rateLimit = RATE_LIMITS[action as keyof typeof RATE_LIMITS]
     const windowStart = new Date(Date.now() - rateLimit.windowMinutes * 60 * 1000)
+
+    edgeLogger.info('Verificando rate limit', { action, maxAttempts: rateLimit.maxAttempts }, 'ADMIN_RATE_LIMITER')
 
     // Check rate limit
     const { data: recentAttempts, error: countError } = await supabaseAdmin
@@ -98,22 +78,23 @@ serve(async (req) => {
       .gte('created_at', windowStart.toISOString())
 
     if (countError) {
-      secureLog.error('Error checking rate limit', { action });
+      edgeLogger.error('Erro ao verificar rate limit', { action, error: countError }, 'ADMIN_RATE_LIMITER')
       throw new Error('Rate limit check failed')
     }
 
     if (recentAttempts && recentAttempts.length >= rateLimit.maxAttempts) {
-      secureLog.security('Rate limit exceeded', { 
+      edgeLogger.security('Rate limit excedido', { 
         action, 
         attempts: recentAttempts.length,
         maxAttempts: rateLimit.maxAttempts,
         windowMinutes: rateLimit.windowMinutes
-      });
+      }, 'ADMIN_RATE_LIMITER');
       
       throw new Error(`Rate limit exceeded. Maximum ${rateLimit.maxAttempts} attempts per ${rateLimit.windowMinutes} minutes`)
     }
 
     // Log the attempt
+    edgeLogger.info('Registrando tentativa de ação', { action }, 'ADMIN_RATE_LIMITER')
     const { error: logError } = await supabaseAdmin
       .from('admin_actions')
       .insert({
@@ -128,8 +109,13 @@ serve(async (req) => {
       })
 
     if (logError) {
-      secureLog.error('Failed to log admin action', { action });
+      edgeLogger.warn('Falha ao registrar ação admin', { action, error: logError }, 'ADMIN_RATE_LIMITER')
     }
+
+    edgeLogger.operation('rate_limit_check', true, {
+      action,
+      remainingAttempts: rateLimit.maxAttempts - (recentAttempts?.length || 0) - 1
+    }, 'ADMIN_RATE_LIMITER')
 
     return new Response(
       JSON.stringify({ 
@@ -143,16 +129,6 @@ serve(async (req) => {
     )
 
   } catch (error) {
-    secureLog.error('Rate limiter error', { error: error.message });
-    return new Response(
-      JSON.stringify({ 
-        success: false, 
-        error: error.message 
-      }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 429,
-      }
-    )
+    return handleEdgeError(error, 'ADMIN_RATE_LIMITER', 'check_rate_limit')
   }
 })
