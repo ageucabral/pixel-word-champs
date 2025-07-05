@@ -1,18 +1,17 @@
 
-import { MonthlyInviteCoreService } from './monthlyInviteCore';
-import { MonthlyInviteCompetitionService } from './monthlyInviteCompetition';
-import { MonthlyInviteStatsService } from './monthlyInviteStats';
-import { MonthlyInvitePrizesService } from './monthlyInvitePrizes';
 import { MonthlyInviteUnifiedService } from './monthlyInviteUnified';
+import { MonthlyInvitePrizesService } from './monthlyInvitePrizes';
 
+/**
+ * SERVIÇO OTIMIZADO DE CONVITES MENSAIS
+ * 
+ * Simplificado para usar apenas os services necessários
+ */
 class MonthlyInviteService {
-  private coreService = new MonthlyInviteCoreService();
-  private competitionService = new MonthlyInviteCompetitionService();
-  private statsService = new MonthlyInviteStatsService();
-  private prizesService = new MonthlyInvitePrizesService();
   private unifiedService = new MonthlyInviteUnifiedService();
+  private prizesService = new MonthlyInvitePrizesService();
 
-  // Métodos do unified service (recomendado para novos usos)
+  // Métodos principais otimizados
   async getMonthlyStats(monthYear?: string) {
     return this.unifiedService.getMonthlyStats(monthYear);
   }
@@ -21,34 +20,7 @@ class MonthlyInviteService {
     return this.unifiedService.refreshMonthlyRanking(monthYear);
   }
 
-  // Métodos do core service (manter para compatibilidade)
-  getCurrentMonth() {
-    return this.coreService.getCurrentMonth();
-  }
-
-  async getUserMonthlyPoints(userId?: string, monthYear?: string) {
-    return this.coreService.getUserMonthlyPoints(userId, monthYear);
-  }
-
-  async getUserMonthlyPosition(userId?: string, monthYear?: string) {
-    return this.coreService.getUserMonthlyPosition(userId, monthYear);
-  }
-
-  // Métodos do competition service (manter para compatibilidade)
-  async getCurrentMonthCompetition() {
-    return this.competitionService.getCurrentMonthCompetition();
-  }
-
-  async getMonthlyRanking(monthYear?: string, limit = 100) {
-    return this.competitionService.getMonthlyRanking(monthYear, limit);
-  }
-
-  // Métodos do stats service (manter para compatibilidade)
-  async getMonthlyStatsLegacy(monthYear?: string) {
-    return this.statsService.getMonthlyStats(monthYear);
-  }
-
-  // Métodos do prizes service
+  // Métodos de prêmios
   async getMonthlyPrizes(competitionId?: string) {
     return this.prizesService.getMonthlyPrizes(competitionId);
   }

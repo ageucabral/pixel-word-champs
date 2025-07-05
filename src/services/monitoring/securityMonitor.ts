@@ -1,10 +1,14 @@
+/**
+ * SERVIÇO OTIMIZADO DE MONITORAMENTO DE SEGURANÇA
+ */
+
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/utils/logger';
 
 export interface SecurityEvent {
   id?: string;
   event_type: string;
-  severity: string;
+  severity: 'low' | 'medium' | 'high' | 'critical';
   user_id?: string;
   ip_address?: string;
   user_agent?: string;
@@ -20,8 +24,20 @@ export interface SecurityMetrics {
   eventsBySeverity: Record<string, number>;
 }
 
-export const securityMonitoring = {
-  async logSecurityEvent(event: Omit<SecurityEvent, 'id' | 'created_at'>) {
+export interface TimeframeOptions {
+  '1h': number;
+  '24h': number;
+  '7d': number;
+}
+
+const TIMEFRAME_HOURS: TimeframeOptions = {
+  '1h': 1,
+  '24h': 24,
+  '7d': 168
+};
+
+export class SecurityMonitoringService {
+  async logSecurityEvent(event: Omit<SecurityEvent, 'id' | 'created_at'>): Promise<SecurityEvent | null> {
     try {
       const { data, error } = await supabase
         .from('security_events')
@@ -42,27 +58,17 @@ export const securityMonitoring = {
       }
 
       logger.info('Evento de segurança registrado', { eventId: data.id, type: event.event_type }, 'SECURITY_MONITORING');
-      return data;
+      return data as SecurityEvent;
     } catch (error) {
       logger.error('Erro inesperado ao registrar evento de segurança', error, 'SECURITY_MONITORING');
       return null;
     }
-  },
+  }
 
-  async getSecurityMetrics(timeframe: '1h' | '24h' | '7d' = '24h'): Promise<SecurityMetrics | null> {
+  async getSecurityMetrics(timeframe: keyof TimeframeOptions = '24h'): Promise<SecurityMetrics | null> {
     try {
-      const timeAgo = new Date();
-      switch (timeframe) {
-        case '1h':
-          timeAgo.setHours(timeAgo.getHours() - 1);
-          break;
-        case '24h':
-          timeAgo.setDate(timeAgo.getDate() - 1);
-          break;
-        case '7d':
-          timeAgo.setDate(timeAgo.getDate() - 7);
-          break;
-      }
+      const hoursAgo = TIMEFRAME_HOURS[timeframe];
+      const timeAgo = new Date(Date.now() - hoursAgo * 60 * 60 * 1000);
 
       const { data: events, error } = await supabase
         .from('security_events')
@@ -75,32 +81,12 @@ export const securityMonitoring = {
         return null;
       }
 
-      const totalEvents = events?.length || 0;
-      const criticalEvents = events?.filter(e => e.severity === 'critical').length || 0;
-      const recentEvents = events?.slice(0, 10) || [];
-
-      const eventsByType = events?.reduce((acc: Record<string, number>, event) => {
-        acc[event.event_type] = (acc[event.event_type] || 0) + 1;
-        return acc;
-      }, {}) || {};
-
-      const eventsBySeverity = events?.reduce((acc: Record<string, number>, event) => {
-        acc[event.severity] = (acc[event.severity] || 0) + 1;
-        return acc;
-      }, {}) || {};
-
-      return {
-        totalEvents,
-        criticalEvents,
-        recentEvents: recentEvents as SecurityEvent[],
-        eventsByType,
-        eventsBySeverity,
-      };
+      return this.processMetrics((events || []) as SecurityEvent[]);
     } catch (error) {
       logger.error('Erro inesperado ao buscar métricas de segurança', error, 'SECURITY_MONITORING');
       return null;
     }
-  },
+  }
 
   async getRecentAlerts(limit: number = 50): Promise<SecurityEvent[]> {
     try {
@@ -122,4 +108,30 @@ export const securityMonitoring = {
       return [];
     }
   }
-};
+
+  private processMetrics(events: SecurityEvent[]): SecurityMetrics {
+    const totalEvents = events.length;
+    const criticalEvents = events.filter(e => e.severity === 'critical').length;
+    const recentEvents = events.slice(0, 10);
+
+    const eventsByType = events.reduce((acc: Record<string, number>, event) => {
+      acc[event.event_type] = (acc[event.event_type] || 0) + 1;
+      return acc;
+    }, {});
+
+    const eventsBySeverity = events.reduce((acc: Record<string, number>, event) => {
+      acc[event.severity] = (acc[event.severity] || 0) + 1;
+      return acc;
+    }, {});
+
+    return {
+      totalEvents,
+      criticalEvents,
+      recentEvents,
+      eventsByType,
+      eventsBySeverity,
+    };
+  }
+}
+
+export const securityMonitoring = new SecurityMonitoringService();

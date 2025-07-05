@@ -35,15 +35,6 @@ export class DailyCompetitionFinalizationService {
     }
   }
 
-  async transferScoresToWeeklyCompetition(dailyCompetitionId: string): Promise<void> {
-    try {
-      logger.info('ℹ️ Função obsoleta - competições diárias agora são independentes', {}, 'DAILY_COMPETITION_FINALIZATION');
-      logger.info('ℹ️ Os pontos vão diretamente para o total_score do perfil do usuário', {}, 'DAILY_COMPETITION_FINALIZATION');
-      logger.info('ℹ️ O ranking semanal é atualizado automaticamente baseado no total_score', {}, 'DAILY_COMPETITION_FINALIZATION');
-    } catch (error) {
-      logger.error('❌ Erro na função obsoleta:', { error }, 'DAILY_COMPETITION_FINALIZATION');
-    }
-  }
 }
 
 export const dailyCompetitionFinalizationService = new DailyCompetitionFinalizationService();

@@ -37,16 +37,6 @@ export const getCellSize = (boardSize: number, isMobile: boolean = false): numbe
   return isMobile ? GAME_CONSTANTS.MOBILE_CELL_SIZE : GAME_CONSTANTS.DESKTOP_CELL_SIZE;
 };
 
-// DEPRECATED - usar useGamePointsConfig hook
-export const getPointsForWord = (word: string): number => {
-  console.warn('⚠️ getPointsForWord deprecated - use useGamePointsConfig hook instead');
-  
-  const length = word.length;
-  if (length <= 7) {
-    return GAME_CONSTANTS.POINTS_BY_LENGTH[length as keyof typeof GAME_CONSTANTS.POINTS_BY_LENGTH] || 50;
-  }
-  return 50 + Math.max(0, length - 7) * 10;
-};
 
 // Função para validar se o tabuleiro contém todas as palavras
 export const validateBoardContainsWords = (board: string[][], words: string[]): boolean => {

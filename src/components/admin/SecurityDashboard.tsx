@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Shield, AlertTriangle, Activity, Clock, RefreshCw } from 'lucide-react';
-import { securityMonitoring, SecurityMetrics, SecurityEvent } from '@/services/securityMonitoring';
+import { securityMonitoring, SecurityMetrics, SecurityEvent } from '@/services/monitoring/securityMonitor';
 import { useToast } from "@/hooks/use-toast";
 import { logger } from '@/utils/logger';
 
