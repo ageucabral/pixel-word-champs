@@ -1,22 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
-
-const secureLog = {
-  security: (message: string, data?: any) => {
-    console.warn(`🔒 [SECURITY] ${message}`, data || '');
-  },
-  error: (message: string, data?: any) => {
-    console.error(`[ERROR] ${message}`, data || '');
-  },
-  info: (message: string, data?: any) => {
-    console.log(`[INFO] ${message}`, data || '');
-  }
-};
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.2'
+import { corsHeaders } from '../_shared/cors.ts'
+import { edgeLogger, validateInput, handleEdgeError } from '../_shared/edgeLogger.ts'
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -26,6 +11,7 @@ serve(async (req) => {
   try {
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) {
+      edgeLogger.security('Tentativa de acesso sem autorização', {}, 'ADMIN_SESSION_VALIDATOR')
       throw new Error('No authorization header')
     }
 
