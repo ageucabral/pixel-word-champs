@@ -372,9 +372,62 @@ export const CSVCompetitionUpload: React.FC<CSVCompetitionUploadProps> = ({ onCo
           Upload de Competições Diárias via CSV
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Formulário à esquerda */}
+      <CardContent className="max-w-none">
+        <div className="space-y-6">
+          {/* Instruções do formato - Sempre no topo */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="flex items-start gap-3">
+              <Info className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+              <div className="min-w-0 flex-1">
+                <h4 className="text-sm font-medium text-blue-800 mb-3">
+                  Formato do CSV
+                </h4>
+                <div className="text-sm text-blue-700 space-y-2">
+                  <p><strong>Separador:</strong> Use pipe (|) para separar as colunas</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 my-3">
+                    <div>
+                      <p>• <strong>titulo:</strong> Nome da competição (mín. 3 caracteres)</p>
+                      <p>• <strong>descricao:</strong> Descrição opcional</p>
+                      <p>• <strong>data_inicio:</strong> YYYY-MM-DD ou DD/MM/YYYY</p>
+                    </div>
+                    <div>
+                      <p>• <strong>hora_inicio:</strong> HH:MM (formato 24h, horário de Brasília)</p>
+                      <p>• <strong>duracao_horas:</strong> Entre 1 e 24 horas</p>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-amber-50 border border-amber-200 rounded p-3 mt-3">
+                    <p className="text-xs text-amber-800">
+                      <strong>⚠️ Importante:</strong> Todas as datas e horários são interpretados como <strong>horário de Brasília (UTC-3)</strong>
+                    </p>
+                  </div>
+                </div>
+                 
+                <div className="mt-4">
+                  <h5 className="text-sm font-medium text-blue-800 mb-2">Exemplo:</h5>
+                  <div className="bg-white border border-blue-200 rounded p-3 text-xs font-mono overflow-x-auto">
+                    <div className="whitespace-nowrap">
+                      titulo|descricao|data_inicio|hora_inicio|duracao_horas<br/>
+                      Desafio Matinal|Competição de manhã|2024-12-10|08:00|4<br/>
+                      Arena Noturna|Competição da noite|11/12/2024|20:00|6
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 flex items-start gap-2">
+                  <AlertCircle className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                  <div className="text-xs text-amber-700">
+                    <p><strong>Regras automáticas:</strong></p>
+                    <p>• Data de fim = Data de início + Duração</p>
+                    <p>• Sem limite de participantes</p>
+                    <p>• Sem prêmios em dinheiro</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Formulário */}
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="csv-competition-file">Arquivo CSV</Label>
@@ -446,52 +499,6 @@ export const CSVCompetitionUpload: React.FC<CSVCompetitionUploadProps> = ({ onCo
                 </div>
               </div>
             )}
-          </div>
-
-          {/* Instruções à direita */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <div className="flex items-start gap-3">
-              <Info className="h-5 w-5 text-blue-600 mt-0.5" />
-              <div>
-                <h4 className="text-sm font-medium text-blue-800 mb-2">
-                  Formato do CSV
-                </h4>
-                 <div className="text-sm text-blue-700 space-y-2">
-                   <p><strong>Separador:</strong> Use pipe (|) para separar as colunas</p>
-                   <p>• <strong>titulo:</strong> Nome da competição (mín. 3 caracteres)</p>
-                   <p>• <strong>descricao:</strong> Descrição opcional</p>
-                   <p>• <strong>data_inicio:</strong> YYYY-MM-DD ou DD/MM/YYYY</p>
-                   <p>• <strong>hora_inicio:</strong> HH:MM (formato 24h, horário de Brasília)</p>
-                   <p>• <strong>duracao_horas:</strong> Entre 1 e 24 horas</p>
-                   <div className="bg-amber-50 border border-amber-200 rounded p-2 mt-2">
-                     <p className="text-xs text-amber-800">
-                       <strong>⚠️ Importante:</strong> Todas as datas e horários são interpretados como <strong>horário de Brasília (UTC-3)</strong>
-                     </p>
-                   </div>
-                 </div>
-                
-                  <div className="mt-3">
-                    <h5 className="text-sm font-medium text-blue-800 mb-1">Exemplo:</h5>
-                    <div className="bg-white border border-blue-200 rounded p-2 text-xs font-mono overflow-x-auto">
-                      <div className="whitespace-nowrap">
-                        titulo|descricao|data_inicio|hora_inicio|duracao_horas<br/>
-                        Desafio Matinal|Competição de manhã|2024-12-10|08:00|4<br/>
-                        Arena Noturna|Competição da noite|11/12/2024|20:00|6
-                      </div>
-                    </div>
-                  </div>
-
-                <div className="mt-3 flex items-start gap-2">
-                  <AlertCircle className="h-4 w-4 text-amber-600 mt-0.5" />
-                  <div className="text-xs text-amber-700">
-                    <p><strong>Regras automáticas:</strong></p>
-                    <p>• Data de fim = Data de início + Duração</p>
-                    <p>• Sem limite de participantes</p>
-                    <p>• Sem prêmios em dinheiro</p>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
 
