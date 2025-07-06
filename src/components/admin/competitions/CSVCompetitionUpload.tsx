@@ -242,7 +242,7 @@ export const CSVCompetitionUpload: React.FC<CSVCompetitionUploadProps> = ({ onCo
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Formulário à esquerda */}
           <div className="space-y-4">
             <div className="space-y-2">
@@ -314,13 +314,11 @@ export const CSVCompetitionUpload: React.FC<CSVCompetitionUploadProps> = ({ onCo
                 
                   <div className="mt-3">
                     <h5 className="text-sm font-medium text-blue-800 mb-1">Exemplo:</h5>
-            <div className="bg-white border border-blue-200 rounded p-2 text-xs font-mono overflow-x-auto">
-              <div className="whitespace-nowrap">
-                titulo|descricao|data_inicio|hora_inicio|duracao_horas<br/>
-                Desafio Matinal|Competição de manhã|2024-12-10|08:00|4<br/>
-                Arena Noturna|Competição da noite|11/12/2024|20:00|6
-              </div>
-            </div>
+                    <div className="bg-white border border-blue-200 rounded p-2 text-xs font-mono">
+                      titulo|descricao|data_inicio|hora_inicio|duracao_horas<br/>
+                      Desafio Matinal|Competição de manhã|2024-12-10|08:00|4<br/>
+                      Arena Noturna|Competição da noite|11/12/2024|20:00|6
+                    </div>
                   </div>
 
                 <div className="mt-3 flex items-start gap-2">
@@ -342,56 +340,54 @@ export const CSVCompetitionUpload: React.FC<CSVCompetitionUploadProps> = ({ onCo
           <div className="mt-6">
             <h3 className="text-lg font-medium mb-3">Preview das Competições ({previewData.length})</h3>
             <div className="border rounded-lg overflow-hidden">
-              <div className="overflow-x-auto">
-                <div className="max-h-64 overflow-y-auto">
-                  <table className="w-full text-sm min-w-[600px]">
-                    <thead className="bg-gray-50 sticky top-0">
-                      <tr>
-                        <th className="p-2 text-left min-w-[120px]">Título</th>
-                        <th className="p-2 text-left min-w-[140px]">Data/Hora</th>
-                        <th className="p-2 text-left min-w-[80px]">Duração</th>
-                        <th className="p-2 text-left min-w-[120px]">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {previewData.map((comp, index) => {
-                        const errors = validateCompetition(comp);
-                        const isValid = errors.length === 0;
-                        
-                        return (
-                          <tr key={index} className={`border-t ${isValid ? 'bg-green-50' : 'bg-red-50'}`}>
-                            <td className="p-2">
-                              <div>
-                                <div className="font-medium truncate" title={comp.titulo}>{comp.titulo}</div>
-                                {comp.descricao && (
-                                  <div className="text-gray-500 text-xs truncate" title={comp.descricao}>{comp.descricao}</div>
-                                )}
-                              </div>
-                            </td>
-                            <td className="p-2 whitespace-nowrap">
-                              {comp.data_inicio} {comp.hora_inicio}
-                            </td>
-                            <td className="p-2 whitespace-nowrap">
-                              {comp.duracao_horas}h
-                            </td>
-                            <td className="p-2">
-                              {isValid ? (
-                                <span className="text-green-600 text-xs whitespace-nowrap">✓ Válida</span>
-                              ) : (
-                                <div className="text-red-600 text-xs">
-                                  <div>✗ Erro:</div>
-                                  {errors.map((error, i) => (
-                                    <div key={i} className="text-xs">• {error}</div>
-                                  ))}
-                                </div>
+              <div className="max-h-64 overflow-y-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="p-2 text-left">Título</th>
+                      <th className="p-2 text-left">Data/Hora</th>
+                      <th className="p-2 text-left">Duração</th>
+                      <th className="p-2 text-left">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {previewData.map((comp, index) => {
+                      const errors = validateCompetition(comp);
+                      const isValid = errors.length === 0;
+                      
+                      return (
+                        <tr key={index} className={`border-t ${isValid ? 'bg-green-50' : 'bg-red-50'}`}>
+                          <td className="p-2">
+                            <div>
+                              <div className="font-medium">{comp.titulo}</div>
+                              {comp.descricao && (
+                                <div className="text-gray-500 text-xs">{comp.descricao}</div>
                               )}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
+                            </div>
+                          </td>
+                          <td className="p-2">
+                            {comp.data_inicio} {comp.hora_inicio}
+                          </td>
+                          <td className="p-2">
+                            {comp.duracao_horas}h
+                          </td>
+                          <td className="p-2">
+                            {isValid ? (
+                              <span className="text-green-600 text-xs">✓ Válida</span>
+                            ) : (
+                              <div className="text-red-600 text-xs">
+                                <div>✗ Erro:</div>
+                                {errors.map((error, i) => (
+                                  <div key={i}>• {error}</div>
+                                ))}
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
