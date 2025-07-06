@@ -53,7 +53,7 @@ export const CSVCompetitionUpload: React.FC<CSVCompetitionUploadProps> = ({ onCo
       const line = lines[i].trim();
       if (!line) continue;
       
-      const parts = line.split(',').map(part => part.trim().replace(/^"(.*)"$/, '$1'));
+      const parts = line.split('|').map(part => part.trim());
       
       if (parts.length >= 5) {
         const [titulo, descricao, data_inicio, hora_inicio, duracao_str] = parts;
@@ -215,10 +215,10 @@ export const CSVCompetitionUpload: React.FC<CSVCompetitionUploadProps> = ({ onCo
 
   const downloadTemplate = () => {
     const template = [
-      'titulo,descricao,data_inicio,hora_inicio,duracao_horas',
-      'Desafio Matinal,Competição de manhã,2024-12-10,08:00,4',
-      'Arena Noturna,Competição da noite,2024-12-10,20:00,6',
-      'Fim de Semana,Competição especial,11/12/2024,14:00,8'
+      'titulo|descricao|data_inicio|hora_inicio|duracao_horas',
+      'Desafio Matinal|Competição de manhã|2024-12-10|08:00|4',
+      'Arena Noturna|Competição da noite|2024-12-10|20:00|6',
+      'Fim de Semana|Competição especial, ideal para famílias|11/12/2024|14:00|8'
     ].join('\n');
 
     const blob = new Blob(['\uFEFF' + template], { type: 'text/csv;charset=utf-8;' });
@@ -304,6 +304,7 @@ export const CSVCompetitionUpload: React.FC<CSVCompetitionUploadProps> = ({ onCo
                   Formato do CSV
                 </h4>
                 <div className="text-sm text-blue-700 space-y-2">
+                  <p><strong>Separador:</strong> Use pipe (|) para separar as colunas</p>
                   <p>• <strong>titulo:</strong> Nome da competição (mín. 3 caracteres)</p>
                   <p>• <strong>descricao:</strong> Descrição opcional</p>
                   <p>• <strong>data_inicio:</strong> YYYY-MM-DD ou DD/MM/YYYY</p>
@@ -311,14 +312,14 @@ export const CSVCompetitionUpload: React.FC<CSVCompetitionUploadProps> = ({ onCo
                   <p>• <strong>duracao_horas:</strong> Entre 1 e 24 horas</p>
                 </div>
                 
-                <div className="mt-3">
-                  <h5 className="text-sm font-medium text-blue-800 mb-1">Exemplo:</h5>
-                  <div className="bg-white border border-blue-200 rounded p-2 text-xs font-mono">
-                    titulo,descricao,data_inicio,hora_inicio,duracao_horas<br/>
-                    Desafio Matinal,Competição de manhã,2024-12-10,08:00,4<br/>
-                    Arena Noturna,Competição da noite,11/12/2024,20:00,6
+                  <div className="mt-3">
+                    <h5 className="text-sm font-medium text-blue-800 mb-1">Exemplo:</h5>
+                    <div className="bg-white border border-blue-200 rounded p-2 text-xs font-mono">
+                      titulo|descricao|data_inicio|hora_inicio|duracao_horas<br/>
+                      Desafio Matinal|Competição de manhã|2024-12-10|08:00|4<br/>
+                      Arena Noturna|Competição da noite|11/12/2024|20:00|6
+                    </div>
                   </div>
-                </div>
 
                 <div className="mt-3 flex items-start gap-2">
                   <AlertCircle className="h-4 w-4 text-amber-600 mt-0.5" />
