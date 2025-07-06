@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, Users, Trash2, Clock } from 'lucide-react';
+import { Checkbox } from "@/components/ui/checkbox";
 import { UnifiedCompetition } from '@/types/competition';
 import { 
   getStatusText, 
@@ -16,12 +17,18 @@ interface CompetitionCardProps {
   competition: UnifiedCompetition;
   onDelete: (competition: UnifiedCompetition) => void;
   isDeleting: boolean;
+  showSelection?: boolean;
+  isSelected?: boolean;
+  onSelectionChange?: (competitionId: string) => void;
 }
 
 export const CompetitionCard: React.FC<CompetitionCardProps> = ({
   competition,
   onDelete,
-  isDeleting
+  isDeleting,
+  showSelection = false,
+  isSelected = false,
+  onSelectionChange
 }) => {
   // 🎯 CONFIAR COMPLETAMENTE NO STATUS DO BANCO
   const status = competition.status as 'scheduled' | 'active' | 'completed';
@@ -51,9 +58,18 @@ export const CompetitionCard: React.FC<CompetitionCardProps> = ({
   };
 
   return (
-    <Card className="hover:shadow-md transition-shadow">
+    <Card className={`hover:shadow-md transition-shadow ${isSelected ? 'ring-2 ring-blue-500 bg-blue-50' : ''}`}>
       <CardContent className="p-4">
         <div className="flex items-start justify-between">
+          {showSelection && (
+            <div className="flex items-center mr-3 mt-1">
+              <Checkbox
+                checked={isSelected}
+                onCheckedChange={() => onSelectionChange?.(competition.id)}
+                disabled={isDeleting}
+              />
+            </div>
+          )}
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
               <h4 className="font-semibold text-slate-800">{competition.title}</h4>

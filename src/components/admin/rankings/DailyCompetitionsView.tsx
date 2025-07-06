@@ -8,6 +8,8 @@ import { UnifiedCompetitionsList } from './UnifiedCompetitionsList';
 import { UnifiedCompetitionModal } from './UnifiedCompetitionModal';
 import { DailyCompetitionFilters } from './daily/DailyCompetitionFilters';
 import { CSVCompetitionUpload } from '../competitions/CSVCompetitionUpload';
+import { BulkDeleteModal } from './BulkDeleteModal';
+import { useBulkCompetitionActions } from '@/hooks/useBulkCompetitionActions';
 import { UnifiedCompetition } from '@/types/competition';
 import { useToast } from "@/hooks/use-toast";
 import { getCurrentBrasiliaTime } from '@/utils/brasiliaTimeUnified';
@@ -23,11 +25,23 @@ interface DailyCompetitionsViewProps {
 export const DailyCompetitionsView = ({ competitions, isLoading, onRefresh }: DailyCompetitionsViewProps) => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
   const [localCompetitions, setLocalCompetitions] = useState<UnifiedCompetition[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [dateFilter, setDateFilter] = useState<Date | null>(null);
   const { toast } = useToast();
+  
+  const {
+    selectedIds,
+    selectedCount,
+    toggleSelection,
+    selectAll,
+    clearSelection,
+    bulkDelete,
+    isDeleting: isBulkDeleting,
+    deleteProgress
+  } = useBulkCompetitionActions();
 
   // Use local competitions if available, otherwise use props
   const allCompetitions = localCompetitions.length > 0 ? localCompetitions : competitions;
@@ -137,6 +151,49 @@ export const DailyCompetitionsView = ({ competitions, isLoading, onRefresh }: Da
     setDateFilter(null);
   };
 
+  const handleBulkDelete = () => {
+    setShowBulkDeleteModal(true);
+  };
+
+  const handleConfirmBulkDelete = async () => {
+    const result = await bulkDelete(allCompetitions, (deletedIds) => {
+      // Optimistic update: remove from local state
+      setLocalCompetitions(prev => prev.filter(comp => !deletedIds.includes(comp.id)));
+    });
+
+    if (result) {
+      const { deleted, failed, errors } = result;
+      
+      if (deleted > 0 && failed === 0) {
+        toast({
+          title: "Sucesso!",
+          description: `${deleted} competições foram excluídas com sucesso.`,
+        });
+      } else if (deleted > 0 && failed > 0) {
+        toast({
+          title: "Parcialmente concluído",
+          description: `${deleted} competições excluídas, ${failed} falharam.`,
+          variant: "destructive",
+        });
+      } else if (failed > 0) {
+        toast({
+          title: "Erro na exclusão",
+          description: `Falha ao excluir ${failed} competições.`,
+          variant: "destructive",
+        });
+      }
+    }
+
+    setShowBulkDeleteModal(false);
+    
+    // Refresh data after bulk delete
+    if (onRefresh) {
+      setTimeout(() => {
+        onRefresh();
+      }, 1000);
+    }
+  };
+
   const handleCSVUploadSuccess = () => {
     setShowUploadModal(false);
     toast({
@@ -208,6 +265,13 @@ export const DailyCompetitionsView = ({ competitions, isLoading, onRefresh }: Da
         competitions={filteredCompetitions}
         isLoading={isLoading}
         onDelete={handleDelete}
+        showBulkActions={true}
+        selectedIds={selectedIds}
+        onSelectionChange={toggleSelection}
+        onSelectAll={() => selectAll(filteredCompetitions)}
+        onClearSelection={clearSelection}
+        onBulkDelete={handleBulkDelete}
+        isBulkDeleting={isBulkDeleting}
       />
 
       {/* Modal de Criação */}
@@ -219,6 +283,17 @@ export const DailyCompetitionsView = ({ competitions, isLoading, onRefresh }: Da
           competitionTypeFilter="daily"
         />
       )}
+
+      {/* Modal de Exclusão em Massa */}
+      <BulkDeleteModal
+        open={showBulkDeleteModal}
+        onOpenChange={setShowBulkDeleteModal}
+        competitions={allCompetitions}
+        selectedIds={selectedIds}
+        onConfirm={handleConfirmBulkDelete}
+        isDeleting={isBulkDeleting}
+        progress={deleteProgress}
+      />
     </div>
   );
 };
