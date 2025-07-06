@@ -177,11 +177,17 @@ export const CSVCompetitionUpload: React.FC<CSVCompetitionUploadProps> = ({ onCo
         return {
           title: comp.titulo,
           description: comp.descricao,
-          type: 'daily' as const,
-          startDate: startDateTime,
-          endDate: endDate.toISOString(),
-          duration: comp.duracao_horas,
-          maxParticipants: 0 // Competições diárias não têm limite
+          competition_type: 'challenge',
+          start_date: startDateTime,
+          end_date: endDate.toISOString(),
+          status: 'scheduled',
+          prize_pool: 0, // Competições diárias não têm prêmio
+          max_participants: null, // Competições diárias não têm limite
+          theme: 'daily',
+          rules: {
+            duration_hours: comp.duracao_horas,
+            type: 'daily_challenge'
+          }
         };
       });
 
