@@ -8,6 +8,7 @@ import { Upload, FileText, AlertCircle, CheckCircle, Info, Download, Calendar, X
 import { useToast } from "@/hooks/use-toast";
 import { customCompetitionService } from '@/services/customCompetitionService';
 import { logger } from '@/utils/logger';
+import { convertBrasiliaInputToUTC } from '@/utils/time/brasiliaCore';
 
 interface CompetitionCSVData {
   titulo: string;
@@ -106,6 +107,40 @@ export const CSVCompetitionUpload: React.FC<CSVCompetitionUploadProps> = ({ onCo
     return errors;
   };
 
+  /**
+   * CORRIGIDO: Converte data/hora CSV para UTC considerando fuso de Brasília
+   * Input: "05/07/2024" + "08:00" → Output: UTC correto para Brasília 08:00
+   */
+  const convertCSVDateTimeToUTC = (dateStr: string, timeStr: string): string => {
+    try {
+      const normalizedDate = normalizeDate(dateStr);
+      const brasiliaDateTime = `${normalizedDate}T${timeStr}:00`;
+      
+      logger.debug('🔄 CONVERSÃO CSV → UTC (BRASÍLIA):', {
+        originalDate: dateStr,
+        originalTime: timeStr,
+        normalizedDate,
+        brasiliaDateTime,
+        step: 'Preparando conversão de Brasília para UTC'
+      }, 'CSV_COMPETITION_UPLOAD');
+      
+      // Usar a função do brasiliaCore para conversão correta
+      const utcResult = convertBrasiliaInputToUTC(brasiliaDateTime);
+      
+      logger.debug('✅ Conversão CSV completa:', {
+        input: `${dateStr} ${timeStr}`,
+        brasiliaDateTime,
+        utcResult,
+        operation: 'CSV interpretado como horário de Brasília'
+      }, 'CSV_COMPETITION_UPLOAD');
+      
+      return utcResult;
+    } catch (error) {
+      logger.error('❌ Erro ao converter data CSV:', error, 'CSV_COMPETITION_UPLOAD');
+      return new Date().toISOString();
+    }
+  };
+
   const normalizeDate = (dateStr: string): string => {
     // Se está no formato DD/MM/YYYY, converter para YYYY-MM-DD
     if (dateStr.includes('/')) {
@@ -167,18 +202,26 @@ export const CSVCompetitionUpload: React.FC<CSVCompetitionUploadProps> = ({ onCo
 
     try {
       const competitions = previewData.map(comp => {
-        const normalizedDate = normalizeDate(comp.data_inicio);
-        const startDateTime = `${normalizedDate}T${comp.hora_inicio}:00`;
-        
-        // Calcular data de fim (mesmo dia)
-        const startDate = new Date(startDateTime);
+        // CORRIGIDO: Usar nova função de conversão que considera Brasília
+        const startDateUTC = convertCSVDateTimeToUTC(comp.data_inicio, comp.hora_inicio);
+        const startDate = new Date(startDateUTC);
         const endDate = new Date(startDate.getTime() + (comp.duracao_horas * 60 * 60 * 1000));
+        
+        logger.debug('🏗️ CRIANDO COMPETIÇÃO CSV:', {
+          original: { date: comp.data_inicio, time: comp.hora_inicio, duration: comp.duracao_horas },
+          converted: {
+            startUTC: startDateUTC,
+            endUTC: endDate.toISOString(),
+            brasiliaStart: startDate.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }),
+            brasiliaEnd: endDate.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })
+          }
+        }, 'CSV_COMPETITION_UPLOAD');
         
         return {
           title: comp.titulo,
           description: comp.descricao,
           competition_type: 'challenge',
-          start_date: startDateTime,
+          start_date: startDateUTC,
           end_date: endDate.toISOString(),
           status: 'scheduled',
           prize_pool: 0, // Competições diárias não têm prêmio
@@ -413,14 +456,19 @@ export const CSVCompetitionUpload: React.FC<CSVCompetitionUploadProps> = ({ onCo
                 <h4 className="text-sm font-medium text-blue-800 mb-2">
                   Formato do CSV
                 </h4>
-                <div className="text-sm text-blue-700 space-y-2">
-                  <p><strong>Separador:</strong> Use pipe (|) para separar as colunas</p>
-                  <p>• <strong>titulo:</strong> Nome da competição (mín. 3 caracteres)</p>
-                  <p>• <strong>descricao:</strong> Descrição opcional</p>
-                  <p>• <strong>data_inicio:</strong> YYYY-MM-DD ou DD/MM/YYYY</p>
-                  <p>• <strong>hora_inicio:</strong> HH:MM (formato 24h)</p>
-                  <p>• <strong>duracao_horas:</strong> Entre 1 e 24 horas</p>
-                </div>
+                 <div className="text-sm text-blue-700 space-y-2">
+                   <p><strong>Separador:</strong> Use pipe (|) para separar as colunas</p>
+                   <p>• <strong>titulo:</strong> Nome da competição (mín. 3 caracteres)</p>
+                   <p>• <strong>descricao:</strong> Descrição opcional</p>
+                   <p>• <strong>data_inicio:</strong> YYYY-MM-DD ou DD/MM/YYYY</p>
+                   <p>• <strong>hora_inicio:</strong> HH:MM (formato 24h, horário de Brasília)</p>
+                   <p>• <strong>duracao_horas:</strong> Entre 1 e 24 horas</p>
+                   <div className="bg-amber-50 border border-amber-200 rounded p-2 mt-2">
+                     <p className="text-xs text-amber-800">
+                       <strong>⚠️ Importante:</strong> Todas as datas e horários são interpretados como <strong>horário de Brasília (UTC-3)</strong>
+                     </p>
+                   </div>
+                 </div>
                 
                   <div className="mt-3">
                     <h5 className="text-sm font-medium text-blue-800 mb-1">Exemplo:</h5>
@@ -477,9 +525,12 @@ export const CSVCompetitionUpload: React.FC<CSVCompetitionUploadProps> = ({ onCo
                               )}
                             </div>
                           </td>
-                          <td className="p-2 whitespace-nowrap">
-                            {comp.data_inicio} {comp.hora_inicio}
-                          </td>
+                           <td className="p-2 whitespace-nowrap">
+                             <div className="text-xs">
+                               <div>{comp.data_inicio} {comp.hora_inicio}</div>
+                               <div className="text-gray-500">(Horário de Brasília)</div>
+                             </div>
+                           </td>
                           <td className="p-2 whitespace-nowrap">
                             {comp.duracao_horas}h
                           </td>
