@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Upload, FileText, AlertCircle, CheckCircle, Info, Download, Calendar } from 'lucide-react';
+import { Progress } from "@/components/ui/progress";
+import { Upload, FileText, AlertCircle, CheckCircle, Info, Download, Calendar, X } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { customCompetitionService } from '@/services/customCompetitionService';
 import { logger } from '@/utils/logger';
@@ -25,6 +26,11 @@ export const CSVCompetitionUpload: React.FC<CSVCompetitionUploadProps> = ({ onCo
   const [isUploading, setIsUploading] = useState(false);
   const [previewData, setPreviewData] = useState<CompetitionCSVData[]>([]);
   const [showPreview, setShowPreview] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [currentBatch, setCurrentBatch] = useState(0);
+  const [totalBatches, setTotalBatches] = useState(0);
+  const [canCancel, setCanCancel] = useState(false);
+  const cancelRef = useRef(false);
   const { toast } = useToast();
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -154,6 +160,10 @@ export const CSVCompetitionUpload: React.FC<CSVCompetitionUploadProps> = ({ onCo
     }
 
     setIsUploading(true);
+    setCanCancel(true);
+    setUploadProgress(0);
+    setCurrentBatch(0);
+    cancelRef.current = false;
 
     try {
       const competitions = previewData.map(comp => {
@@ -175,18 +185,83 @@ export const CSVCompetitionUpload: React.FC<CSVCompetitionUploadProps> = ({ onCo
         };
       });
 
-      logger.info('Creating bulk competitions', { 
-        count: competitions.length,
-        sample: competitions[0]
+      // Processar em lotes para evitar travar o navegador
+      const BATCH_SIZE = 5;
+      const batches = [];
+      for (let i = 0; i < competitions.length; i += BATCH_SIZE) {
+        batches.push(competitions.slice(i, i + BATCH_SIZE));
+      }
+
+      setTotalBatches(batches.length);
+      
+      logger.info('Creating bulk competitions in batches', { 
+        totalCompetitions: competitions.length,
+        totalBatches: batches.length,
+        batchSize: BATCH_SIZE
       }, 'CSV_COMPETITION_UPLOAD');
 
-      const result = await customCompetitionService.createBulkCompetitions(competitions);
+      let totalCreated = 0;
+      const allErrors: string[] = [];
 
-      if (result.success) {
-        toast({
-          title: "Sucesso!",
-          description: `${result.data?.created || competitions.length} competições foram criadas com sucesso`,
-        });
+      for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
+        // Verificar se foi cancelado
+        if (cancelRef.current) {
+          toast({
+            title: "Upload cancelado",
+            description: `${totalCreated} competições foram criadas antes do cancelamento`,
+            variant: "destructive",
+          });
+          return;
+        }
+
+        setCurrentBatch(batchIndex + 1);
+        const batch = batches[batchIndex];
+
+        // Processar lote atual
+        for (const competition of batch) {
+          if (cancelRef.current) break;
+          
+          try {
+            const result = await customCompetitionService.createCompetition(competition);
+            if (result.success) {
+              totalCreated++;
+            } else {
+              allErrors.push(`${competition.title}: ${result.error}`);
+            }
+          } catch (error) {
+            const errorMsg = error instanceof Error ? error.message : 'Erro desconhecido';
+            allErrors.push(`${competition.title}: ${errorMsg}`);
+          }
+        }
+
+        // Atualizar progresso
+        const progress = ((batchIndex + 1) / batches.length) * 100;
+        setUploadProgress(progress);
+
+        // Delay entre lotes para não travar o navegador
+        if (batchIndex < batches.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, 200));
+        }
+      }
+
+      if (!cancelRef.current) {
+        // Upload concluído
+        if (allErrors.length === 0) {
+          toast({
+            title: "Sucesso!",
+            description: `${totalCreated} competições foram criadas com sucesso`,
+          });
+        } else {
+          toast({
+            title: "Concluído com erros",
+            description: `${totalCreated} competições criadas. ${allErrors.length} erros encontrados.`,
+            variant: "destructive",
+          });
+          logger.warn('Bulk upload completed with errors', { 
+            created: totalCreated, 
+            errors: allErrors 
+          }, 'CSV_COMPETITION_UPLOAD');
+        }
 
         // Limpar formulário
         setSelectedFile(null);
@@ -197,8 +272,6 @@ export const CSVCompetitionUpload: React.FC<CSVCompetitionUploadProps> = ({ onCo
 
         // Callback para atualizar lista
         onCompetitionsCreated?.();
-      } else {
-        throw new Error(result.error || 'Erro desconhecido');
       }
 
     } catch (error) {
@@ -210,7 +283,16 @@ export const CSVCompetitionUpload: React.FC<CSVCompetitionUploadProps> = ({ onCo
       });
     } finally {
       setIsUploading(false);
+      setCanCancel(false);
+      setUploadProgress(0);
+      setCurrentBatch(0);
+      setTotalBatches(0);
     }
+  };
+
+  const handleCancelUpload = () => {
+    cancelRef.current = true;
+    setCanCancel(false);
   };
 
   const downloadTemplate = () => {
@@ -283,15 +365,37 @@ export const CSVCompetitionUpload: React.FC<CSVCompetitionUploadProps> = ({ onCo
               </Button>
             </div>
 
-            {showPreview && (
+            {showPreview && !isUploading && (
               <Button
                 onClick={handleUpload}
-                disabled={previewData.length === 0 || isUploading}
+                disabled={previewData.length === 0}
                 className="w-full"
               >
                 <Calendar className="h-4 w-4 mr-2" />
-                {isUploading ? 'Criando...' : `Criar ${previewData.length} Competições`}
+                Criar {previewData.length} Competições
               </Button>
+            )}
+
+            {isUploading && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between text-sm">
+                  <span>Processando lote {currentBatch} de {totalBatches}</span>
+                  <span>{Math.round(uploadProgress)}%</span>
+                </div>
+                <Progress value={uploadProgress} className="w-full" />
+                <div className="flex gap-2">
+                  <Button
+                    onClick={handleCancelUpload}
+                    disabled={!canCancel}
+                    variant="outline"
+                    size="sm"
+                    className="flex-1"
+                  >
+                    <X className="h-4 w-4 mr-2" />
+                    Cancelar
+                  </Button>
+                </div>
+              </div>
             )}
           </div>
 
@@ -314,10 +418,12 @@ export const CSVCompetitionUpload: React.FC<CSVCompetitionUploadProps> = ({ onCo
                 
                   <div className="mt-3">
                     <h5 className="text-sm font-medium text-blue-800 mb-1">Exemplo:</h5>
-                    <div className="bg-white border border-blue-200 rounded p-2 text-xs font-mono">
-                      titulo|descricao|data_inicio|hora_inicio|duracao_horas<br/>
-                      Desafio Matinal|Competição de manhã|2024-12-10|08:00|4<br/>
-                      Arena Noturna|Competição da noite|11/12/2024|20:00|6
+                    <div className="bg-white border border-blue-200 rounded p-2 text-xs font-mono overflow-x-auto">
+                      <div className="whitespace-nowrap">
+                        titulo|descricao|data_inicio|hora_inicio|duracao_horas<br/>
+                        Desafio Matinal|Competição de manhã|2024-12-10|08:00|4<br/>
+                        Arena Noturna|Competição da noite|11/12/2024|20:00|6
+                      </div>
                     </div>
                   </div>
 
@@ -340,14 +446,14 @@ export const CSVCompetitionUpload: React.FC<CSVCompetitionUploadProps> = ({ onCo
           <div className="mt-6">
             <h3 className="text-lg font-medium mb-3">Preview das Competições ({previewData.length})</h3>
             <div className="border rounded-lg overflow-hidden">
-              <div className="max-h-64 overflow-y-auto">
-                <table className="w-full text-sm">
-                  <thead className="bg-gray-50">
+              <div className="max-h-64 overflow-y-auto overflow-x-auto">
+                <table className="w-full text-sm min-w-full">
+                  <thead className="bg-gray-50 sticky top-0">
                     <tr>
-                      <th className="p-2 text-left">Título</th>
-                      <th className="p-2 text-left">Data/Hora</th>
-                      <th className="p-2 text-left">Duração</th>
-                      <th className="p-2 text-left">Status</th>
+                      <th className="p-2 text-left whitespace-nowrap">Título</th>
+                      <th className="p-2 text-left whitespace-nowrap">Data/Hora</th>
+                      <th className="p-2 text-left whitespace-nowrap">Duração</th>
+                      <th className="p-2 text-left whitespace-nowrap">Status</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -358,27 +464,27 @@ export const CSVCompetitionUpload: React.FC<CSVCompetitionUploadProps> = ({ onCo
                       return (
                         <tr key={index} className={`border-t ${isValid ? 'bg-green-50' : 'bg-red-50'}`}>
                           <td className="p-2">
-                            <div>
-                              <div className="font-medium">{comp.titulo}</div>
+                            <div className="max-w-48">
+                              <div className="font-medium break-words">{comp.titulo}</div>
                               {comp.descricao && (
-                                <div className="text-gray-500 text-xs">{comp.descricao}</div>
+                                <div className="text-gray-500 text-xs break-words">{comp.descricao}</div>
                               )}
                             </div>
                           </td>
-                          <td className="p-2">
+                          <td className="p-2 whitespace-nowrap">
                             {comp.data_inicio} {comp.hora_inicio}
                           </td>
-                          <td className="p-2">
+                          <td className="p-2 whitespace-nowrap">
                             {comp.duracao_horas}h
                           </td>
                           <td className="p-2">
                             {isValid ? (
-                              <span className="text-green-600 text-xs">✓ Válida</span>
+                              <span className="text-green-600 text-xs whitespace-nowrap">✓ Válida</span>
                             ) : (
-                              <div className="text-red-600 text-xs">
+                              <div className="text-red-600 text-xs max-w-32">
                                 <div>✗ Erro:</div>
                                 {errors.map((error, i) => (
-                                  <div key={i}>• {error}</div>
+                                  <div key={i} className="break-words">• {error}</div>
                                 ))}
                               </div>
                             )}
