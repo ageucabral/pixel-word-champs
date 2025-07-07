@@ -1,23 +1,14 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-
 const PrivacyPolicy = () => {
   const navigate = useNavigate();
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-700 p-4">
+  return <div className="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-700 p-4">
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center mb-6">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate(-1)}
-            className="mr-3 text-white hover:bg-white/10"
-          >
+          <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="mr-3 text-white hover:bg-white/10">
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <h1 className="text-2xl font-bold text-white">Política de Privacidade</h1>
@@ -25,7 +16,7 @@ const PrivacyPolicy = () => {
 
         <Card className="bg-white/95 backdrop-blur-sm">
           <CardHeader>
-            <CardTitle>Política de Privacidade - Caça Palavras Royale</CardTitle>
+            
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="text-center mb-6">
@@ -107,7 +98,7 @@ const PrivacyPolicy = () => {
               <p className="text-gray-700 mb-2">Se você tiver dúvidas sobre esta Política de Privacidade, entre em contato conosco:</p>
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                 <p className="text-sm text-blue-800">
-                  <strong>Responsável:</strong> Equipe Caça Palavras Royale<br/>
+                  <strong>Responsável:</strong> Equipe Caça Palavras Royale<br />
                   <strong>E-mail de contato:</strong> app.ageu@gmail.com
                 </p>
               </div>
@@ -115,8 +106,6 @@ const PrivacyPolicy = () => {
           </CardContent>
         </Card>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default PrivacyPolicy;
