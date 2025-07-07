@@ -66,7 +66,7 @@ const DeleteAccountScreen = ({ onBack }: DeleteAccountScreenProps) => {
           </CardHeader>
           <CardContent className="pt-0">
             <p className="text-sm text-red-700 leading-relaxed">
-              Uma vez excluída, sua conta do Letra Arena e todos os dados associados serão permanentemente removidos. 
+              Uma vez excluída, sua conta do Caça Palavras Royale e todos os dados associados serão permanentemente removidos. 
               Esta ação não pode ser desfeita.
             </p>
           </CardContent>

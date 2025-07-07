@@ -34,7 +34,7 @@ export interface AppConfig {
 
 const config: AppConfig = {
   app: {
-    name: 'Letra Arena',
+    name: 'Caça Palavras Royale',
     version: '1.0.0',
     environment: (import.meta.env.VITE_APP_ENV as 'development' | 'staging' | 'production') || 'development',
   },

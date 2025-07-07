@@ -153,7 +153,7 @@ const HelpSupportScreen = ({ onBack }: HelpSupportScreenProps) => {
 
         {/* Footer */}
         <div className="text-center text-gray-500 text-sm">
-          <p>Letra Arena v1.0.0</p>
+          <p>Caça Palavras Royale v1.0.0</p>
           <p>Feito com ❤️ para gamers brasileiros</p>
         </div>
       </div>

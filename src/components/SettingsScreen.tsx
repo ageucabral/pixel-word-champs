@@ -198,7 +198,7 @@ const SettingsScreen = ({ onBack }: SettingsScreenProps) => {
         <div className="text-center mt-6 pt-4 border-t border-gray-200">
           <div className="flex items-center justify-center gap-2 text-gray-500 text-sm">
             <Smartphone className="w-4 h-4" />
-            <span>Letra Arena v1.0.0</span>
+            <span>Caça Palavras Royale v1.0.0</span>
           </div>
           <p className="text-xs text-gray-400 mt-1">Feito com ❤️ para gamers brasileiros</p>
         </div>

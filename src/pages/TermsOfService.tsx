@@ -25,13 +25,13 @@ const TermsOfService = () => {
 
         <Card className="bg-white/95 backdrop-blur-sm">
           <CardHeader>
-            <CardTitle>Termos de Uso - Letra Arena</CardTitle>
+            <CardTitle>Termos de Uso - Caça Palavras Royale</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <section>
               <h3 className="text-lg font-semibold mb-3">1. Aceitação dos Termos</h3>
               <p className="text-gray-700">
-                Ao usar o Letra Arena, você concorda com estes termos de uso. Se não concordar, 
+                Ao usar o Caça Palavras Royale, você concorda com estes termos de uso. Se não concordar, 
                 não utilize nossos serviços.
               </p>
             </section>
@@ -39,7 +39,7 @@ const TermsOfService = () => {
             <section>
               <h3 className="text-lg font-semibold mb-3">2. Descrição do Serviço</h3>
               <p className="text-gray-700">
-                O Letra Arena é um jogo de palavras onde os usuários participam de desafios 
+                O Caça Palavras Royale é um jogo de palavras onde os usuários participam de desafios 
                 diários e competições com premiações reais.
               </p>
             </section>
@@ -71,7 +71,7 @@ const TermsOfService = () => {
             <section>
               <h3 className="text-lg font-semibold mb-3">6. Propriedade Intelectual</h3>
               <p className="text-gray-700">
-                Todo o conteúdo do Letra Arena é protegido por direitos autorais e 
+                Todo o conteúdo do Caça Palavras Royale é protegido por direitos autorais e 
                 não pode ser reproduzido sem autorização.
               </p>
             </section>

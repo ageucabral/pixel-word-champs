@@ -13,7 +13,7 @@ const LiveChatScreen = ({ onBack }: LiveChatScreenProps) => {
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: "Olá! Sou o assistente virtual do Letra Arena. Como posso ajudá-lo hoje?",
+      text: "Olá! Sou o assistente virtual do Caça Palavras Royale. Como posso ajudá-lo hoje?",
       sender: 'bot',
       time: '14:30'
     }

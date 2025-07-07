@@ -4,7 +4,7 @@
  */
 
 export const APP_CONFIG = {
-  NAME: 'Letra Arena',
+  NAME: 'Caça Palavras Royale',
   DESCRIPTION: 'Desafie sua mente, conquiste palavras',
   VERSION: '1.0.0'
 } as const;

@@ -38,10 +38,10 @@ const ShareResultModal = ({ competition, onClose }: ShareResultModalProps) => {
     
     if (competition.prize && competition.prize > 0) {
       // Foco no prêmio quando houver
-      return `🏆 Ganhei R$ ${competition.prize.toFixed(2)} no Letra Arena! 🎉\n\nFiquei em #${competition.userPosition} lugar na competição semanal ${weekNumber} (${weekRange}) com ${competition.userScore.toLocaleString()} pontos!\n\nVenha jogar comigo e também ganhe prêmios em dinheiro! 💰`;
+      return `🏆 Ganhei R$ ${competition.prize.toFixed(2)} no Caça Palavras Royale! 🎉\n\nFiquei em #${competition.userPosition} lugar na competição semanal ${weekNumber} (${weekRange}) com ${competition.userScore.toLocaleString()} pontos!\n\nVenha jogar comigo e também ganhe prêmios em dinheiro! 💰`;
     } else {
       // Foco na posição quando não houver prêmio
-      return `🎯 Fiquei em #${competition.userPosition} lugar no Letra Arena! \n\nCompetição semanal ${weekNumber} (${weekRange}) - ${competition.userScore.toLocaleString()} pontos entre ${competition.totalParticipants.toLocaleString()} jogadores!\n\nVenha jogar comigo e competir por prêmios em dinheiro! 🏆`;
+      return `🎯 Fiquei em #${competition.userPosition} lugar no Caça Palavras Royale! \n\nCompetição semanal ${weekNumber} (${weekRange}) - ${competition.userScore.toLocaleString()} pontos entre ${competition.totalParticipants.toLocaleString()} jogadores!\n\nVenha jogar comigo e competir por prêmios em dinheiro! 🏆`;
     }
   };
 

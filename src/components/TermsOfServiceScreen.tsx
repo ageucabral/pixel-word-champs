@@ -38,7 +38,7 @@ const TermsOfServiceScreen = ({ onBack }: TermsOfServiceScreenProps) => {
               <section>
                 <h3 className="font-semibold text-gray-800 mb-2">1. Aceitação dos Termos</h3>
                 <p className="text-sm text-gray-600">
-                  Ao usar o Letra Arena, você concorda com estes termos de uso. 
+                  Ao usar o Caça Palavras Royale, você concorda com estes termos de uso. 
                   Se não concordar, não utilize nossos serviços.
                 </p>
               </section>
@@ -64,7 +64,7 @@ const TermsOfServiceScreen = ({ onBack }: TermsOfServiceScreenProps) => {
               <section>
                 <h3 className="font-semibold text-gray-800 mb-2">4. Propriedade Intelectual</h3>
                 <p className="text-sm text-gray-600">
-                  Todo o conteúdo do Letra Arena, incluindo design, texto, gráficos e software, 
+                  Todo o conteúdo do Caça Palavras Royale, incluindo design, texto, gráficos e software, 
                   é propriedade nossa ou de nossos licenciadores.
                 </p>
               </section>
