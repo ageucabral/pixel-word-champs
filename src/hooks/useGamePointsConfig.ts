@@ -30,12 +30,12 @@ export const useGamePointsConfig = () => {
         setConfig(configObj);
       } catch (error) {
         logger.error('Erro ao carregar configurações de pontos:', error);
-        // Valores padrão em caso de erro
+        // Valores padrão em caso de erro (conforme Opção A)
         setConfig({
-          'points_per_3_to_5_letter_word': 30,
-          'points_per_6_to_8_letter_word': 60,
-          'points_per_8_to_10_letter_word': 100,
-          'points_per_11_to_20_letter_word': 150
+          'points_per_3_to_5_letter_word': 1,
+          'points_per_6_to_8_letter_word': 2,
+          'points_per_8_to_10_letter_word': 3,
+          'points_per_11_to_20_letter_word': 6
         });
       } finally {
         setLoading(false);

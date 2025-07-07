@@ -1,12 +1,12 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { type Position } from '@/utils/boardUtils';
-import { useGameScoring } from '@/hooks/useGameScoring';
+import { useGameScoring as useGameScoringHook } from '@/hooks/useGameScoring';
 import { useGameSessionManager } from '@/hooks/useGameSessionManager';
 import { toast } from '@/hooks/use-toast';
 import { logger } from '@/utils/logger';
 import { GAME_CONSTANTS } from '@/constants/game';
-import { calculateWordPoints } from '@/utils/gameScoring';
+import { useGameScoring } from '@/contexts/GameScoringContext';
 
 interface FoundWord {
   word: string;
@@ -41,13 +41,14 @@ export const useGameState = (
   });
 
   const { addWordFound: addWordToSession } = useGameSessionManager();
+  const { calculateWordPoints } = useGameScoring();
 
   // Usar hook especializado de pontuação
   const { 
     currentLevelScore, 
     isLevelCompleted, 
     updateUserScore 
-  } = useGameScoring(state.foundWords, 1); // level default 1
+  } = useGameScoringHook(state.foundWords, 1); // level default 1
 
   // Reset state quando muda as palavras do nível
   useEffect(() => {

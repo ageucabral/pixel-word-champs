@@ -7,6 +7,7 @@ import AuthScreen from '@/components/auth/AuthScreen';
 import AuthProvider from '@/components/auth/AuthProvider';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import ErrorBoundary from '@/components/ErrorBoundary';
+import { GameScoringProvider } from '@/contexts/GameScoringContext';
 import { logger } from '@/utils/logger';
 import { initializeCacheWarming } from '@/utils/cacheWarming';
 
@@ -43,34 +44,36 @@ function App() {
   return (
     <ErrorBoundary>
       <TooltipProvider>
-        <AuthProvider>
-          <div className="App">
-            <Suspense fallback={<PageLoadingFallback />}>
-              <Routes>
-                <Route path="/auth" element={<AuthScreen />} />
-                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-                <Route path="/terms-of-service" element={<TermsOfService />} />
-                <Route path="/" element={
-                  <ProtectedRoute>
-                    <Index />
-                  </ProtectedRoute>
-                } />
-                <Route path="/ranking-mensal" element={
-                  <ProtectedRoute>
-                    <MonthlyRankingPage />
-                  </ProtectedRoute>
-                } />
-                <Route path="/admin" element={
-                  <ProtectedRoute>
-                    <AdminPanel />
-                  </ProtectedRoute>
-                } />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </Suspense>
-            <Toaster />
-          </div>
-        </AuthProvider>
+        <GameScoringProvider>
+          <AuthProvider>
+            <div className="App">
+              <Suspense fallback={<PageLoadingFallback />}>
+                <Routes>
+                  <Route path="/auth" element={<AuthScreen />} />
+                  <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                  <Route path="/terms-of-service" element={<TermsOfService />} />
+                  <Route path="/" element={
+                    <ProtectedRoute>
+                      <Index />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/ranking-mensal" element={
+                    <ProtectedRoute>
+                      <MonthlyRankingPage />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/admin" element={
+                    <ProtectedRoute>
+                      <AdminPanel />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </Suspense>
+              <Toaster />
+            </div>
+          </AuthProvider>
+        </GameScoringProvider>
       </TooltipProvider>
     </ErrorBoundary>
   );

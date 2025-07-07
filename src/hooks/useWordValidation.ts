@@ -3,7 +3,7 @@ import { useCallback, useRef } from 'react';
 import { type Position } from '@/utils/boardUtils';
 import { isLinearPath } from '@/hooks/word-selection/validateLinearPath';
 import { logger } from '@/utils/logger';
-import { calculateWordPoints } from '@/utils/gameScoring';
+import { useGameScoring } from '@/contexts/GameScoringContext';
 
 interface FoundWord {
   word: string;
@@ -24,6 +24,7 @@ export const useWordValidation = ({
   foundWords,
   onWordFound
 }: UseWordValidationProps) => {
+  const { calculateWordPoints } = useGameScoring();
 
   // ✅ PROTEÇÃO ROBUSTA: Lock com timeout
   const isExecutingRef = useRef(false);

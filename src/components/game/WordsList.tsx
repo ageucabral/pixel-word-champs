@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { CheckCircle, Star, Target, Lock, Sparkles } from 'lucide-react';
-import { calculateWordPoints } from '@/utils/gameScoring';
+import { useGameScoring } from '@/contexts/GameScoringContext';
 
 interface FoundWord {
   word: string;
@@ -17,6 +17,7 @@ interface WordsListProps {
 
 const WordsList = ({ levelWords, foundWords, getWordColor }: WordsListProps) => {
   const TOTAL_WORDS = 5;
+  const { calculateWordPoints } = useGameScoring();
 
   // Identificar apenas a palavra com maior pontuação
   const wordsWithPoints = levelWords.map(word => ({

@@ -2,7 +2,7 @@
 import { useCallback } from 'react';
 import { type Position } from '@/utils/boardUtils';
 import { logger } from '@/utils/logger';
-import { calculateWordPoints } from '@/utils/gameScoring';
+import { useGameScoring } from '@/contexts/GameScoringContext';
 
 interface FoundWord {
   word: string;
@@ -27,6 +27,7 @@ export const useUnifiedHintSystem = ({
   setHintsUsed,
   setHintHighlightedCells
 }: UseUnifiedHintSystemProps) => {
+  const { calculateWordPoints } = useGameScoring();
 
   // Função principal para usar dica - TODAS as palavras podem receber dica
   const useHint = useCallback(() => {
@@ -101,7 +102,8 @@ export const useUnifiedHintSystem = ({
     levelWords,
     boardData.placedWords,
     setHintsUsed,
-    setHintHighlightedCells
+    setHintHighlightedCells,
+    calculateWordPoints
   ]);
 
   return {

@@ -7,7 +7,7 @@ import { useAuth } from './useAuth';
 import { logger } from '@/utils/logger';
 import { getCurrentBrasiliaTime } from '@/utils/brasiliaTimeUnified';
 import { type Position } from '@/utils/boardUtils';
-import { calculateWordPoints } from '@/utils/gameScoring';
+import { useGameScoring } from '@/contexts/GameScoringContext';
 
 interface FoundWord {
   word: string;
@@ -34,6 +34,7 @@ export const useSimplifiedGameLogic = ({
 }: UseSimplifiedGameLogicProps) => {
   const { user } = useAuth();
   const { boardData, size, levelWords, isLoading, error } = useOptimizedBoard(level);
+  const { calculateWordPoints } = useGameScoring();
 
   // Estados do jogo
   const [foundWords, setFoundWords] = useState<FoundWord[]>([]);
