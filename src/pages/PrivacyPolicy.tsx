@@ -25,7 +25,7 @@ const PrivacyPolicy = () => {
 
         <Card className="bg-white/95 backdrop-blur-sm">
           <CardHeader>
-            <CardTitle>Política de Privacidade - Letra Arena</CardTitle>
+            <CardTitle>Política de Privacidade - Caça Palavras Royale</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="text-center mb-6">
