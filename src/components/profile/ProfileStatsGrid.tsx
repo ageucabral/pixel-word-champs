@@ -24,17 +24,10 @@ const ProfileStatsGrid = ({ user }: ProfileStatsGridProps) => {
       color: 'text-yellow-600',
       bgColor: 'bg-yellow-50'
     },
-    { 
-      label: 'XP Total', 
-      value: user?.experience_points?.toLocaleString() || '0', 
-      icon: Star,
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-50'
-    },
   ];
 
   return (
-    <div className="grid grid-cols-3 gap-2 mb-4">
+    <div className="grid grid-cols-2 gap-2 mb-4">
       {stats.map((stat, index) => (
         <Card key={index} className="border-0 shadow-sm">
           <CardContent className="p-3 text-center">
