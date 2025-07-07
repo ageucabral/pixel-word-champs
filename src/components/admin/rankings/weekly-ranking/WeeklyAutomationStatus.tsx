@@ -45,14 +45,14 @@ export const WeeklyAutomationStatus = () => {
       {/* Ativação Necessária */}
       {needsActivation && (
         <Card className="border-blue-200 bg-blue-50">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-blue-800 flex items-center gap-2">
-              <Zap className="h-4 w-4" />
-              Ativação Necessária
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <div className="space-y-3">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium text-blue-800 flex items-center gap-2">
+            <Zap className="h-4 w-4" />
+            Ativação Necessária
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="pt-0">
+          <div className="space-y-2">
               <p className="text-xs text-blue-700">
                 Competições agendadas precisam ser ativadas manualmente
               </p>
@@ -89,14 +89,14 @@ export const WeeklyAutomationStatus = () => {
 
       {/* Sistema de Finalização Automática */}
       <Card className={`border-green-200 bg-green-50 ${!needsActivation ? 'lg:col-span-2' : ''}`}>
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium text-green-800 flex items-center gap-2">
             <CheckCircle className="h-4 w-4" />
             Sistema de Finalização Automática
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-0">
-          <div className="space-y-3">
+          <div className="space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-sm text-green-700">Status do Sistema</span>
               <Badge variant="outline" className="border-green-300 text-green-700 bg-green-100">
@@ -109,11 +109,11 @@ export const WeeklyAutomationStatus = () => {
               <span className="text-sm text-green-700">Execução Diária</span>
               <div className="flex items-center gap-1 text-xs text-green-600">
                 <Clock className="h-3 w-3" />
-                00:05 (Brasília)
+                00:01 (Brasília)
               </div>
             </div>
             
-            <div className="bg-green-100 p-2 rounded-md">
+            <div className="bg-green-100 p-1.5 rounded-md">
               <p className="text-xs text-green-700">
                 <Settings className="h-3 w-3 inline mr-1" />
                 Verifica automaticamente competições vencidas e executa finalização, 
