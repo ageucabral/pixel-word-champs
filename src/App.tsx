@@ -7,6 +7,7 @@ import AuthScreen from '@/components/auth/AuthScreen';
 import AuthProvider from '@/components/auth/AuthProvider';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import ErrorBoundary from '@/components/ErrorBoundary';
+import DeleteAccountScreen from '@/components/DeleteAccountScreen';
 import { GameScoringProvider } from '@/contexts/GameScoringContext';
 import { logger } from '@/utils/logger';
 import { initializeCacheWarming } from '@/utils/cacheWarming';
@@ -52,6 +53,7 @@ function App() {
                   <Route path="/auth" element={<AuthScreen />} />
                   <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                   <Route path="/terms-of-service" element={<TermsOfService />} />
+                  <Route path="/delete-account" element={<DeleteAccountScreen onBack={() => window.history.back()} />} />
                   <Route path="/" element={
                     <ProtectedRoute>
                       <Index />
