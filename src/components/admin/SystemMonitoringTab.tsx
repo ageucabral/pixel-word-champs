@@ -20,6 +20,7 @@ import { useSystemHealth, useSystemIntegrity, useAdvancedAnalytics } from '@/hoo
 import { Skeleton } from "@/components/ui/skeleton";
 import { logger } from '@/utils/logger';
 import { ValidationTabContent } from '@/components/admin/layout/ValidationTabContent';
+import { WeeklyFinalizationMonitor } from '@/components/admin/WeeklyFinalizationMonitor';
 
 const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
   const getStatusConfig = (status: string) => {
@@ -207,13 +208,20 @@ export const SystemMonitoringTab = () => {
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           <Tabs defaultValue="health" className="w-full">
             <div className="border-b border-slate-200 bg-slate-50 px-6 py-4">
-              <TabsList className="grid grid-cols-4 bg-white border border-slate-200">
+              <TabsList className="grid grid-cols-5 bg-white border border-slate-200">
                 <TabsTrigger 
                   value="health" 
                   className="flex items-center gap-2 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700"
                 >
                   <Activity className="h-4 w-4" />
                   Saúde do Sistema
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="finalization" 
+                  className="flex items-center gap-2 data-[state=active]:bg-indigo-50 data-[state=active]:text-indigo-700"
+                >
+                  <Clock className="h-4 w-4" />
+                  Finalização Automática
                 </TabsTrigger>
                 <TabsTrigger 
                   value="integrity" 
@@ -297,6 +305,10 @@ export const SystemMonitoringTab = () => {
                     )}
                   </>
                 ) : null}
+              </TabsContent>
+
+              <TabsContent value="finalization" className="space-y-6 mt-0">
+                <WeeklyFinalizationMonitor />
               </TabsContent>
 
               <TabsContent value="integrity" className="space-y-6 mt-0">

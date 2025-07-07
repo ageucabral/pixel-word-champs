@@ -1580,6 +1580,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      monitor_cron_executions: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       prevent_unsafe_score_reset: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -1605,6 +1609,10 @@ export type Database = {
         Returns: Json
       }
       test_scoring_functions: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      test_weekly_finalizer: {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
