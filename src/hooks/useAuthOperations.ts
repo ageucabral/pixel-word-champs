@@ -42,6 +42,7 @@ export const useAuthOperations = (
         setError(errorMessage);
         setIsAuthenticated(false);
         setUser(null);
+        setIsLoading(false); // IMPORTANTE: Parar o loading quando há erro
         logger.error('Falha no login', { error: errorMessage }, 'AUTH_OPERATIONS');
       }
     } catch (error: any) {
