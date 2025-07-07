@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useOptimizedProfile } from './useOptimizedProfile';
+import { profileService } from '@/services/profileService';
 import { User } from '@/types';
 import { logger } from '@/utils/logger';
 
@@ -20,7 +20,7 @@ export const useUnifiedAuth = () => {
   });
 
   const isMountedRef = useRef(true);
-  const { profile, isLoading: profileLoading, refetch: refetchProfile } = useOptimizedProfile();
+  const profileCacheRef = useRef<User | null>(null);
 
   // Função para sincronizar dados do perfil com auth
   const syncUserData = useCallback((sessionUser: any, profileData?: User | null) => {
@@ -60,6 +60,27 @@ export const useUnifiedAuth = () => {
     }));
   }, []);
 
+  // Função para carregar perfil diretamente
+  const loadProfile = useCallback(async (userId: string) => {
+    try {
+      logger.info('📊 CARREGANDO PERFIL DIRETAMENTE', { userId }, 'UNIFIED_AUTH');
+      
+      const response = await profileService.getCurrentProfile();
+      
+      if (response.success && response.data) {
+        profileCacheRef.current = response.data;
+        logger.info('✅ PERFIL CARREGADO COM SUCESSO', {
+          username: response.data.username,
+          hasAvatar: !!response.data.avatar_url
+        }, 'UNIFIED_AUTH');
+        return response.data;
+      }
+    } catch (error) {
+      logger.warn('⚠️ FALHA AO CARREGAR PERFIL', { error }, 'UNIFIED_AUTH');
+    }
+    return null;
+  }, []);
+
   // Processar mudanças de autenticação
   const handleAuthChange = useCallback(async (event: string, session: any) => {
     if (!isMountedRef.current) return;
@@ -79,16 +100,18 @@ export const useUnifiedAuth = () => {
       }));
 
       // Sincronizar com dados básicos primeiro
-      syncUserData(session.user);
+      syncUserData(session.user, profileCacheRef.current);
 
-      // Aguardar dados do perfil
-      try {
-        await refetchProfile();
-      } catch (error) {
-        logger.warn('⚠️ Falha ao carregar perfil, usando dados da sessão', { error }, 'UNIFIED_AUTH');
+      // Carregar perfil completo
+      const profileData = await loadProfile(session.user.id);
+      if (profileData && isMountedRef.current) {
+        syncUserData(session.user, profileData);
       }
+
+      setAuthState(prev => ({ ...prev, isLoading: false }));
     } else {
       // Usuário deslogado
+      profileCacheRef.current = null;
       setAuthState({
         user: null,
         isAuthenticated: false,
@@ -96,20 +119,7 @@ export const useUnifiedAuth = () => {
         error: undefined
       });
     }
-  }, [syncUserData, refetchProfile]);
-
-  // Sincronizar quando dados do perfil forem carregados/atualizados
-  useEffect(() => {
-    if (authState.isAuthenticated && authState.user && profile) {
-      logger.info('📊 PERFIL CARREGADO - ATUALIZANDO DADOS DO USUÁRIO', {
-        userId: profile.id,
-        username: profile.username,
-        hasAvatar: !!profile.avatar_url
-      }, 'UNIFIED_AUTH');
-
-      syncUserData(authState.user, profile);
-    }
-  }, [profile, authState.isAuthenticated, authState.user, syncUserData]);
+  }, [syncUserData, loadProfile]);
 
   // Configurar listener de autenticação
   useEffect(() => {
@@ -127,16 +137,6 @@ export const useUnifiedAuth = () => {
       subscription.unsubscribe();
     };
   }, [handleAuthChange]);
-
-  // Atualizar isLoading baseado no estado do perfil
-  useEffect(() => {
-    if (authState.isAuthenticated) {
-      setAuthState(prev => ({
-        ...prev,
-        isLoading: profileLoading
-      }));
-    }
-  }, [profileLoading, authState.isAuthenticated]);
 
   // Cleanup no unmount
   useEffect(() => {
