@@ -41,64 +41,19 @@ const setCachedProfile = (profile: any) => {
   }
 };
 
-// Circuit breaker para evitar loops infinitos
-const CIRCUIT_BREAKER_KEY = 'auth_circuit_breaker';
-const CIRCUIT_BREAKER_TIMEOUT = 5 * 60 * 1000; // 5 minutos
-
-const isCircuitBreakerOpen = () => {
-  const breakerData = localStorage.getItem(CIRCUIT_BREAKER_KEY);
-  if (!breakerData) return false;
-  
-  const { failures, lastFailure } = JSON.parse(breakerData);
-  return failures >= 3 && (Date.now() - lastFailure) < CIRCUIT_BREAKER_TIMEOUT;
-};
-
-const updateCircuitBreaker = (success: boolean) => {
-  const breakerData = localStorage.getItem(CIRCUIT_BREAKER_KEY);
-  const data = breakerData ? JSON.parse(breakerData) : { failures: 0, lastFailure: 0 };
-  
-  if (success) {
-    localStorage.removeItem(CIRCUIT_BREAKER_KEY);
-  } else {
-    data.failures += 1;
-    data.lastFailure = Date.now();
-    localStorage.setItem(CIRCUIT_BREAKER_KEY, JSON.stringify(data));
-  }
-};
-
 // Função auxiliar para buscar perfil com retry otimizado
 const fetchProfileWithRetry = async (
   session: any,
   callbacks: AuthCallbacks,
   isMountedRef: React.MutableRefObject<boolean>,
-  maxRetries = 3 // Reduzido para 3 tentativas
+  maxRetries = 5 // Aumentado para 5
 ) => {
   const { setUser, setIsLoading } = callbacks;
   
-  // Detectar se é refresh ou login inicial
-  const isPageRefresh = performance.navigation?.type === 1 || 
-                       document.referrer === window.location.href;
-  
   logger.info('📊 INICIANDO BUSCA DE PERFIL COM RETRY OTIMIZADO', { 
     maxRetries, 
-    userId: session.user.id,
-    isPageRefresh,
-    circuitBreakerOpen: isCircuitBreakerOpen()
+    userId: session.user.id 
   }, 'AUTH_PROCESSOR');
-
-  // Verificar circuit breaker - se aberto, usar apenas cache/fallback
-  if (isCircuitBreakerOpen()) {
-    logger.warn('🚧 CIRCUIT BREAKER ATIVO - USANDO APENAS CACHE/FALLBACK', { 
-      userId: session.user.id 
-    }, 'AUTH_PROCESSOR');
-    
-    const cachedProfile = getCachedProfile();
-    if (cachedProfile && cachedProfile.id === session.user.id) {
-      const fallbackUserData = mapUserFromProfile(cachedProfile, session.user);
-      setUser(fallbackUserData);
-    }
-    return;
-  }
 
   // Verificar se há perfil no cache e usar como fallback inicial
   const cachedProfile = getCachedProfile();
@@ -112,8 +67,6 @@ const fetchProfileWithRetry = async (
     setUser(fallbackUserData);
   }
 
-  let hasSuccess = false;
-
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     if (!isMountedRef.current) return;
 
@@ -124,8 +77,8 @@ const fetchProfileWithRetry = async (
         hasCache: !!cachedProfile
       }, 'AUTH_PROCESSOR');
 
-      // Backoff reduzido: 500ms, 1s, 2s
-      const delayMs = Math.min(Math.pow(2, attempt - 1) * 500, 2000);
+      // Backoff exponencial: 1s, 2s, 4s, 8s, 16s
+      const delayMs = Math.pow(2, attempt - 1) * 1000;
       
       // Query otimizada em duas etapas - primeiro dados essenciais
       const essentialPromise = supabase
@@ -216,9 +169,6 @@ const fetchProfileWithRetry = async (
               attempt,
               totalTime: Date.now() - startTime
             }, 'AUTH_PROCESSOR');
-            
-            hasSuccess = true;
-            updateCircuitBreaker(true);
             return; // Sucesso total
           } else {
             // Usar dados essenciais como fallback
@@ -330,29 +280,8 @@ export const processUserAuthentication = async (
       }, 'AUTH_PROCESSOR');
     }
 
-    // PRIORIDADE 2: Buscar perfil completo com retry e timeout menor
-    logger.info('📊 INICIANDO BUSCA DE PERFIL', { userId: session.user?.id }, 'AUTH_PROCESSOR');
-    
-    // Timeout global reduzido para evitar que o processamento trave
-    const profileFetchPromise = fetchProfileWithRetry(session, callbacks, isMountedRef);
-    const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Timeout na busca de perfil')), 8000) // Reduzido para 8s
-    );
-
-    try {
-      await Promise.race([profileFetchPromise, timeoutPromise]);
-      logger.info('📊 BUSCA DE PERFIL CONCLUÍDA', { userId: session.user?.id }, 'AUTH_PROCESSOR');
-    } catch (profileError: any) {
-      logger.warn('⚠️ ERRO/TIMEOUT NA BUSCA DE PERFIL - CONTINUANDO COM DADOS FALLBACK', { 
-        error: profileError.message,
-        userId: session.user?.id 
-      }, 'AUTH_PROCESSOR');
-      
-      // Atualizar circuit breaker em caso de falha
-      updateCircuitBreaker(false);
-      
-      // Continuar com dados fallback - não falhar a autenticação
-    }
+    // PRIORIDADE 2: Buscar perfil completo com retry e timeout maior
+    await fetchProfileWithRetry(session, callbacks, isMountedRef);
 
   } catch (error: any) {
     logger.error('❌ ERRO CRÍTICO NA AUTENTICAÇÃO', { 

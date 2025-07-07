@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useUnifiedAuth, AuthContext } from '@/hooks/useAuth';
+import { useAuthProvider, AuthContext } from '@/hooks/useAuth';
 import { useAuthCleanup } from '@/hooks/useAuthCleanup';
 
 interface AuthProviderProps {
@@ -8,7 +8,7 @@ interface AuthProviderProps {
 }
 
 const AuthProvider = ({ children }: AuthProviderProps) => {
-  const auth = useUnifiedAuth();
+  const auth = useAuthProvider();
   
   // Executar limpeza automática na inicialização
   useAuthCleanup();
