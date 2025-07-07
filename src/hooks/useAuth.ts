@@ -12,4 +12,5 @@ export const useAuth = () => {
   return context;
 };
 
+export { useUnifiedAuth } from './useUnifiedAuth';
 export { useAuthProvider } from './useAuthProvider';

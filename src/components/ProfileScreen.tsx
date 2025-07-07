@@ -30,9 +30,8 @@ const ProfileScreen = ({
   const [currentAvatar, setCurrentAvatar] = useState(user?.avatar_url);
   const [showMyData, setShowMyData] = useState(false);
   
-  const {
-    profile: profileData
-  } = useOptimizedProfile();
+  // O usuário já vem sincronizado com dados do perfil do useUnifiedAuth
+  const profileData = user;
 
   // Usar o novo sistema de XP baseado nos experience_points do perfil otimizado
   const {
