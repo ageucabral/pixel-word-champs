@@ -280,8 +280,25 @@ export const processUserAuthentication = async (
       }, 'AUTH_PROCESSOR');
     }
 
-    // PRIORIDADE 2: Buscar perfil completo com retry e timeout maior
-    await fetchProfileWithRetry(session, callbacks, isMountedRef);
+    // PRIORIDADE 2: Buscar perfil completo com retry e timeout menor
+    logger.info('📊 INICIANDO BUSCA DE PERFIL', { userId: session.user?.id }, 'AUTH_PROCESSOR');
+    
+    // Timeout global para evitar que o processamento trave
+    const profileFetchPromise = fetchProfileWithRetry(session, callbacks, isMountedRef);
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Timeout na busca de perfil')), 15000)
+    );
+
+    try {
+      await Promise.race([profileFetchPromise, timeoutPromise]);
+      logger.info('📊 BUSCA DE PERFIL CONCLUÍDA', { userId: session.user?.id }, 'AUTH_PROCESSOR');
+    } catch (profileError: any) {
+      logger.warn('⚠️ ERRO/TIMEOUT NA BUSCA DE PERFIL - CONTINUANDO COM DADOS FALLBACK', { 
+        error: profileError.message,
+        userId: session.user?.id 
+      }, 'AUTH_PROCESSOR');
+      // Continuar com dados fallback - não falhar a autenticação
+    }
 
   } catch (error: any) {
     logger.error('❌ ERRO CRÍTICO NA AUTENTICAÇÃO', { 
