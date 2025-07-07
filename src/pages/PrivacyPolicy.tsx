@@ -28,76 +28,89 @@ const PrivacyPolicy = () => {
             <CardTitle>Política de Privacidade - Letra Arena</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
+            <div className="text-center mb-6">
+              <h2 className="text-xl font-bold text-gray-800 mb-2">Política de Privacidade – Caça Palavras Royale</h2>
+              <p className="text-sm text-gray-600">Data de Vigência: 07 de julho de 2025</p>
+            </div>
+
+            <p className="text-gray-700 mb-6">
+              Esta Política de Privacidade descreve como o aplicativo "Caça Palavras Royale" coleta, usa e protege as informações dos usuários, incluindo crianças menores de 13 anos, em conformidade com a Política do Programa para Famílias da Google Play e com a Lei de Proteção da Privacidade Online das Crianças (COPPA).
+            </p>
+
             <section>
-              <h3 className="text-lg font-semibold mb-3">1. Informações que Coletamos</h3>
+              <h3 className="text-lg font-semibold mb-3">1. Coleta de Dados</h3>
+              <p className="text-gray-700 mb-3">
+                O aplicativo não coleta dados pessoais sensíveis dos usuários, como nome, e-mail, localização precisa ou contatos.
+              </p>
+              <p className="text-gray-700 mb-2">Podemos coletar os seguintes dados não pessoais, automaticamente:</p>
+              <ul className="text-gray-700 ml-4 space-y-1">
+                <li>• Identificadores anônimos (ID de dispositivo, cookies para anúncios);</li>
+                <li>• Estatísticas de uso (tempo de uso, interações com o jogo);</li>
+                <li>• Dados de desempenho e erros (falhas e logs técnicos).</li>
+              </ul>
+            </section>
+
+            <section>
+              <h3 className="text-lg font-semibold mb-3">2. Publicidade e Monetização</h3>
+              <p className="text-gray-700 mb-3">
+                O jogo pode exibir anúncios de terceiros, como o Google AdMob, que podem utilizar identificadores anônimos para exibir anúncios.
+              </p>
               <p className="text-gray-700">
-                Coletamos informações pessoais como nome, email, dados bancários para premiações 
-                e dados de gameplay para melhorar a experiência.
+                ⚠️ Para usuários com menos de 13 anos, os anúncios são exibidos de forma não personalizada (sem rastreamento de comportamento).
               </p>
             </section>
 
             <section>
-              <h3 className="text-lg font-semibold mb-3">2. Como Usamos suas Informações</h3>
-              <p className="text-gray-700">
-                Suas informações são usadas para gerenciar sua conta, processar premiações, 
-                melhorar nossos serviços e enviar comunicações relevantes.
+              <h3 className="text-lg font-semibold mb-3">3. Crianças</h3>
+              <p className="text-gray-700 mb-3">
+                Caça Palavras Royale é destinado a públicos de todas as idades, incluindo crianças. Para proteger os menores de 13 anos, seguimos as seguintes práticas:
               </p>
+              <ul className="text-gray-700 ml-4 space-y-1">
+                <li>• Não coletamos dados pessoais de crianças;</li>
+                <li>• Exibimos apenas anúncios apropriados para crianças, quando necessário;</li>
+                <li>• Garantimos uma experiência segura, educativa e divertida.</li>
+              </ul>
             </section>
 
             <section>
-              <h3 className="text-lg font-semibold mb-3">3. Compartilhamento de Dados</h3>
-              <p className="text-gray-700">
-                Não vendemos ou compartilhamos seus dados pessoais com terceiros, exceto 
-                quando necessário para processar pagamentos ou cumprir obrigações legais.
-              </p>
+              <h3 className="text-lg font-semibold mb-3">4. Compartilhamento de Dados</h3>
+              <p className="text-gray-700 mb-2">Não compartilhamos informações dos usuários com terceiros, exceto:</p>
+              <ul className="text-gray-700 ml-4 space-y-1">
+                <li>• Provedores de serviços estritamente necessários para o funcionamento (ex: Google AdMob);</li>
+                <li>• Quando exigido por lei ou por autoridades legais competentes.</li>
+              </ul>
             </section>
 
             <section>
-              <h3 className="text-lg font-semibold mb-3">4. Segurança</h3>
+              <h3 className="text-lg font-semibold mb-3">5. Segurança</h3>
               <p className="text-gray-700">
-                Implementamos medidas de segurança para proteger suas informações contra 
-                acesso não autorizado, alteração ou divulgação.
-              </p>
-            </section>
-
-            <section>
-              <h3 className="text-lg font-semibold mb-3">5. Cookies e Tecnologias Similares</h3>
-              <p className="text-gray-700">
-                Usamos cookies para melhorar sua experiência, manter você logado e 
-                analisar o uso do aplicativo.
+                Adotamos medidas técnicas e organizacionais para proteger todos os dados coletados contra acesso não autorizado, vazamentos ou exclusões indevidas.
               </p>
             </section>
 
             <section>
               <h3 className="text-lg font-semibold mb-3">6. Seus Direitos</h3>
               <p className="text-gray-700">
-                Você tem direito a acessar, corrigir ou excluir suas informações pessoais. 
-                Entre em contato conosco para exercer esses direitos.
+                Se você é pai, mãe ou responsável e acredita que coletamos dados pessoais de uma criança sem consentimento adequado, entre em contato conosco para que possamos excluir essas informações.
               </p>
             </section>
 
             <section>
-              <h3 className="text-lg font-semibold mb-3">7. Retenção de Dados</h3>
+              <h3 className="text-lg font-semibold mb-3">7. Alterações nesta Política</h3>
               <p className="text-gray-700">
-                Mantemos suas informações apenas pelo tempo necessário para fornecer 
-                nossos serviços ou conforme exigido por lei.
+                Esta Política pode ser atualizada ocasionalmente. A versão mais recente estará sempre disponível em uma página acessível do aplicativo ou na loja.
               </p>
             </section>
 
             <section>
-              <h3 className="text-lg font-semibold mb-3">8. Alterações nesta Política</h3>
-              <p className="text-gray-700">
-                Podemos atualizar esta política periodicamente. Notificaremos sobre 
-                mudanças significativas através do aplicativo.
-              </p>
-            </section>
-
-            <section>
-              <h3 className="text-lg font-semibold mb-3">9. Contato</h3>
-              <p className="text-gray-700">
-                Para questões sobre privacidade, entre em contato através do suporte 
-                dentro do aplicativo ou pelo email privacy@letraarena.com.
-              </p>
+              <h3 className="text-lg font-semibold mb-3">8. Contato</h3>
+              <p className="text-gray-700 mb-2">Se você tiver dúvidas sobre esta Política de Privacidade, entre em contato conosco:</p>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <p className="text-sm text-blue-800">
+                  <strong>Responsável:</strong> Equipe Caça Palavras Royale<br/>
+                  <strong>E-mail de contato:</strong> app.ageu@gmail.com
+                </p>
+              </div>
             </section>
           </CardContent>
         </Card>
