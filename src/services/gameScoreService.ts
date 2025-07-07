@@ -107,30 +107,6 @@ class GameScoreService {
     }
   }
 
-  /**
-   * Calcular nível do usuário baseado no XP permanente
-   */
-  calculateUserLevel(experiencePoints: number): number {
-    // Fórmula: a cada 1000 XP = 1 nível
-    return Math.floor(experiencePoints / 1000) + 1;
-  }
-
-  /**
-   * Calcular progresso para o próximo nível
-   */
-  calculateLevelProgress(experiencePoints: number): { current: number; next: number; progress: number } {
-    const currentLevel = this.calculateUserLevel(experiencePoints);
-    const currentLevelXP = (currentLevel - 1) * 1000;
-    const nextLevelXP = currentLevel * 1000;
-    const progressXP = experiencePoints - currentLevelXP;
-    const progressPercent = (progressXP / (nextLevelXP - currentLevelXP)) * 100;
-
-    return {
-      current: currentLevel,
-      next: currentLevel + 1,
-      progress: Math.min(100, Math.max(0, progressPercent))
-    };
-  }
 }
 
 export const gameScoreService = new GameScoreService();

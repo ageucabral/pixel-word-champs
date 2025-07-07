@@ -84,16 +84,9 @@ const OptimizedHomeScreen = memo(({
 
   const { currentRanking } = useWeeklyRanking();
 
-  // Memoização do totalXP e level para evitar recálculos
-  const playerData = useMemo(() => {
-    const totalXP = profile?.experience_points || 0;
-    return {
-      totalXP,
-      level: Math.max(1, Math.floor(totalXP / 1000) + 1)
-    };
-  }, [profile?.experience_points]);
-
-  const { currentLevel } = usePlayerLevel(playerData.totalXP);
+  // Usar system unificado de níveis com usePlayerLevel
+  const totalXP = profile?.experience_points || 0;
+  const { currentLevel } = usePlayerLevel(totalXP);
 
   // Memoização das funções de cálculo para evitar recriações
   const calculatePointsToNextPosition = useCallback(() => {
